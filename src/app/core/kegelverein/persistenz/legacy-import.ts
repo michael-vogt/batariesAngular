@@ -9,6 +9,7 @@ import {
   SpielRunde,
   SpielStatus,
 } from '../kegelverein.models';
+import { berechneKegelabendErgebnisse } from '../kegelabend.logic';
 
 /**
  * Wandelt einen Export der Legacy-App (version "1.0"/"2.0", flacher
@@ -54,13 +55,20 @@ interface LegacyRunde {
   notes: string;
 }
 
+interface LegacySummaryRow {
+  name: string;
+  siege: number;
+  niederlagen: number;
+  strafe: number;
+}
+
 interface LegacyKegelabend {
   id: string;
   datum: string;
   ort: string | null;
   players: LegacySpieler[];
   rounds: Record<string, LegacyRunde[]>;
-  summary?: unknown; // wird bewusst verworfen, siehe unten
+  summary?: { rows: LegacySummaryRow[] }; // wird bewusst verworfen, siehe unten
 }
 
 interface LegacyKegeljahr {
@@ -228,4 +236,58 @@ function mapKegelabend(
 function normalizeDatum(d: string | number): string {
   if (typeof d === 'number') return new Date(d).toISOString().slice(0, 10);
   return d.length > 10 ? d.slice(0, 10) : d;
+}
+
+/**
+ * Vergleicht die beim Import verworfenen summary-Werte der Legacy-Daten
+ * mit den aus den Rohdaten (Runden + Teilnehmerstatistik) neu berechneten
+ * Ergebnissen.
+ *
+ * Beide müssten identisch sein — Abweichungen bedeuten, dass die
+ * gespeicherte Zusammenfassung in den Altdaten bereits nicht mehr zu den
+ * zugrundeliegenden Runden passte. Das ist kein Importfehler, sondern ein
+ * Fund: die neu berechneten Werte sind die korrekten, aber es lohnt sich
+ * zu wissen, welche Abende betroffen sind (z.B. weil daraus schon Strafen
+ * verbucht wurden).
+ */
+export function pruefeSummaryAbweichungen(json: unknown, kegeljahre: Kegeljahr[]): string[] {
+  const legacy = json as LegacyExport;
+  const abweichungen: string[] = [];
+
+  const neuNachId = new Map<string, Kegelabend>();
+  for (const kj of kegeljahre) {
+    for (const ka of kj.kegelabende) neuNachId.set(ka.id, ka);
+  }
+
+  for (const legacyKj of legacy.kegeljahre) {
+    for (const legacyKa of legacyKj.kegelabende) {
+      const zeilen = legacyKa.summary?.rows;
+      const neu = neuNachId.get(legacyKa.id);
+      if (!zeilen || !neu) continue;
+
+      const berechnet = berechneKegelabendErgebnisse(neu);
+      const nameNachId = new Map(neu.teilnehmer.map((t) => [t.id, t.name]));
+
+      for (const zeile of zeilen) {
+        const passend = berechnet.find((b) => nameNachId.get(b.teilnehmerId) === zeile.name);
+        if (!passend) continue;
+
+        // Centbeträge: kleine Rundungsdifferenzen nicht als Abweichung melden.
+        if (Math.abs(passend.strafeGesamt - zeile.strafe) > 0.005) {
+          abweichungen.push(
+            `Kegelabend ${legacyKa.datum}, ${zeile.name}: Strafe gespeichert ${zeile.strafe.toFixed(2)} €, ` +
+              `neu berechnet ${passend.strafeGesamt.toFixed(2)} €`,
+          );
+        }
+        if (passend.siege !== zeile.siege || passend.niederlagen !== zeile.niederlagen) {
+          abweichungen.push(
+            `Kegelabend ${legacyKa.datum}, ${zeile.name}: Bilanz gespeichert ${zeile.siege}/${zeile.niederlagen}, ` +
+              `neu berechnet ${passend.siege}/${passend.niederlagen}`,
+          );
+        }
+      }
+    }
+  }
+
+  return abweichungen;
 }

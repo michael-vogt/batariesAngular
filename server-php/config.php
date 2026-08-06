@@ -16,7 +16,7 @@
  */
 
 return [
-    'apiKey' => 'HIER_LANGEN_ZUFAELLIGEN_STRING_EINSETZEN',
+    'apiKey' => '369763d293676977b6a9ab9efc992d8530807912dd34f070b22f0fac2c3633e4',
     'dataDir' => __DIR__ . '/data',
     // Nur nötig, falls Angular während der Entwicklung von einem anderen
     // Origin läuft (z.B. http://localhost:4200). In Produktion auf die

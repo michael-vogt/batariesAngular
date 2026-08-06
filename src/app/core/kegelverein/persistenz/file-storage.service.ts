@@ -24,12 +24,13 @@ export type VerbindungsStatus = 'nicht_verbunden' | 'verbunden';
 export class FileStorageService {
   private readonly adapter = inject(PERSISTENZ_ADAPTER);
 
-  readonly status = signal<VerbindungsStatus>('nicht_verbunden');
+  private readonly _status = signal<VerbindungsStatus>('nicht_verbunden');
+  readonly status = this._status.asReadonly();
 
   /** Beim App-Start aufrufen: reaktiviert eine zuvor gespeicherte Serververbindung. */
   async automatischVerbinden(): Promise<boolean> {
     const ok = await this.adapter.verbindungWiederherstellen();
-    this.status.set(ok ? 'verbunden' : 'nicht_verbunden');
+    this._status.set(ok ? 'verbunden' : 'nicht_verbunden');
     if (ok) await this.manifestSicherstellen();
     return ok;
   }
@@ -40,9 +41,14 @@ export class FileStorageService {
    */
   async verbindungUebernehmen(): Promise<boolean> {
     const ok = this.adapter.hatVerbindung();
-    this.status.set(ok ? 'verbunden' : 'nicht_verbunden');
+    this._status.set(ok ? 'verbunden' : 'nicht_verbunden');
     if (ok) await this.manifestSicherstellen();
     return ok;
+  }
+
+  /** Setzt den Status zurück; die eigentlichen Zugangsdaten löscht der Adapter. */
+  verbindungGetrennt(): void {
+    this._status.set('nicht_verbunden');
   }
 
   private pruefeVerbunden(): void {
@@ -89,7 +95,7 @@ export class FileStorageService {
     // Wirft ValidierungsFehler, falls Daten inkonsistent sind — bricht VOR dem Schreiben ab.
     pruefeKegeljahrDatei(datei);
 
-    const dateiname = dateinameFuerKegeljahr(kegeljahr.bezeichnung);
+    const dateiname = dateinameFuerKegeljahr(kegeljahr.bezeichnung, `kegeljahr-${kegeljahr.id}`);
     const pfad = `kegeljahre/${dateiname}`;
 
     await this.backupErstellen(pfad, dateiname);

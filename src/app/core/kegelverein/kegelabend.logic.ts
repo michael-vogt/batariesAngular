@@ -21,7 +21,9 @@ export function berechneKegelabendErgebnisse(
 
   for (const spielKey of Object.keys(ka.runden) as SpielKey[]) {
     for (const runde of ka.runden[spielKey] ?? []) {
-      const gewinnerVorhanden = Object.values(runde.ergebnisse).includes('gewonnen');
+      const statusWerte = Object.values(runde.ergebnisse);
+      const gewinnerVorhanden = statusWerte.includes('gewonnen');
+      const verliererVorhanden = statusWerte.includes('verloren');
 
       for (const [teilnehmerId, status] of Object.entries(runde.ergebnisse)) {
         const zeile = zeilen.get(teilnehmerId);
@@ -37,9 +39,11 @@ export function berechneKegelabendErgebnisse(
               : strafsaetze.niederlageStandard;
         } else if (status === 'teilgenommen') {
           if (spielKey === 'fuchsjagd' && gewinnerVorhanden) {
-            zeile.strafeGesamt += 0.25;
+            zeile.strafeGesamt += strafsaetze.fuchsjagdTeilnahmeMitSieger;
+          } else if (spielKey === 'fuchsjagd' && verliererVorhanden) {
+            // Fuchsjagd ohne Sieger, aber mit Verlierer: straffrei für Mitläufer
           } else if (spielKey === 'totenkiste') {
-            // keine Strafe bei reiner Teilnahme
+            // Totenkiste: reine Teilnahme ist straffrei
           } else {
             zeile.strafeGesamt += strafsaetze.teilnahme;
           }

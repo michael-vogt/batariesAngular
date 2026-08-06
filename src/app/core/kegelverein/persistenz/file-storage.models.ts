@@ -36,7 +36,30 @@ export function leeresManifest(): Manifest {
   };
 }
 
-export function dateinameFuerKegeljahr(bezeichnung: string): string {
-  // "2025/2026" -> "2025-2026.json"
-  return `${bezeichnung.replace(/\//g, '-')}.json`;
+/**
+ * Erzeugt einen Dateinamen, der garantiert dem serverseitig erlaubten
+ * Zeichensatz entspricht ([A-Za-z0-9_-] plus ".json"). Leerzeichen,
+ * Umlaute und Sonderzeichen werden ersetzt bzw. entfernt — sonst weist
+ * api.php den Pfad mit "Ungültiger Dateiname" zurück.
+ *
+ * Beispiel: "Kegeljahr 2025/2026" -> "kegeljahr-2025-2026.json"
+ */
+export function dateinameFuerKegeljahr(bezeichnung: string, fallbackId = 'kegeljahr'): string {
+  const umlaute: Record<string, string> = {
+    ä: 'ae',
+    ö: 'oe',
+    ü: 'ue',
+    Ä: 'ae',
+    Ö: 'oe',
+    Ü: 'ue',
+    ß: 'ss',
+  };
+
+  const slug = bezeichnung
+    .replace(/[äöüÄÖÜß]/g, (treffer) => umlaute[treffer])
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-') // alles Übrige (inkl. Leerzeichen, "/") zu "-"
+    .replace(/^-+|-+$/g, ''); // führende/abschließende Bindestriche weg
+
+  return `${slug || fallbackId}.json`;
 }
