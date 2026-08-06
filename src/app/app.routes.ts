@@ -1,7 +1,12 @@
 import { Routes } from '@angular/router';
 import { LegacyImportComponent } from './features/import/legacy-import.component';
+import { MitgliederListeComponent } from './features/mitglieder/mitglieder-liste.component';
 
 export const routes: Routes = [
+  {
+    path: 'mitglieder',
+    component: MitgliederListeComponent
+  },
   {
     path: 'import',
     component: LegacyImportComponent

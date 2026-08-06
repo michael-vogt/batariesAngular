@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { FileStorageService } from './core/kegelverein/persistenz/file-storage.service';
+import { VereinsdatenService } from './core/kegelverein/vereinsdaten.service';
 
 @Component({
   selector: 'app-root',
@@ -12,10 +13,10 @@ export class App implements OnInit {
   protected readonly title = signal('bataries');
 
   private readonly storage = inject(FileStorageService);
+  private readonly daten = inject(VereinsdatenService);
 
   async ngOnInit(): Promise<void> {
-    // Reaktiviert stillschweigend die zuletzt gespeicherten Zugangsdaten.
-    // Schlägt das fehl, zeigt das Verbindungsformular seinen Status an.
-    await this.storage.automatischVerbinden();
+    const verbunden = await this.storage.automatischVerbinden();
+    if (verbunden) await this.daten.initialisieren();
   }
 }

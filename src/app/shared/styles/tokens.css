@@ -1,0 +1,174 @@
+/* Design-Tokens für die Vereinsverwaltung.
+   In src/styles.css importieren:  @import './app/shared/styles/tokens.css';
+
+   Bewusst nüchtern gehalten: das hier ist ein Arbeitswerkzeug für
+   Kassenwart und Schriftführer, keine Schauseite. Priorität haben
+   Lesbarkeit dichter Zahlentabellen und eindeutige Zustände. */
+
+:root {
+  /* Farben: gedecktes Grün als Vereinsakzent, Rot/Grün nur für Beträge */
+  --farbe-flaeche: #fbfaf7;
+  --farbe-karte: #ffffff;
+  --farbe-rand: #e2ded4;
+  --farbe-text: #23211d;
+  --farbe-text-leise: #6c6759;
+  --farbe-akzent: #2f5d42;
+  --farbe-akzent-hell: #eaf1ec;
+  --farbe-soll: #a33a2c;
+  --farbe-haben: #2f5d42;
+  --farbe-warnung: #8a6d1f;
+  --farbe-warnung-hell: #fbf4e0;
+
+  /* Typografie: Systemschriften, Tabellenzahlen mit fester Breite */
+  --schrift-text: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --schrift-zahl: 'SF Mono', 'Cascadia Mono', 'Roboto Mono', Consolas, monospace;
+
+  --abstand-1: 0.25rem;
+  --abstand-2: 0.5rem;
+  --abstand-3: 0.75rem;
+  --abstand-4: 1rem;
+  --abstand-6: 1.5rem;
+  --abstand-8: 2rem;
+
+  --radius: 6px;
+}
+
+body {
+  margin: 0;
+  background: var(--farbe-flaeche);
+  color: var(--farbe-text);
+  font-family: var(--schrift-text);
+  line-height: 1.5;
+}
+
+.seite {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: var(--abstand-6) var(--abstand-4);
+}
+
+.seiten-kopf {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--abstand-3);
+  margin-bottom: var(--abstand-6);
+}
+
+.seiten-kopf h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.karte {
+  background: var(--farbe-karte);
+  border: 1px solid var(--farbe-rand);
+  border-radius: var(--radius);
+  padding: var(--abstand-4);
+}
+
+/* Tabellen: Zahlen rechtsbündig und mit Monospace, damit Spalten
+   optisch vergleichbar bleiben */
+table.daten {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+table.daten th,
+table.daten td {
+  padding: var(--abstand-2) var(--abstand-3);
+  border-bottom: 1px solid var(--farbe-rand);
+  text-align: left;
+}
+
+table.daten th {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--farbe-text-leise);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+table.daten td.zahl,
+table.daten th.zahl {
+  text-align: right;
+  font-family: var(--schrift-zahl);
+  font-variant-numeric: tabular-nums;
+}
+
+table.daten tbody tr:hover {
+  background: var(--farbe-akzent-hell);
+}
+
+.betrag-offen { color: var(--farbe-soll); }
+.betrag-guthaben { color: var(--farbe-haben); }
+.leise { color: var(--farbe-text-leise); }
+
+/* Bedienelemente */
+button {
+  font: inherit;
+  padding: var(--abstand-2) var(--abstand-4);
+  border: 1px solid var(--farbe-rand);
+  border-radius: var(--radius);
+  background: var(--farbe-karte);
+  color: var(--farbe-text);
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) { border-color: var(--farbe-akzent); }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+button.primaer {
+  background: var(--farbe-akzent);
+  border-color: var(--farbe-akzent);
+  color: #fff;
+}
+
+button.leise-aktion {
+  padding: var(--abstand-1) var(--abstand-2);
+  color: var(--farbe-text-leise);
+  border-color: transparent;
+  background: transparent;
+}
+
+button.leise-aktion:hover:not(:disabled) {
+  color: var(--farbe-soll);
+  border-color: var(--farbe-rand);
+}
+
+input, select {
+  font: inherit;
+  padding: var(--abstand-2);
+  border: 1px solid var(--farbe-rand);
+  border-radius: var(--radius);
+  background: var(--farbe-karte);
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--farbe-akzent);
+  outline-offset: 2px;
+}
+
+/* Statusmeldungen */
+.hinweis { color: var(--farbe-text-leise); font-size: 0.9375rem; }
+.fehler {
+  padding: var(--abstand-3);
+  border-radius: var(--radius);
+  background: #fdeceb;
+  color: var(--farbe-soll);
+}
+.warnung {
+  padding: var(--abstand-3);
+  border-radius: var(--radius);
+  background: var(--farbe-warnung-hell);
+  color: var(--farbe-warnung);
+}
+.ok { color: var(--farbe-haben); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

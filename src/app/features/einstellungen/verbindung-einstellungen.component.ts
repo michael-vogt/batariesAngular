@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PhpApiAdapter } from '../../core/kegelverein/persistenz/php-api-adapter';
 import { FileStorageService } from '../../core/kegelverein/persistenz/file-storage.service';
+import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
 
 /**
  * Einmalige Eingabe der Serverzugangsdaten. Nach erfolgreichem Test
@@ -55,6 +56,7 @@ import { FileStorageService } from '../../core/kegelverein/persistenz/file-stora
 export class VerbindungEinstellungenComponent {
   private readonly adapter = inject(PhpApiAdapter);
   protected readonly storage = inject(FileStorageService);
+  private readonly daten = inject(VereinsdatenService);
 
   protected readonly baseUrl = signal('');
   protected readonly apiKey = signal('');
@@ -79,6 +81,10 @@ export class VerbindungEinstellungenComponent {
       // Übernimmt den Status in den FileStorageService und legt
       // manifest.json an, falls der Server noch leer ist.
       await this.storage.verbindungUebernehmen();
+
+      // Danach die eigentlichen Vereinsdaten in den Store laden, damit
+      // die Feature-Seiten ohne Neuladen der Anwendung nutzbar sind.
+      await this.daten.initialisieren();
       this.apiKey.set('');
     } catch (e) {
       this.fehler.set(e instanceof Error ? e.message : 'Unbekannter Fehler');
