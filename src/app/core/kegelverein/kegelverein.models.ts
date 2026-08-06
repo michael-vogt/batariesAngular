@@ -103,6 +103,20 @@ export type SpielKey =
   | 'totenkiste'
   | 'viergewinnt';
 
+/** Anzeigenamen der Spiele; die Reihenfolge bestimmt auch die Anzeige. */
+export const SPIELE: readonly { key: SpielKey; name: string }[] = [
+  { key: 'abraeumen', name: 'Abräumen' },
+  { key: 'christbaum', name: 'Christbaum' },
+  { key: 'fuchsjagd', name: 'Fuchsjagd' },
+  { key: 'hohe', name: 'Hohe' },
+  { key: 'koenig', name: 'König' },
+  { key: 'niedrige', name: 'Niedrige' },
+  { key: 'regenundsonne', name: 'Regen und Sonne' },
+  { key: 'siebzehn', name: 'Siebzehn' },
+  { key: 'totenkiste', name: 'Totenkiste' },
+  { key: 'viergewinnt', name: 'Vier gewinnt' },
+] as const;
+
 export type SpielStatus = 'teilgenommen' | 'gewonnen' | 'verloren' | 'nicht_teilgenommen';
 
 export interface KegelabendTeilnehmer {

@@ -1,7 +1,7 @@
-import { Injectable, computed, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { KegeljahrStore } from './kegeljahr.store';
 import { berechneKegelabendErgebnisse } from './kegelabend.logic';
-import { Kegelabend, Mitglied } from './kegelverein.models';
+import { Kegelabend, KegelabendErgebnisZeile, Mitglied } from './kegelverein.models';
 import { AccountingService } from './accounting.service';
 
 /**
@@ -10,11 +10,17 @@ import { AccountingService } from './accounting.service';
 @Injectable({ providedIn: 'root' })
 export class KegelabendService {
   private readonly store = inject(KegeljahrStore);
+  private readonly accounting = inject(AccountingService);
 
   readonly kegelabende = this.store.kegelabende;
 
-  ergebnisse(ka: Kegelabend) {
-    return computed(() => berechneKegelabendErgebnisse(ka));
+  /**
+   * Kein computed(): der Kegelabend kommt als Parameter, nicht als Signal.
+   * Aufrufer, die Reaktivität brauchen, wickeln den Aufruf selbst in ein
+   * computed() um ihre eigene Signal-Quelle.
+   */
+  ergebnisse(ka: Kegelabend): KegelabendErgebnisZeile[] {
+    return berechneKegelabendErgebnisse(ka);
   }
 
   speichern(ka: Kegelabend): void {
@@ -27,23 +33,18 @@ export class KegelabendService {
   }
 
   /**
-   * Übergibt die berechneten Strafen eines Kegelabends direkt an die
-   * Buchhaltung (verbindet KegelabendService mit AccountingService).
+   * Überträgt die berechneten Strafen eines Kegelabends als Buchungen in
+   * die Buchführung. Teilnehmer, die keine Mitglieder sind (Gäste), werden
+   * übersprungen — für sie gibt es kein Forderungskonto.
    */
-  strafenUebernehmen(
-    ka: Kegelabend,
-    datum: string,
-    mitgliederNachTeilnehmerId: Map<string, Mitglied>,
-    accounting: AccountingService,
-  ): void {
-    const ergebnisse = berechneKegelabendErgebnisse(ka);
-    const posten = ergebnisse
-      .map((z) => ({
-        mitglied: mitgliederNachTeilnehmerId.get(z.teilnehmerId),
-        betrag: z.strafeGesamt,
-      }))
+  strafenUebernehmen(ka: Kegelabend, datum: string): number {
+    const mitgliedNachId = new Map(this.store.mitglieder().map((m) => [m.id, m]));
+
+    const posten = berechneKegelabendErgebnisse(ka)
+      .map((z) => ({ mitglied: mitgliedNachId.get(z.teilnehmerId), betrag: z.strafeGesamt }))
       .filter((p): p is { mitglied: Mitglied; betrag: number } => !!p.mitglied && p.betrag > 0);
 
-    accounting.uebernehmeStrafen(datum, posten);
+    this.accounting.uebernehmeStrafen(datum, posten);
+    return posten.length;
   }
 }
