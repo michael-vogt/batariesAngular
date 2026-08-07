@@ -29,6 +29,7 @@ export class HauptnavigationComponent {
     { pfad: '/buchfuehrung/journal', titel: 'Journal' },
     { pfad: '/buchfuehrung/vorfaelle', titel: 'Geschäftsvorfälle' },
     { pfad: '/buchfuehrung/konten', titel: 'Konten' },
+    { pfad: '/abrechnung', titel: 'Abrechnung' },
     { pfad: '/buchfuehrung/abschluss', titel: 'Jahresabschluss' },
   ];
 

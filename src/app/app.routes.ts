@@ -11,6 +11,12 @@ import { HauptnavigationComponent } from './features/hauptnavigation/hauptnaviga
 
 export const routes: Routes = [
   {
+    path: 'abrechnung',
+    loadComponent: () =>
+      import('./features/abrechnung/abrechnung.component')
+        .then(m => m.AbrechnungComponent)
+  },
+  {
     path: '',
     redirectTo: 'mitglieder',
     pathMatch: 'full'

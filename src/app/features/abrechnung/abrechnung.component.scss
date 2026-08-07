@@ -1,0 +1,52 @@
+.seiten-kopf .hinweis {
+  margin: var(--abstand-1) 0 0;
+}
+
+.karte {
+  margin-bottom: var(--abstand-4);
+}
+
+.einstellungen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--abstand-6);
+}
+
+.einstellungen > label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--abstand-1);
+  font-size: 0.8125rem;
+  color: var(--farbe-text-leise);
+}
+
+.einstellungen .wahl {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--abstand-2);
+  font-size: 0.9375rem;
+  color: var(--farbe-text);
+  cursor: pointer;
+}
+
+.warnung {
+  margin-bottom: var(--abstand-4);
+}
+
+/* Der zu zahlende Betrag ist die Spalte, auf die am Kegelabend geschaut
+   wird — deshalb hervorgehoben. */
+td.summe {
+  font-weight: 600;
+}
+
+/* Leere Spalte zum Abhaken: im Ausdruck breit, am Bildschirm nur angedeutet. */
+td.bezahlt {
+  min-width: 5rem;
+  border-bottom: 1px solid var(--farbe-rand);
+}
+
+.karte > .hinweis {
+  margin: var(--abstand-4) 0 0;
+  max-width: 52rem;
+}

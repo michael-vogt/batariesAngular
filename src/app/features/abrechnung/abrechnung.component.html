@@ -1,0 +1,101 @@
+<div class="seite">
+  <header class="seiten-kopf">
+    <div>
+      <h1>Abrechnung</h1>
+      @if (daten.aktuellesJahr(); as jahr) {
+        <p class="hinweis">{{ jahr.bezeichnung }}</p>
+      }
+    </div>
+    <button type="button" class="primaer" (click)="pdfErzeugen()">PDF herunterladen</button>
+  </header>
+
+  @if (daten.fehler(); as text) {
+    <p class="fehler">{{ text }}</p>
+  }
+  @if (pdfFehler(); as text) {
+    <p class="fehler">{{ text }}</p>
+  }
+
+  <div class="karte einstellungen">
+    <label>
+      Stand
+      <input type="date" [ngModel]="stichtag()" (ngModelChange)="stichtag.set($event)" />
+    </label>
+    <label class="wahl">
+      <input
+        type="checkbox"
+        [checked]="ausgetreteneAusblenden()"
+        (change)="ausgetreteneAusblenden.set(!ausgetreteneAusblenden())"
+      />
+      Ausgetretene ohne offene Posten ausblenden
+    </label>
+  </div>
+
+  @if (nichtZugeordnet() !== 0) {
+    <p class="warnung">
+      {{ euro(nichtZugeordnet()) }} € an Forderungen sind keinem Mitglied zugeordnet und fehlen
+      deshalb in dieser Liste. Im Journal lässt sich die Zuordnung nachtragen.
+    </p>
+  }
+
+  <div class="karte">
+    @if (abrechnung().zeilen.length === 0) {
+      <p class="hinweis">Keine abzurechnenden Posten.</p>
+    } @else {
+      <table class="daten">
+        <thead>
+        <tr>
+          <th>Stand: {{ datumKurz(stichtag()) }}</th>
+          <th class="zahl">Beiträge</th>
+          <th class="zahl">Strafen</th>
+          <th class="zahl">Umlagen</th>
+          <th class="zahl">Ausgleich</th>
+          <th class="zahl">Summe</th>
+          <th class="zahl">bezahlt</th>
+          <th class="zahl">übriges Restguthaben</th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (z of abrechnung().zeilen; track z.mitgliedId) {
+            <tr>
+              <td>{{ z.name }}</td>
+              <td class="zahl">{{ euro(z.beitraege) }}</td>
+              <td class="zahl">{{ euro(z.strafen) }}</td>
+              <td class="zahl">{{ euro(z.umlagen) }}</td>
+              <td class="zahl">{{ z.ausgleich > 0 ? '-' : '' }}{{ euro(z.ausgleich) }}</td>
+              <td class="zahl summe" [class.betrag-offen]="z.summe > 0">{{ euro(z.summe) }}</td>
+              <td class="zahl bezahlt"></td>
+              <td class="zahl" [class.betrag-guthaben]="z.verbleibendesRestguthaben > 0">
+                {{ euro(z.verbleibendesRestguthaben) }}
+              </td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+        <tr>
+          <td><strong>Summe</strong></td>
+          <td class="zahl"><strong>{{ euro(abrechnung().summen.beitraege) }}</strong></td>
+          <td class="zahl"><strong>{{ euro(abrechnung().summen.strafen) }}</strong></td>
+          <td class="zahl"><strong>{{ euro(abrechnung().summen.umlagen) }}</strong></td>
+          <td class="zahl">
+            <strong>
+              {{ abrechnung().summen.ausgleich > 0 ? '-' : '' }}{{ euro(abrechnung().summen.ausgleich) }}
+            </strong>
+          </td>
+          <td class="zahl"><strong>{{ euro(abrechnung().summen.summe) }}</strong></td>
+          <td></td>
+          <td class="zahl">
+            <strong>{{ euro(abrechnung().summen.verbleibendesRestguthaben) }}</strong>
+          </td>
+        </tr>
+        </tfoot>
+      </table>
+
+      <p class="hinweis">
+        Die Spalte „bezahlt“ bleibt im Ausdruck leer — sie ist zum Abhaken am Kegelabend gedacht.
+        „Ausgleich“ zeigt, was durch vorhandenes Restguthaben gedeckt wäre; gebucht wird dabei
+        nichts. Die tatsächliche Verrechnung erfolgt unter Geschäftsvorfälle.
+      </p>
+    }
+  </div>
+</div>
