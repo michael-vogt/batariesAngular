@@ -1,0 +1,138 @@
+<div class="seite">
+  <header class="seiten-kopf">
+    <h1>Jahresabschluss</h1>
+  </header>
+
+  @if (daten.fehler(); as text) {
+    <p class="fehler">{{ text }}</p>
+  }
+
+  @if (abgeschlossen()) {
+    <p class="ok meldung">
+      Das Kegeljahr wurde abgeschlossen. Das neue Jahr ist jetzt ausgewählt.
+    </p>
+  }
+
+  @if (!aktuellesJahr()) {
+    <div class="karte">
+      <p>Kein Kegeljahr ausgewählt.</p>
+    </div>
+  } @else {
+    <div class="karte">
+      <h2>Abzuschließendes Jahr</h2>
+      <p class="jahr">
+        {{ aktuellesJahr()!.bezeichnung }}
+        <span class="leise">
+          ({{ datumKurz(aktuellesJahr()!.startDatum) }} bis {{ datumKurz(aktuellesJahr()!.endDatum) }})
+        </span>
+      </p>
+
+      <dl class="bestaende">
+        <div>
+          <dt>Kasse</dt>
+          <dd class="zahl">{{ euro(bestaende().kasse) }} €</dd>
+        </div>
+        <div>
+          <dt>Forderungen</dt>
+          <dd class="zahl">{{ euro(bestaende().forderungen) }} €</dd>
+        </div>
+        <div>
+          <dt>Restguthaben</dt>
+          <dd class="zahl">{{ euro(bestaende().restguthaben) }} €</dd>
+        </div>
+        <div>
+          <dt>Vereinsvermögen</dt>
+          <dd class="zahl">{{ euro(bestaende().vereinsvermoegen) }} €</dd>
+        </div>
+      </dl>
+
+      <p class="hinweis">
+        Diese Bestände werden in das Folgejahr übertragen. Erträge und Aufwendungen werden nicht
+        übertragen — sie sind im Vereinsvermögen bereits verrechnet und beginnen wieder bei null.
+      </p>
+
+      @if (!vorschau()) {
+        <button type="button" (click)="vorschauErstellen()">Abschluss vorbereiten</button>
+      }
+
+      @if (pruefFehler(); as text) {
+        <p class="fehler">{{ text }}</p>
+      }
+    </div>
+
+    @if (vorschau(); as v) {
+      <div class="karte">
+        <h2>Vorschau: {{ v.neuesKegeljahr.bezeichnung }}</h2>
+        <p class="hinweis">
+          {{ datumKurz(v.neuesKegeljahr.startDatum) }} bis
+          {{ datumKurz(v.neuesKegeljahr.endDatum) }} ·
+          {{ v.eroeffnungsbuchungen.length }} Eröffnungsbuchungen
+        </p>
+
+        @for (w of v.warnungen; track w) {
+          <p class="warnung">{{ w }}</p>
+        }
+
+        <table class="daten">
+          <thead>
+          <tr>
+            <th>Buchungstext</th>
+            <th>Soll</th>
+            <th>Haben</th>
+            <th class="zahl">Betrag</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (b of v.eroeffnungsbuchungen; track b.id) {
+              <tr>
+                <td>{{ b.buchungstext }}</td>
+                <td class="leise">{{ b.sollKonto }}</td>
+                <td class="leise">{{ b.habenKonto }}</td>
+                <td class="zahl">{{ euro(b.betrag) }}</td>
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+          <tr>
+            <td colspan="3"><strong>Summe</strong></td>
+            <td class="zahl"><strong>{{ euro(summe()) }}</strong></td>
+          </tr>
+          </tfoot>
+        </table>
+
+        <div class="ebk" [class.fehlerhaft]="!v.ausgeglichen">
+          @if (v.ausgeglichen) {
+            <p class="ok">
+              Das Eröffnungsbilanzkonto ist ausgeglichen ({{ euro(v.ebkSoll) }} € auf beiden Seiten).
+            </p>
+          } @else {
+            <p>
+              Das Eröffnungsbilanzkonto geht nicht auf: Soll {{ euro(v.ebkSoll) }} € gegen Haben
+              {{ euro(v.ebkHaben) }} €. Der Abschluss sollte erst nach Klärung ausgeführt werden.
+            </p>
+          }
+        </div>
+
+        <div class="aktionen">
+          <button
+            type="button"
+            class="primaer"
+            [disabled]="laeuft()"
+            (click)="ausfuehren()"
+          >
+            {{ laeuft() ? 'Schließe ab…' : 'Jahr abschließen' }}
+          </button>
+          <button type="button" class="leise-aktion" [disabled]="laeuft()" (click)="verwerfen()">
+            Abbrechen
+          </button>
+        </div>
+
+        <p class="hinweis">
+          Der Abschluss wird direkt gespeichert und lässt sich nicht rückgängig machen. Das
+          abgeschlossene Jahr bleibt vollständig erhalten; auf dem Server liegt zusätzlich ein
+          Backup des vorherigen Standes.
+        </p>
+      </div>
+    }
+  }
+</div>

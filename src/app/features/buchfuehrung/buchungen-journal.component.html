@@ -1,0 +1,167 @@
+<div class="seite">
+  <header class="seiten-kopf">
+    <h1>Journal</h1>
+    <div class="kopf-aktionen">
+      @if (daten.ungespeichert()) {
+        <span class="hinweis">Nicht gespeicherte Änderungen</span>
+      }
+      <button
+        type="button"
+        class="primaer"
+        [disabled]="!daten.ungespeichert() || speichert()"
+        (click)="speichern()"
+      >
+        {{ speichert() ? 'Speichert…' : 'Änderungen speichern' }}
+      </button>
+    </div>
+  </header>
+
+  @if (daten.fehler(); as text) {
+    <p class="fehler">{{ text }}</p>
+  }
+
+  <div class="karte">
+    <h2>Neue Buchung</h2>
+    <div class="formular-zeile">
+      <label>
+        Datum
+        <input type="date" [ngModel]="neuDatum()" (ngModelChange)="neuDatum.set($event)" />
+      </label>
+      <label>
+        Soll
+        <select [ngModel]="neuSoll()" (ngModelChange)="neuSoll.set($event)">
+          @for (k of konten; track k.nummer) {
+            <option [value]="k.nummer">{{ k.nummer }} · {{ k.name }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        Haben
+        <select [ngModel]="neuHaben()" (ngModelChange)="neuHaben.set($event)">
+          @for (k of konten; track k.nummer) {
+            <option [value]="k.nummer">{{ k.nummer }} · {{ k.name }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        Betrag (€)
+        <input
+          class="zahl-feld"
+          type="number"
+          min="0"
+          step="0.01"
+          [ngModel]="neuBetrag()"
+          (ngModelChange)="neuBetrag.set($event)"
+        />
+      </label>
+      <label class="breit">
+        Buchungstext
+        <input
+          type="text"
+          [ngModel]="neuText()"
+          (ngModelChange)="neuText.set($event)"
+          (keyup.enter)="buchen()"
+        />
+      </label>
+      <label>
+        Mitglied (optional)
+        <select [ngModel]="neuMitgliedId()" (ngModelChange)="neuMitgliedId.set($event)">
+          <option value="">– keines –</option>
+          @for (m of mitglieder(); track m.id) {
+            <option [value]="m.id">{{ m.name }}</option>
+          }
+        </select>
+      </label>
+      <button type="button" (click)="buchen()">Buchen</button>
+    </div>
+
+    @if (formularFehler(); as text) {
+      <p class="fehler">{{ text }}</p>
+    }
+    <p class="hinweis">
+      Für Monatsbeiträge, Zahlungseingänge und Umlagen die Geschäftsvorfälle nutzen — dort
+      werden die Gegenkonten automatisch richtig gesetzt.
+    </p>
+  </div>
+
+  <div class="karte">
+    <div class="filter">
+      <label>
+        Suche
+        <input
+          type="search"
+          placeholder="Buchungstext"
+          [ngModel]="suche()"
+          (ngModelChange)="suche.set($event)"
+        />
+      </label>
+      <label>
+        Konto
+        <select [ngModel]="filterKonto()" (ngModelChange)="filterKonto.set($event)">
+          <option value="">alle</option>
+          @for (k of konten; track k.nummer) {
+            <option [value]="k.nummer">{{ k.nummer }} · {{ k.name }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        Mitglied
+        <select [ngModel]="filterMitgliedId()" (ngModelChange)="filterMitgliedId.set($event)">
+          <option value="">alle</option>
+          @for (m of mitglieder(); track m.id) {
+            <option [value]="m.id">{{ m.name }}</option>
+          }
+        </select>
+      </label>
+      @if (istGefiltert()) {
+        <button type="button" class="leise-aktion" (click)="filterZuruecksetzen()">
+          Filter zurücksetzen
+        </button>
+      }
+    </div>
+
+    @if (gefiltert().length === 0) {
+      <p class="hinweis">
+        {{ istGefiltert() ? 'Keine Buchung passt zum Filter.' : 'Noch keine Buchungen erfasst.' }}
+      </p>
+    } @else {
+      <table class="daten">
+        <thead>
+        <tr>
+          <th>Datum</th>
+          <th>Buchungstext</th>
+          <th>Mitglied</th>
+          <th>Soll</th>
+          <th>Haben</th>
+          <th class="zahl">Betrag</th>
+          <th><span class="visuell-versteckt">Aktionen</span></th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (b of gefiltert(); track b.id) {
+            <tr>
+              <td class="zahl leise">{{ datumKurz(b.datum) }}</td>
+              <td>{{ b.buchungstext }}</td>
+              <td class="leise">{{ mitgliedName(b.mitgliedId) || '—' }}</td>
+              <td class="leise">{{ b.sollKonto }} · {{ kontoName(b.sollKonto) }}</td>
+              <td class="leise">{{ b.habenKonto }} · {{ kontoName(b.habenKonto) }}</td>
+              <td class="zahl">{{ euro(b.betrag) }}</td>
+              <td>
+                <button type="button" class="leise-aktion" (click)="loeschen(b)">Löschen</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+        <tr>
+          <td colspan="5">
+            <strong>{{ gefiltert().length }} Buchungen{{ istGefiltert() ? ' (gefiltert)' : '' }}</strong>
+          </td>
+          <td class="zahl"><strong>{{ euro(summe()) }}</strong></td>
+          <td></td>
+        </tr>
+        </tfoot>
+      </table>
+    }
+  </div>
+</div>

@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { PersistenzAdapter } from './persistenz-adapter';
@@ -23,10 +23,19 @@ export interface ServerVerbindung {
 @Injectable({ providedIn: 'root' })
 export class PhpApiAdapter implements PersistenzAdapter {
   private readonly http = inject(HttpClient);
-  private verbindung: ServerVerbindung | null = null;
+
+  /**
+   * Als Signal, damit die Oberfläche die tatsächlich aktive Verbindung
+   * anzeigen kann — auch nach einem Neuladen, wenn sie aus dem
+   * localStorage reaktiviert wurde und kein Formular ausgefüllt war.
+   */
+  private readonly _verbindung = signal<ServerVerbindung | null>(null);
+
+  /** Adresse der aktiven Verbindung, leer wenn nicht verbunden. */
+  readonly aktiveBaseUrl = computed(() => this._verbindung()?.baseUrl ?? '');
 
   hatVerbindung(): boolean {
-    return this.verbindung !== null;
+    return this._verbindung() !== null;
   }
 
   async verbindungWiederherstellen(): Promise<boolean> {
@@ -45,13 +54,13 @@ export class PhpApiAdapter implements PersistenzAdapter {
     const erreichbar = await this.pruefeVerbindung(kandidat);
     if (!erreichbar) return false;
 
-    this.verbindung = kandidat;
+    this._verbindung.set(kandidat);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(kandidat));
     return true;
   }
 
   trennen(): void {
-    this.verbindung = null;
+    this._verbindung.set(null);
     localStorage.removeItem(STORAGE_KEY);
   }
 
@@ -72,9 +81,9 @@ export class PhpApiAdapter implements PersistenzAdapter {
   }
 
   private pruefeVerbunden(): ServerVerbindung {
-    if (!this.verbindung)
-      throw new Error('Keine Serververbindung aktiv — zuerst verbinden() aufrufen.');
-    return this.verbindung;
+    const v = this._verbindung();
+    if (!v) throw new Error('Keine Serververbindung aktiv — zuerst verbinden() aufrufen.');
+    return v;
   }
 
   async dateiLesen(pfad: string): Promise<string | null> {

@@ -1,0 +1,64 @@
+.karte {
+  margin-bottom: var(--abstand-6);
+}
+
+.karte h2 {
+  margin: 0 0 var(--abstand-3);
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+/* Ergebniszeile bewusst hervorgehoben: die eine Zahl, nach der im
+   Kassenbericht zuerst gefragt wird. */
+.ergebnis {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--abstand-3);
+  border-left: 3px solid var(--farbe-haben);
+}
+
+.ergebnis.verlust {
+  border-left-color: var(--farbe-soll);
+}
+
+.ergebnis .beschriftung {
+  color: var(--farbe-text-leise);
+}
+
+.ergebnis .wert {
+  font-family: var(--schrift-zahl);
+  font-size: 1.5rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--farbe-haben);
+}
+
+.ergebnis.verlust .wert {
+  color: var(--farbe-soll);
+}
+
+.probe p {
+  margin: 0;
+}
+
+/* Kennzahlen der Bilanzprobe nebeneinander, damit die Gleichung als
+   Ganzes ablesbar bleibt. */
+.bilanz {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--abstand-6);
+  margin: 0 0 var(--abstand-3);
+}
+
+.bilanz dt {
+  font-size: 0.8125rem;
+  color: var(--farbe-text-leise);
+}
+
+.bilanz dd {
+  margin: var(--abstand-1) 0 0;
+  font-family: var(--schrift-zahl);
+  font-size: 1.125rem;
+  font-variant-numeric: tabular-nums;
+}

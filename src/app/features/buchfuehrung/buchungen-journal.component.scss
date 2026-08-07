@@ -1,0 +1,65 @@
+.kopf-aktionen {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-3);
+}
+
+.karte {
+  margin-bottom: var(--abstand-6);
+}
+
+.karte h2 {
+  margin: 0 0 var(--abstand-3);
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+.formular-zeile,
+.filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--abstand-3);
+}
+
+.formular-zeile label,
+.filter label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--abstand-1);
+  font-size: 0.8125rem;
+  color: var(--farbe-text-leise);
+}
+
+/* Der Buchungstext bekommt mehr Platz als die Auswahlfelder — er ist das
+   einzige Feld mit freiem Inhalt und später der Anker für die Suche. */
+.formular-zeile label.breit {
+  flex: 1 1 18rem;
+}
+
+.zahl-feld {
+  width: 7rem;
+  text-align: right;
+  font-family: var(--schrift-zahl);
+}
+
+.filter {
+  margin-bottom: var(--abstand-4);
+  padding-bottom: var(--abstand-4);
+  border-bottom: 1px solid var(--farbe-rand);
+}
+
+.formular-zeile + .fehler,
+.formular-zeile + .hinweis,
+.fehler + .hinweis {
+  margin: var(--abstand-3) 0 0;
+  max-width: 48rem;
+}
+
+.visuell-versteckt {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}

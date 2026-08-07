@@ -1,0 +1,95 @@
+<div class="seite">
+  <header class="seiten-kopf">
+    <div>
+      <h1>Kontenübersicht</h1>
+      @if (daten.aktuellesJahr(); as jahr) {
+        <p class="hinweis">{{ jahr.bezeichnung }} · {{ anzahlBuchungen() }} Buchungen</p>
+      }
+    </div>
+  </header>
+
+  @if (daten.fehler(); as text) {
+    <p class="fehler">{{ text }}</p>
+  }
+
+  @if (anzahlBuchungen() === 0) {
+    <div class="karte">
+      <p>Noch keine Buchungen erfasst.</p>
+    </div>
+  } @else {
+    <div class="karte ergebnis" [class.verlust]="ergebnis() < 0">
+      <span class="beschriftung">
+        {{ ergebnis() >= 0 ? 'Überschuss' : 'Fehlbetrag' }} im laufenden Kegeljahr
+      </span>
+      <span class="wert">{{ euro(ergebnis()) }} €</span>
+    </div>
+
+    @for (gruppe of gruppen(); track gruppe.titel) {
+      <div class="karte">
+        <h2>{{ gruppe.titel }}</h2>
+        <table class="daten">
+          <thead>
+          <tr>
+            <th class="zahl">Konto</th>
+            <th>Bezeichnung</th>
+            <th class="zahl">Soll</th>
+            <th class="zahl">Haben</th>
+            <th class="zahl">Saldo</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (zeile of gruppe.zeilen; track zeile.nummer) {
+              <tr>
+                <td class="zahl leise">{{ zeile.nummer }}</td>
+                <td>{{ zeile.name }}</td>
+                <td class="zahl leise">{{ euro(zeile.soll) }}</td>
+                <td class="zahl leise">{{ euro(zeile.haben) }}</td>
+                <td class="zahl"><strong>{{ euro(zeile.saldo) }}</strong></td>
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+          <tr>
+            <td colspan="4"><strong>Summe</strong></td>
+            <td class="zahl"><strong>{{ euro(gruppe.summe) }}</strong></td>
+          </tr>
+          </tfoot>
+        </table>
+      </div>
+    }
+
+    <div class="karte probe" [class.warnung]="!probe().stimmt">
+      <h2>Gegenprobe</h2>
+      <dl class="bilanz">
+        <div>
+          <dt>Vermögen</dt>
+          <dd class="zahl">{{ euro(probe().aktiva) }} €</dd>
+        </div>
+        <div>
+          <dt>Verbindlichkeiten</dt>
+          <dd class="zahl">{{ euro(probe().passiva) }} €</dd>
+        </div>
+        <div>
+          <dt>Vereinsvermögen</dt>
+          <dd class="zahl">{{ euro(probe().eigenkapital) }} €</dd>
+        </div>
+      </dl>
+
+      @if (probe().stimmt) {
+        <p class="ok">
+          Die Bilanz geht auf: Vermögen entspricht Verbindlichkeiten zuzüglich Vereinsvermögen.
+        </p>
+      } @else {
+        <p>
+          Die Bilanz weicht um {{ euro(probe().differenz) }} € ab.
+          @if (probe().eroeffnungsrest !== 0) {
+            Auf dem Eröffnungsbilanzkonto stehen noch {{ euro(probe().eroeffnungsrest) }} € —
+              beim Jahreswechsel wurden vermutlich nicht alle Posten übernommen.
+          } @else {
+            Vermutlich fehlt eine Gegenbuchung; bitte das Journal prüfen.
+          }
+        </p>
+      }
+    </div>
+  }
+</div>

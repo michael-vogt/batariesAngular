@@ -1,0 +1,76 @@
+.kopf-aktionen {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-3);
+}
+
+.meldung {
+  margin: 0 0 var(--abstand-4);
+}
+
+.vorgang-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--abstand-2);
+  margin-bottom: var(--abstand-4);
+}
+
+.vorgang-tabs button {
+  font-size: 0.875rem;
+}
+
+.vorgang-tabs button.aktiv {
+  background: var(--farbe-akzent-hell);
+  border-color: var(--farbe-akzent);
+  color: var(--farbe-akzent);
+  font-weight: 600;
+}
+
+.karte h2 {
+  margin: 0 0 var(--abstand-3);
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+.formular-zeile {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--abstand-3);
+}
+
+.formular-zeile label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--abstand-1);
+  font-size: 0.8125rem;
+  color: var(--farbe-text-leise);
+}
+
+.karte > .hinweis {
+  margin: var(--abstand-3) 0;
+  max-width: 48rem;
+}
+
+.zahl-feld {
+  width: 7rem;
+  text-align: right;
+  font-family: var(--schrift-zahl);
+}
+
+/* Nicht ausgewählte Zeilen zurücknehmen, ohne sie auszublenden — die
+   Auswahl bleibt jederzeit erreichbar. */
+tr.inaktiv td {
+  opacity: 0.55;
+}
+
+.wahl {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-2);
+  cursor: pointer;
+}
+
+.aktion {
+  margin-top: var(--abstand-4);
+}

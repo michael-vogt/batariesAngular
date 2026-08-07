@@ -1,0 +1,300 @@
+<div class="seite">
+  <header class="seiten-kopf">
+    <h1>Geschäftsvorfälle</h1>
+    <div class="kopf-aktionen">
+      @if (daten.ungespeichert()) {
+        <span class="hinweis">Nicht gespeicherte Änderungen</span>
+      }
+      <button
+        type="button"
+        class="primaer"
+        [disabled]="!daten.ungespeichert() || speichert()"
+        (click)="speichern()"
+      >
+        {{ speichert() ? 'Speichert…' : 'Änderungen speichern' }}
+      </button>
+    </div>
+  </header>
+
+  @if (daten.fehler(); as text) {
+    <p class="fehler">{{ text }}</p>
+  }
+  @if (meldung(); as text) {
+    <p class="ok meldung">{{ text }}</p>
+  }
+
+  <nav class="vorgang-tabs" role="tablist">
+    <button
+      type="button" role="tab"
+      [attr.aria-selected]="aktiverVorgang() === 'beitraege'"
+      [class.aktiv]="aktiverVorgang() === 'beitraege'"
+      (click)="aktiverVorgang.set('beitraege')"
+    >Monatsbeiträge</button>
+    <button
+      type="button" role="tab"
+      [attr.aria-selected]="aktiverVorgang() === 'einnahmen'"
+      [class.aktiv]="aktiverVorgang() === 'einnahmen'"
+      (click)="aktiverVorgang.set('einnahmen')"
+    >Zahlungseingänge</button>
+    <button
+      type="button" role="tab"
+      [attr.aria-selected]="aktiverVorgang() === 'restguthaben'"
+      [class.aktiv]="aktiverVorgang() === 'restguthaben'"
+      (click)="aktiverVorgang.set('restguthaben')"
+    >Restguthaben verrechnen</button>
+    <button
+      type="button" role="tab"
+      [attr.aria-selected]="aktiverVorgang() === 'geburtstag'"
+      [class.aktiv]="aktiverVorgang() === 'geburtstag'"
+      (click)="aktiverVorgang.set('geburtstag')"
+    >Geburtstagsumlage</button>
+  </nav>
+
+  <!-- ---------------- Monatsbeiträge ---------------- -->
+  @if (aktiverVorgang() === 'beitraege') {
+    <div class="karte">
+      <h2>Monatsbeiträge</h2>
+      <div class="formular-zeile">
+        <label>
+          Buchungsdatum
+          <input type="date" [ngModel]="beitragDatum()" (ngModelChange)="beitragDatum.set($event)" />
+        </label>
+        <label>
+          Beitrag aktiv (€)
+          <input class="zahl-feld" type="number" min="0" step="0.5"
+                 [ngModel]="beitragAktiv()" (ngModelChange)="beitragAktiv.set($event)" />
+        </label>
+        <label>
+          Beitrag passiv (€)
+          <input class="zahl-feld" type="number" min="0" step="0.5"
+                 [ngModel]="beitragPassiv()" (ngModelChange)="beitragPassiv.set($event)" />
+        </label>
+      </div>
+
+      <p class="hinweis">
+        Maßgeblich ist der Status zum Buchungsdatum, nicht der heutige. Gastkegler und
+        Ausgetretene bleiben unberücksichtigt.
+      </p>
+
+      @if (beitragVorschau().length === 0) {
+        <p class="hinweis">Zu diesem Datum ist kein Mitglied beitragspflichtig.</p>
+      } @else {
+        <table class="daten">
+          <thead>
+          <tr><th>Mitglied</th><th class="zahl">Betrag</th></tr>
+          </thead>
+          <tbody>
+            @for (b of beitragVorschau(); track b.id) {
+              <tr>
+                <td>{{ b.buchungstext }}</td>
+                <td class="zahl">{{ euro(b.betrag) }}</td>
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+          <tr>
+            <td><strong>{{ beitragVorschau().length }} Buchungen</strong></td>
+            <td class="zahl"><strong>{{ euro(beitragSumme()) }}</strong></td>
+          </tr>
+          </tfoot>
+        </table>
+
+        <button type="button" class="primaer aktion" (click)="beitraegeBuchen()">
+          Beiträge buchen
+        </button>
+      }
+    </div>
+  }
+
+  <!-- ---------------- Zahlungseingänge ---------------- -->
+  @if (aktiverVorgang() === 'einnahmen') {
+    <div class="karte">
+      <h2>Zahlungseingänge</h2>
+      <div class="formular-zeile">
+        <label>
+          Buchungsdatum
+          <input type="date" [ngModel]="einnahmeDatum()" (ngModelChange)="einnahmeDatum.set($event)" />
+        </label>
+      </div>
+
+      <p class="hinweis">
+        Zahlungen tilgen zuerst Beiträge, dann Strafen, dann Umlagen. Über den offenen Betrag
+        hinausgehende Zahlungen werden als Restguthaben gutgeschrieben.
+      </p>
+
+      @if (offeneposten().length === 0) {
+        <p class="hinweis">Aktuell hat kein Mitglied offene Forderungen.</p>
+      } @else {
+        <table class="daten">
+          <thead>
+          <tr>
+            <th>Mitglied</th>
+            <th class="zahl">Offen</th>
+            <th class="zahl">Zahlung</th>
+            <th></th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (zeile of offeneposten(); track zeile.mitglied.id) {
+              <tr>
+                <td>{{ zeile.mitglied.name }}</td>
+                <td class="zahl betrag-offen">{{ euro(zeile.offen) }}</td>
+                <td class="zahl">
+                  <input
+                    class="zahl-feld" type="number" min="0" step="0.01"
+                    [ngModel]="zahlungVon(zeile.mitglied.id)"
+                    (ngModelChange)="zahlungGeaendert(zeile.mitglied.id, $event)"
+                    [attr.aria-label]="'Zahlung ' + zeile.mitglied.name"
+                  />
+                </td>
+                <td>
+                  <button
+                    type="button" class="leise-aktion"
+                    (click)="offenenBetragUebernehmen(zeile.mitglied.id, zeile.offen)"
+                  >offenen Betrag</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+          <tr>
+            <td colspan="2"><strong>Summe</strong></td>
+            <td class="zahl"><strong>{{ euro(zahlungSumme()) }}</strong></td>
+            <td></td>
+          </tr>
+          </tfoot>
+        </table>
+
+        <button
+          type="button" class="primaer aktion"
+          [disabled]="zahlungSumme() === 0"
+          (click)="einnahmenBuchen()"
+        >Zahlungen buchen</button>
+      }
+    </div>
+  }
+
+  <!-- ---------------- Restguthaben ---------------- -->
+  @if (aktiverVorgang() === 'restguthaben') {
+    <div class="karte">
+      <h2>Restguthaben verrechnen</h2>
+      <div class="formular-zeile">
+        <label>
+          Buchungsdatum
+          <input type="date" [ngModel]="verrechnungDatum()" (ngModelChange)="verrechnungDatum.set($event)" />
+        </label>
+      </div>
+
+      <p class="hinweis">
+        Bestehendes Restguthaben wird gegen offene Forderungen aufgerechnet — zuerst Beiträge,
+        dann Strafen, dann Umlagen.
+      </p>
+
+      @if (verrechnungZeilen().length === 0) {
+        <p class="hinweis">Aktuell gibt es nichts zu verrechnen.</p>
+      } @else {
+        <table class="daten">
+          <thead>
+          <tr><th>Mitglied</th><th class="zahl">Verrechnung</th></tr>
+          </thead>
+          <tbody>
+            @for (zeile of verrechnungZeilen(); track zeile.name) {
+              <tr>
+                <td>{{ zeile.name }}</td>
+                <td class="zahl">{{ euro(zeile.betrag) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        <button type="button" class="primaer aktion" (click)="verrechnungBuchen()">
+          Verrechnung buchen
+        </button>
+      }
+    </div>
+  }
+
+  <!-- ---------------- Geburtstagsumlage ---------------- -->
+  @if (aktiverVorgang() === 'geburtstag') {
+    <div class="karte">
+      <h2>Geburtstagsumlage</h2>
+      <div class="formular-zeile">
+        <label>
+          Buchungsdatum
+          <input type="date" [ngModel]="geburtstagDatum()" (ngModelChange)="geburtstagDatum.set($event)" />
+        </label>
+        <label>
+          Ausrichter
+          <select [ngModel]="ausrichterId()" (ngModelChange)="ausrichterId.set($event)">
+            <option value="">– auswählen –</option>
+            @for (m of vereinsmitglieder(); track m.id) {
+              <option [value]="m.id">{{ m.name }}</option>
+            }
+          </select>
+        </label>
+      </div>
+
+      <p class="hinweis">
+        10 € je teilnehmender Person. Der gesammelte Betrag wird dem Ausrichter als
+        Restguthaben gutgeschrieben.
+      </p>
+
+      @if (!ausrichterId()) {
+        <p class="hinweis">Zuerst den Ausrichter auswählen.</p>
+      } @else {
+        <table class="daten">
+          <thead>
+          <tr>
+            <th>Teilnehmer</th>
+            <th class="zahl">Zusatzpersonen</th>
+            <th class="zahl">Betrag</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (m of moeglicheGaeste(); track m.id) {
+              <tr [class.inaktiv]="!istGast(m.id)">
+                <td>
+                  <label class="wahl">
+                    <input
+                      type="checkbox"
+                      [checked]="istGast(m.id)"
+                      (change)="gastUmschalten(m.id, $event)"
+                    />
+                    {{ m.name }}
+                  </label>
+                </td>
+                <td class="zahl">
+                  @if (istGast(m.id)) {
+                    <input
+                      class="zahl-feld" type="number" min="0"
+                      [ngModel]="zusatzVon(m.id)"
+                      (ngModelChange)="zusatzGeaendert(m.id, $event)"
+                      [attr.aria-label]="'Zusatzpersonen ' + m.name"
+                    />
+                  }
+                </td>
+                <td class="zahl">
+                  @if (istGast(m.id)) {
+                    {{ euro(umlageFuer(m.id)) }}
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+          <tr>
+            <td colspan="2"><strong>Summe</strong></td>
+            <td class="zahl"><strong>{{ euro(umlageSumme()) }}</strong></td>
+          </tr>
+          </tfoot>
+        </table>
+
+        <button
+          type="button" class="primaer aktion"
+          [disabled]="umlageSumme() === 0"
+          (click)="umlageBuchen()"
+        >Umlage buchen</button>
+      }
+    </div>
+  }
+</div>

@@ -2,7 +2,7 @@
   <h2>Serververbindung</h2>
 
   @if (storage.status() === 'verbunden') {
-    <p class="ok">Verbunden mit {{ baseUrl() }}</p>
+    <p class="ok">Verbunden mit {{ adapter.aktiveBaseUrl() }}</p>
     <button type="button" (click)="trennen()">Verbindung trennen</button>
   } @else {
     <label>

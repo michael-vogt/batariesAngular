@@ -3,13 +3,14 @@ import { KegeljahrStore } from './kegeljahr.store';
 import {
   berechneMitgliedFinanzen,
   berechneSalden,
+  erstelleBuchung,
   journalEinnahmen,
   journalGeburtstagsumlage,
   journalMonatsbeitraege,
   journalRestguthabenVerrechnung,
   journalStrafen,
 } from './accounting.logic';
-import { Mitglied } from './kegelverein.models';
+import { KontoNummer, Mitglied } from './kegelverein.models';
 
 /**
  * Buchhaltung: kombiniert Store-Daten (buchungen$) mit der reinen Logik
@@ -67,6 +68,21 @@ export class AccountingService {
     gaeste: { mitglied: Mitglied; anzahlZusatzpersonen: number }[],
   ): void {
     this.store.addBuchungen(journalGeburtstagsumlage({ datum, ausrichter, gaeste }));
+  }
+
+  /**
+   * Freie Einzelbuchung, z.B. Bahnmiete oder Vereinsrunde. Für alles, was
+   * keinem der vorgefertigten Geschäftsvorfälle entspricht.
+   */
+  bucheManuell(input: {
+    datum: string;
+    sollKonto: KontoNummer;
+    habenKonto: KontoNummer;
+    betrag: number;
+    buchungstext: string;
+    mitgliedId?: string;
+  }): void {
+    this.store.addBuchungen([erstelleBuchung(input)]);
   }
 
   loescheBuchung(id: string): void {

@@ -1,0 +1,71 @@
+.karte {
+  margin-bottom: var(--abstand-6);
+}
+
+.karte h2 {
+  margin: 0 0 var(--abstand-3);
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+.meldung {
+  margin: 0 0 var(--abstand-4);
+}
+
+.jahr {
+  margin: 0 0 var(--abstand-4);
+  font-size: 1.125rem;
+}
+
+/* Die vier Bestände nebeneinander: sie sind das, was der Kassenwart vor
+   dem Abschluss gegen seine eigenen Zahlen abgleicht. */
+.bestaende {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--abstand-6);
+  margin: 0 0 var(--abstand-3);
+}
+
+.bestaende dt {
+  font-size: 0.8125rem;
+  color: var(--farbe-text-leise);
+}
+
+.bestaende dd {
+  margin: var(--abstand-1) 0 0;
+  font-family: var(--schrift-zahl);
+  font-size: 1.125rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.karte > .hinweis {
+  margin: var(--abstand-3) 0;
+  max-width: 48rem;
+}
+
+.warnung {
+  margin: 0 0 var(--abstand-3);
+}
+
+.ebk {
+  margin-top: var(--abstand-4);
+  padding: var(--abstand-3);
+  border-radius: var(--radius);
+  background: var(--farbe-akzent-hell);
+}
+
+.ebk.fehlerhaft {
+  background: var(--farbe-warnung-hell);
+  color: var(--farbe-warnung);
+}
+
+.ebk p {
+  margin: 0;
+}
+
+.aktionen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--abstand-3);
+  margin-top: var(--abstand-4);
+}

@@ -2,6 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { KegeljahrStore } from './kegeljahr.store';
 import { FileStorageService } from './persistenz/file-storage.service';
 import { KegeljahrRef, SCHEMA_VERSION } from './persistenz/file-storage.models';
+import { AbschlussVorschau, bereiteAbschlussVor } from './jahresabschluss.logic';
 import { istSchemaV1, migriereV1 } from './persistenz/file-storage.migration';
 
 export type LadeStatus = 'leer' | 'laedt' | 'bereit' | 'fehler';
@@ -128,6 +129,61 @@ export class VereinsdatenService {
 
     // Nach dem Schreiben regulär laden, damit die Prüfungen greifen.
     await this.initialisieren();
+  }
+
+  // ---------------------------------------------------------------
+  // Jahresabschluss
+  // ---------------------------------------------------------------
+
+  /** Vorschau ohne Seiteneffekt; wirft, wenn das Folgejahr schon existiert. */
+  abschlussVorbereiten(): AbschlussVorschau {
+    const altesJahr = this.store.aktuellesKegeljahr();
+    if (!altesJahr) throw new Error('Kein Kegeljahr ausgewählt.');
+
+    return bereiteAbschlussVor({
+      altesJahr,
+      mitglieder: this.store.mitglieder(),
+      vorhandeneJahre: [
+        ...this.store.kegeljahre(),
+        // Auch Jahre berücksichtigen, die nur im Manifest stehen und
+        // (noch) nicht geladen sind — sonst entstünde ein zweites Jahr
+        // für denselben Zeitraum.
+        ...this._verfuegbareJahre()
+          .filter((ref) => !this.store.kegeljahre().some((kj) => kj.id === ref.id))
+          .map((ref) => ({
+            id: ref.id,
+            bezeichnung: ref.bezeichnung,
+            // Zeitraum unbekannt, solange nicht geladen: Kollision wird
+            // beim Speichern serverseitig ohnehin über den Dateinamen
+            // erkannt. Hier nur ein unmöglicher Bereich als Platzhalter.
+            startDatum: '9999-12-31',
+            endDatum: '9999-12-31',
+            buchungen: [],
+            kegelabende: [],
+          })),
+      ],
+    });
+  }
+
+  /**
+   * Führt den Abschluss aus: legt das Folgejahr an, speichert es und macht
+   * es zum aktuellen. Das alte Jahr bleibt unverändert erhalten.
+   */
+  async abschlussAusfuehren(vorschau: AbschlussVorschau): Promise<void> {
+    this._fehler.set(null);
+    try {
+      // Mitglieder zuerst — die Eröffnungsbuchungen verweisen darauf.
+      await this.storage.mitgliederSpeichern(this.store.mitglieder());
+      await this.storage.kegeljahrSpeichern(vorschau.neuesKegeljahr, this.mitgliedIds());
+      await this.storage.aktuellesKegeljahrSetzen(vorschau.neuesKegeljahr.id);
+
+      this.store.addKegeljahr(vorschau.neuesKegeljahr);
+      this._verfuegbareJahre.set((await this.storage.manifestLaden()).kegeljahre);
+      this._ungespeichert.set(false);
+    } catch (e) {
+      this._fehler.set(e instanceof Error ? e.message : 'Abschluss fehlgeschlagen');
+      throw e;
+    }
   }
 
   private mitgliedIds(): Set<string> {
