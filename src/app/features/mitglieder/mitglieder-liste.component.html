@@ -123,6 +123,13 @@
                             <span class="datum">{{ datumKurz(e.ab) }}</span>
                             <span>{{ statusText(e.status) }}</span>
                             @if (e.notiz) { <span class="leise">— {{ e.notiz }}</span> }
+                            @if (zeile.mitglied.statusVerlauf.length > 1) {
+                              <button
+                                type="button"
+                                class="leise-aktion"
+                                (click)="eintragEntfernen(zeile.mitglied, e.ab)"
+                                >entfernen</button>
+                            }
                           </li>
                         }
                       </ol>
@@ -216,6 +223,10 @@
       <label>
         Amt (optional)
         <input type="text" [ngModel]="neuRolle()" (ngModelChange)="neuRolle.set($event)" />
+      </label>
+      <label>
+        Mitglied seit
+        <input type="date" [ngModel]="neuEintritt()" (ngModelChange)="neuEintritt.set($event)" />
       </label>
       <button type="button" [disabled]="!neuName().trim()" (click)="anlegen()">
         Aufnehmen

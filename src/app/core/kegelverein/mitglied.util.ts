@@ -63,11 +63,21 @@ export function mitStatusaenderung(
   ab: string,
   notiz?: string,
 ): Mitglied {
-  const ohneGleichesDatum = m.statusVerlauf.filter(e => e.ab !== ab);
+  const ohneGleichesDatum = m.statusVerlauf.filter((e) => e.ab !== ab);
   const neuerVerlauf = [...ohneGleichesDatum, { ab, status, ...(notiz ? { notiz } : {}) }].sort(
     (a, b) => a.ab.localeCompare(b.ab),
   );
   return { ...m, statusVerlauf: neuerVerlauf };
+}
+
+/**
+ * Entfernt den Statuseintrag zum angegebenen Datum. Der letzte verbleibende
+ * Eintrag lässt sich nicht löschen — ein Mitglied ohne Verlauf hätte keinen
+ * ermittelbaren Status und würde die Validierung beim Speichern verletzen.
+ */
+export function ohneStatuseintrag(m: Mitglied, ab: string): Mitglied {
+  if (m.statusVerlauf.length <= 1) return m;
+  return { ...m, statusVerlauf: m.statusVerlauf.filter((e) => e.ab !== ab) };
 }
 
 /** Neues Mitglied mit Eintritt zum angegebenen Datum. */

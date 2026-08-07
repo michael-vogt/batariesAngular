@@ -10,7 +10,7 @@ import {
   aktuellerStatus,
   mitStatusaenderung,
   neuesMitglied,
-  sortierterVerlauf,
+  sortierterVerlauf, ohneStatuseintrag,
 } from '../../core/kegelverein/mitglied.util';
 
 const HEUTE = () => new Date().toISOString().slice(0, 10);
@@ -19,7 +19,7 @@ const HEUTE = () => new Date().toISOString().slice(0, 10);
   selector: 'app-mitglieder-liste',
   imports: [FormsModule],
   templateUrl: './mitglieder-liste.component.html',
-  styleUrl: './mitglieder-liste.component.scss'
+  styleUrl: './mitglieder-liste.component.scss',
 })
 export class MitgliederListeComponent {
   private readonly mitgliederService = inject(MitgliederService);
@@ -31,19 +31,17 @@ export class MitgliederListeComponent {
   /** Stammdaten und berechnete Finanzen paarweise für die Tabelle. */
   protected readonly zeilen = computed(() => {
     const finanzen = this.accounting.finanzenAlleMitglieder();
-    return this.mitglieder().map(mitglied => ({
+    return this.mitglieder().map((mitglied) => ({
       mitglied,
       status: aktuellerStatus(mitglied),
-      finanzen:
-        finanzen.find(f => f.mitgliedId === mitglied.id) ??
-        {
-          mitgliedId: mitglied.id,
-          offeneBeitraege: 0,
-          offeneStrafen: 0,
-          offeneUmlagen: 0,
-          offeneForderungenGesamt: 0,
-          restguthaben: 0,
-        },
+      finanzen: finanzen.find((f) => f.mitgliedId === mitglied.id) ?? {
+        mitgliedId: mitglied.id,
+        offeneBeitraege: 0,
+        offeneStrafen: 0,
+        offeneUmlagen: 0,
+        offeneForderungenGesamt: 0,
+        restguthaben: 0,
+      },
     }));
   });
 
@@ -65,11 +63,17 @@ export class MitgliederListeComponent {
     return [
       bauen(
         'Vereinsmitglieder',
-        alle.filter(z => z.status === 'aktiv' || z.status === 'passiv' || z.status === null),
+        alle.filter((z) => z.status === 'aktiv' || z.status === 'passiv' || z.status === null),
       ),
-      bauen('Gastkegler', alle.filter(z => z.status === 'gastkegler')),
-      bauen('Ausgetreten', alle.filter(z => z.status === 'ausgetreten')),
-    ].filter(g => g.zeilen.length > 0 || g.titel === 'Vereinsmitglieder');
+      bauen(
+        'Gastkegler',
+        alle.filter((z) => z.status === 'gastkegler'),
+      ),
+      bauen(
+        'Ausgetreten',
+        alle.filter((z) => z.status === 'ausgetreten'),
+      ),
+    ].filter((g) => g.zeilen.length > 0 || g.titel === 'Vereinsmitglieder');
   });
 
   protected readonly bearbeiteId = signal<string | null>(null);
@@ -77,6 +81,7 @@ export class MitgliederListeComponent {
   protected readonly neuName = signal('');
   protected readonly neuStatus = signal<MitgliedStatus>('aktiv');
   protected readonly neuRolle = signal('');
+  protected readonly neuEintritt = signal(HEUTE());
   protected readonly anlegeFehler = signal<string | null>(null);
   protected readonly bearbeitenFehler = signal<string | null>(null);
   protected readonly verlaufOffen = signal<string | null>(null);
@@ -103,11 +108,17 @@ export class MitgliederListeComponent {
     }
 
     this.mitgliederService.hinzufuegen(
-      neuesMitglied(name, this.neuStatus(), HEUTE(), this.neuRolle().trim() || undefined),
+      neuesMitglied(
+        name,
+        this.neuStatus(),
+        this.neuEintritt() || HEUTE(),
+        this.neuRolle().trim() || undefined,
+      ),
     );
 
     this.neuName.set('');
     this.neuRolle.set('');
+    this.neuEintritt.set(HEUTE());
     this.anlegeFehler.set(null);
     this.daten.aenderungVorgemerkt();
   }
@@ -120,7 +131,7 @@ export class MitgliederListeComponent {
   protected bearbeitungSpeichern(): void {
     const id = this.bearbeiteId();
     const name = this.entwurfName().trim();
-    const mitglied = this.mitglieder().find(m => m.id === id);
+    const mitglied = this.mitglieder().find((m) => m.id === id);
 
     if (!mitglied || !name || name === mitglied.name) {
       this.bearbeitungAbbrechen();
@@ -155,7 +166,7 @@ export class MitgliederListeComponent {
   }
 
   protected verlaufUmschalten(id: string): void {
-    this.verlaufOffen.update(offen => (offen === id ? null : id));
+    this.verlaufOffen.update((offen) => (offen === id ? null : id));
     this.wechselDatum.set(HEUTE());
     this.wechselNotiz.set('');
   }
@@ -172,6 +183,19 @@ export class MitgliederListeComponent {
     return new Date(iso).toLocaleDateString('de-DE');
   }
 
+  /** Entfernt einen Verlaufseintrag, etwa nach einer Fehleingabe. */
+  protected eintragEntfernen(m: Mitglied, ab: string): void {
+    if (m.statusVerlauf.length <= 1) {
+      this.bearbeitenFehler.set('Der letzte Statuseintrag lässt sich nicht entfernen — sonst hätte das Mitglied keinen Status.');
+      return;
+    }
+    if (!confirm(`Eintrag vom ${this.datumKurz(ab)} entfernen?`)) return;
+
+    this.mitgliederService.aktualisieren(ohneStatuseintrag(m, ab));
+    this.daten.aenderungVorgemerkt();
+    this.bearbeitenFehler.set(null);
+  }
+
   protected wechselEintragen(m: Mitglied): void {
     const ab = this.wechselDatum();
     if (!ab) return;
@@ -184,13 +208,13 @@ export class MitgliederListeComponent {
   }
 
   protected loeschen(m: Mitglied): void {
-    const finanzen = this.accounting.finanzenAlleMitglieder().find(f => f.mitgliedId === m.id);
+    const finanzen = this.accounting.finanzenAlleMitglieder().find((f) => f.mitgliedId === m.id);
     const hatBewegungen =
       (finanzen?.offeneForderungenGesamt ?? 0) !== 0 || (finanzen?.restguthaben ?? 0) !== 0;
 
     const text = hatBewegungen
-      ? `${m.name} hat offene Beträge. Buchungen und Spielabende verlieren die Zuordnung. `
-        + `Für Austritte besser den Status auf „ausgetreten“ setzen. Trotzdem endgültig entfernen?`
+      ? `${m.name} hat offene Beträge. Buchungen und Spielabende verlieren die Zuordnung. ` +
+        `Für Austritte besser den Status auf „ausgetreten“ setzen. Trotzdem endgültig entfernen?`
       : `${m.name} endgültig entfernen? Für Austritte genügt der Status „ausgetreten“.`;
 
     if (!confirm(text)) return;
