@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FileStorageService } from '../../core/kegelverein/persistenz/file-storage.service';
+import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
 import {
   ImportErgebnis,
   importiereLegacyExport,
@@ -22,11 +23,13 @@ type Phase = 'leer' | 'geprueft' | 'speichert' | 'fertig' | 'fehler';
       <h2>Altdaten importieren</h2>
 
       @if (storage.status() !== 'verbunden') {
-        <p class="fehler">Keine Serververbindung — bitte zuerst unter Einstellungen verbinden.</p>
+        <p class="fehler">
+          Keine Serververbindung — bitte zuerst unter Einstellungen verbinden.
+        </p>
       } @else {
         <p class="hinweis">
-          Datei <code>daten.json</code> der alten Anwendung auswählen. Die Daten werden zunächst nur
-          geprüft und angezeigt, gespeichert wird erst auf Knopfdruck.
+          Datei <code>daten.json</code> der alten Anwendung auswählen. Die Daten werden
+          zunächst nur geprüft und angezeigt, gespeichert wird erst auf Knopfdruck.
         </p>
 
         <input type="file" accept="application/json,.json" (change)="dateiGewaehlt($event)" />
@@ -37,26 +40,33 @@ type Phase = 'leer' | 'geprueft' | 'speichert' | 'fertig' | 'fehler';
 
         @if (ergebnis(); as erg) {
           <h3>Vorschau</h3>
+          <p>
+            <strong>{{ erg.mitglieder.length }}</strong> Mitglieder (vereinsweit, jahresübergreifend
+            zusammengeführt)
+          </p>
           <ul class="jahre">
             @for (kj of erg.kegeljahre; track kj.id) {
               <li>
                 <strong>{{ kj.bezeichnung }}</strong>
-                ({{ kj.startDatum }} bis {{ kj.endDatum }}) — {{ kj.mitglieder.length }} Mitglieder,
-                {{ kj.buchungen.length }} Buchungen, {{ kj.kegelabende.length }} Kegelabende
+                ({{ kj.startDatum }} bis {{ kj.endDatum }}) —
+                {{ kj.buchungen.length }} Buchungen,
+                {{ kj.kegelabende.length }} Kegelabende
               </li>
             }
           </ul>
 
           <p>
             Buchungen ohne Mitgliedszuordnung: {{ buchungenOhneMitglied() }}
-            <span class="hinweis"> (normal für allgemeine Vereinsbuchungen wie Bahnmiete) </span>
+            <span class="hinweis">
+              (normal für allgemeine Vereinsbuchungen wie Bahnmiete)
+            </span>
           </p>
 
           @if (erg.warnungen.length) {
             <h4>Warnungen ({{ erg.warnungen.length }})</h4>
             <p class="hinweis">
-              Kein Blocker — die Daten werden trotzdem importiert. Meist verweisen sie auf
-              ausgetretene Mitglieder, die noch in alten Buchungen auftauchen.
+              Kein Blocker — die Daten werden trotzdem importiert. Meist verweisen sie
+              auf ausgetretene Mitglieder, die noch in alten Buchungen auftauchen.
             </p>
             <ul class="warnungen">
               @for (w of erg.warnungen; track w) {
@@ -68,8 +78,8 @@ type Phase = 'leer' | 'geprueft' | 'speichert' | 'fertig' | 'fehler';
           @if (abweichungen().length) {
             <h4>Abweichende Spielabend-Auswertungen ({{ abweichungen().length }})</h4>
             <p class="hinweis">
-              Die in den Altdaten gespeicherten Strafen passen hier nicht zu den zugrundeliegenden
-              Runden. Übernommen werden die neu berechneten Werte.
+              Die in den Altdaten gespeicherten Strafen passen hier nicht zu den
+              zugrundeliegenden Runden. Übernommen werden die neu berechneten Werte.
             </p>
             <ul class="warnungen">
               @for (a of abweichungen(); track a) {
@@ -77,7 +87,9 @@ type Phase = 'leer' | 'geprueft' | 'speichert' | 'fertig' | 'fehler';
               }
             </ul>
           } @else {
-            <p class="ok">Spielabend-Auswertungen stimmen mit den Altdaten überein.</p>
+            <p class="ok">
+              Spielabend-Auswertungen stimmen mit den Altdaten überein.
+            </p>
           }
 
           <button type="button" [disabled]="phase() === 'speichert'" (click)="speichern()">
@@ -86,9 +98,7 @@ type Phase = 'leer' | 'geprueft' | 'speichert' | 'fertig' | 'fehler';
         }
 
         @if (phase() === 'fertig') {
-          <p class="ok">
-            Import abgeschlossen — {{ gespeicherteJahre() }} Kegeljahr(e) gespeichert.
-          </p>
+          <p class="ok">Import abgeschlossen — {{ gespeicherteJahre() }} Kegeljahr(e) gespeichert.</p>
         }
       }
     </section>
@@ -96,6 +106,7 @@ type Phase = 'leer' | 'geprueft' | 'speichert' | 'fertig' | 'fehler';
 })
 export class LegacyImportComponent {
   protected readonly storage = inject(FileStorageService);
+  private readonly daten = inject(VereinsdatenService);
 
   protected readonly phase = signal<Phase>('leer');
   protected readonly ergebnis = signal<ImportErgebnis | null>(null);
@@ -106,7 +117,7 @@ export class LegacyImportComponent {
   protected readonly buchungenOhneMitglied = computed(
     () =>
       this.ergebnis()?.kegeljahre.reduce(
-        (summe, kj) => summe + kj.buchungen.filter((b) => !b.mitgliedId).length,
+        (summe, kj) => summe + kj.buchungen.filter(b => !b.mitgliedId).length,
         0,
       ) ?? 0,
   );
@@ -126,9 +137,7 @@ export class LegacyImportComponent {
       this.phase.set('geprueft');
     } catch (e) {
       this.fehlertext.set(
-        e instanceof Error
-          ? `Datei konnte nicht gelesen werden: ${e.message}`
-          : 'Unbekannter Fehler',
+        e instanceof Error ? `Datei konnte nicht gelesen werden: ${e.message}` : 'Unbekannter Fehler',
       );
       this.phase.set('fehler');
     }
@@ -142,10 +151,18 @@ export class LegacyImportComponent {
     this.fehlertext.set(null);
 
     try {
+      // Stammdaten zuerst: die Kegeljahre verweisen per mitgliedId darauf,
+      // die referentielle Prüfung beim Speichern würde sonst fehlschlagen.
+      await this.storage.mitgliederSpeichern(erg.mitglieder);
+      const ids = new Set(erg.mitglieder.map(m => m.id));
+
       for (const kj of erg.kegeljahre) {
-        await this.storage.kegeljahrSpeichern(kj);
+        await this.storage.kegeljahrSpeichern(kj, ids);
       }
       await this.storage.aktuellesKegeljahrSetzen(erg.aktuellesKegeljahrId);
+
+      // Frisch importierte Daten direkt in den Store laden.
+      await this.daten.initialisieren();
 
       this.gespeicherteJahre.set(erg.kegeljahre.length);
       this.phase.set('fertig');

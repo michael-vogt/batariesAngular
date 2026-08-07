@@ -11,6 +11,7 @@ import {
 } from '../kegelverein.models';
 import { berechneKegelabendErgebnisse } from '../kegelabend.logic';
 import { nameSchluessel } from '../namen.util';
+import { neuesMitglied } from '../mitglied.util';
 
 /**
  * Wandelt einen Export der Legacy-App (version "1.0"/"2.0", flacher
@@ -40,13 +41,7 @@ interface LegacySpieler {
   role?: string;
   isGuest: boolean;
   present: boolean;
-  stats: {
-    verspaetung: number;
-    pumpen: number;
-    neuner: number;
-    eingeholt: number;
-    schnaps: number;
-  };
+  stats: { verspaetung: number; pumpen: number; neuner: number; eingeholt: number; schnaps: number };
 }
 
 interface LegacyRunde {
@@ -89,6 +84,8 @@ interface LegacyExport {
 }
 
 export interface ImportErgebnis {
+  /** Vereinsweite Stammdaten, aus allen Jahren zusammengeführt. */
+  mitglieder: Mitglied[];
   kegeljahre: Kegeljahr[];
   aktuellesKegeljahrId: string;
   warnungen: string[];
@@ -105,69 +102,85 @@ export function importiereLegacyExport(json: unknown): ImportErgebnis {
   const legacy = json as LegacyExport;
   const warnungen: string[] = [];
 
-  const kegeljahre = legacy.kegeljahre.map((kj) => mapKegeljahr(kj, warnungen));
+  // Mitglieder werden über alle Jahre hinweg in einer Map gesammelt, damit
+  // dieselbe Person nicht je Jahr erneut angelegt wird. Statuswechsel
+  // zwischen den Jahren landen als Verlaufseinträge auf demselben Mitglied.
+  const stamm = new Map<string, Mitglied>();
+  const chronologisch = [...legacy.kegeljahre].sort((a, b) =>
+    String(a.startDatum).localeCompare(String(b.startDatum)),
+  );
+
+  const kegeljahre = chronologisch.map(kj => mapKegeljahr(kj, stamm, warnungen));
 
   // Bug in der Legacy-App: currentKegeljahrId war oft number, kegeljahr.id string.
   // Hier konsequent auf string normalisieren, sonst matcht die Zuordnung nie.
   const aktuellesKegeljahrId = String(legacy.currentKegeljahrId);
-  if (!kegeljahre.some((kj) => kj.id === aktuellesKegeljahrId)) {
+  if (!kegeljahre.some(kj => kj.id === aktuellesKegeljahrId)) {
     warnungen.push(
       `currentKegeljahrId "${aktuellesKegeljahrId}" referenziert kein vorhandenes Kegeljahr.`,
     );
   }
 
-  return { kegeljahre, aktuellesKegeljahrId, warnungen };
+  return { mitglieder: [...stamm.values()], kegeljahre, aktuellesKegeljahrId, warnungen };
 }
 
-function mapKegeljahr(kj: LegacyKegeljahr, warnungen: string[]): Kegeljahr {
-  const mitglieder: Mitglied[] = kj.mitglieder.map((m) => ({
-    id: m.id,
-    name: m.name,
-    status: m.status,
-    rolle: m.role || undefined,
-  }));
+function mapKegeljahr(
+  kj: LegacyKegeljahr,
+  stamm: Map<string, Mitglied>,
+  warnungen: string[],
+): Kegeljahr {
+  const start = normalizeDatum(kj.startDatum);
 
-  // Schlüssel statt Rohname: "Müller"/"mueller"/" Müller " sind dieselbe
-  // Person, sonst entstünden beim Import Dubletten.
-  const mitgliedNachName = new Map(mitglieder.map((m) => [nameSchluessel(m.name), m]));
+  /** Legt an oder ergänzt einen Statuswechsel am bestehenden Eintrag. */
+  const erfasse = (name: string, status: Mitglied['statusVerlauf'][number]['status'], rolle?: string) => {
+    const schluessel = nameSchluessel(name);
+    const vorhanden = stamm.get(schluessel);
 
-  // In den Altdaten waren Gäste nur Namen in einzelnen Spielabenden. Sie
-  // werden hier zu vollwertigen Mitgliedern mit Status 'gastkegler', damit
-  // Teilnehmer-IDs auflösbar sind und ihre Strafen buchbar werden.
-  // Gleiche Namen über mehrere Abende hinweg werden zusammengeführt.
+    if (!vorhanden) {
+      const m = neuesMitglied(name.trim(), status, start, rolle);
+      stamm.set(schluessel, m);
+      return m;
+    }
+
+    const letzter = vorhanden.statusVerlauf[vorhanden.statusVerlauf.length - 1];
+    if (letzter.status !== status) {
+      vorhanden.statusVerlauf.push({ ab: start, status, notiz: 'Wechsel aus Altdaten erschlossen' });
+      warnungen.push(
+        `${vorhanden.name}: Statuswechsel ${letzter.status} → ${status} zum ${start} erschlossen.`,
+      );
+    }
+    if (rolle && !vorhanden.rolle) vorhanden.rolle = rolle;
+    return vorhanden;
+  };
+
+  for (const m of kj.mitglieder) erfasse(m.name, m.status, m.role || undefined);
+
+  // Gäste aus den Spielabenden werden zu Mitgliedern mit Status 'gastkegler',
+  // damit Teilnehmer-IDs auflösbar sind und ihre Strafen buchbar werden.
   for (const legacyKa of kj.kegelabende) {
     for (const spieler of legacyKa.players) {
-      if (!spieler.isGuest || mitgliedNachName.has(nameSchluessel(spieler.name))) continue;
-
-      const gast: Mitglied = {
-        id: crypto.randomUUID(),
-        name: spieler.name.trim(),
-        status: 'gastkegler',
-      };
-      mitglieder.push(gast);
-      mitgliedNachName.set(nameSchluessel(gast.name), gast);
+      if (!spieler.isGuest || stamm.has(nameSchluessel(spieler.name))) continue;
+      const gast = erfasse(spieler.name, 'gastkegler');
       warnungen.push(`Gastkegler „${gast.name}“ aus Spielabenden als Mitglied angelegt.`);
     }
   }
 
   return {
     id: String(kj.id),
-    bezeichnung:
-      kj.name ?? `Kegeljahr ${normalizeDatum(kj.startDatum)}–${normalizeDatum(kj.endDatum)}`,
-    startDatum: normalizeDatum(kj.startDatum),
+    bezeichnung: kj.name ?? `Kegeljahr ${start}–${normalizeDatum(kj.endDatum)}`,
+    startDatum: start,
     endDatum: normalizeDatum(kj.endDatum),
-    mitglieder,
-    buchungen: kj.buchungen.map((b) => mapBuchung(b, mitgliedNachName, warnungen)),
-    kegelabende: kj.kegelabende.map((ka) => mapKegelabend(ka, mitgliedNachName, warnungen)),
+    buchungen: kj.buchungen.map(b => mapBuchung(b, stamm, warnungen)),
+    kegelabende: kj.kegelabende.map(ka => mapKegelabend(ka, stamm, warnungen)),
   };
 }
 
 function mapBuchung(
   b: LegacyBuchung,
-  mitgliedNachName: Map<string, Mitglied>,
+  stamm: Map<string, Mitglied>,
   warnungen: string[],
 ): Buchung {
-  const mitgliedId = findeMitgliedInText(b.buchungstext, mitgliedNachName);
+  const mitgliedId = findeMitgliedInText(b.buchungstext, stamm);
   if (!mitgliedId && istPersonenbezogenerText(b.buchungstext)) {
     warnungen.push(`Buchung ${b.id}: kein Mitglied im Text "${b.buchungstext}" gefunden.`);
   }
@@ -184,12 +197,9 @@ function mapBuchung(
 }
 
 /** Sucht den längsten passenden Mitgliedsnamen im Freitext (vermeidet Fehltreffer bei Teilnamen). */
-function findeMitgliedInText(
-  text: string,
-  mitgliedNachName: Map<string, Mitglied>,
-): string | undefined {
+function findeMitgliedInText(text: string, mitgliedNachName: Map<string, Mitglied>): string | undefined {
   const mitglieder = [...mitgliedNachName.values()].sort((a, b) => b.name.length - a.name.length);
-  const treffer = mitglieder.find((m) => text.includes(m.name));
+  const treffer = mitglieder.find(m => text.includes(m.name));
   return treffer?.id;
 }
 
@@ -199,11 +209,11 @@ function istPersonenbezogenerText(text: string): boolean {
 
 function mapKegelabend(
   ka: LegacyKegelabend,
-  mitgliedNachName: Map<string, Mitglied>,
+  stamm: Map<string, Mitglied>,
   warnungen: string[],
 ): Kegelabend {
-  const teilnehmer: KegelabendTeilnehmer[] = ka.players.map((p) => {
-    const mitglied = mitgliedNachName.get(nameSchluessel(p.name));
+  const teilnehmer: KegelabendTeilnehmer[] = ka.players.map(p => {
+    const mitglied = stamm.get(nameSchluessel(p.name));
     if (!mitglied) {
       // Sollte nach der Gastkegler-Anlage in mapKegeljahr nicht mehr vorkommen.
       warnungen.push(`Kegelabend ${ka.id}: Teilnehmer "${p.name}" konnte nicht zugeordnet werden.`);
@@ -221,18 +231,15 @@ function mapKegelabend(
   });
 
   // players[i] <-> states[i] war positionsbasiert: hier explizit auf teilnehmer.id auflösen.
-  const idNachIndex = teilnehmer.map((t) => t.id);
+  const idNachIndex = teilnehmer.map(t => t.id);
 
   const runden: Partial<Record<SpielKey, SpielRunde[]>> = {};
   for (const [spielKey, legacyRunden] of Object.entries(ka.rounds)) {
-    runden[spielKey as SpielKey] = legacyRunden.map((r) => ({
+    runden[spielKey as SpielKey] = legacyRunden.map(r => ({
       id: r.id,
       notiz: r.notes || undefined,
       ergebnisse: Object.fromEntries(
-        r.states.map((status, index) => [
-          idNachIndex[index],
-          STATUS_MAP[status] ?? 'nicht_teilgenommen',
-        ]),
+        r.states.map((status, index) => [idNachIndex[index], STATUS_MAP[status] ?? 'nicht_teilgenommen']),
       ),
     }));
   }
@@ -284,10 +291,10 @@ export function pruefeSummaryAbweichungen(json: unknown, kegeljahre: Kegeljahr[]
       if (!zeilen || !neu) continue;
 
       const berechnet = berechneKegelabendErgebnisse(neu);
-      const nameNachId = new Map(neu.teilnehmer.map((t) => [t.id, t.name]));
+      const nameNachId = new Map(neu.teilnehmer.map(t => [t.id, t.name]));
 
       for (const zeile of zeilen) {
-        const passend = berechnet.find((b) => nameNachId.get(b.teilnehmerId) === zeile.name);
+        const passend = berechnet.find(b => nameNachId.get(b.teilnehmerId) === zeile.name);
         if (!passend) continue;
 
         // Centbeträge: kleine Rundungsdifferenzen nicht als Abweichung melden.

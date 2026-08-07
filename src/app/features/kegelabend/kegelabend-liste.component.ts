@@ -5,6 +5,7 @@ import { KegelabendService } from '../../core/kegelverein/kegelabend.service';
 import { MitgliederService } from '../../core/kegelverein/mitglieder.service';
 import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
 import { Kegelabend } from '../../core/kegelverein/kegelverein.models';
+import { aktuellerStatus } from '../../core/kegelverein/mitglied.util';
 
 @Component({
   selector: 'app-kegelabend-liste',
@@ -45,7 +46,9 @@ import { Kegelabend } from '../../core/kegelverein/kegelverein.models';
           </label>
           <button type="button" [disabled]="!neuDatum()" (click)="anlegen()">Anlegen</button>
         </div>
-        <p class="hinweis">Alle aktiven Mitglieder werden automatisch als anwesend eingetragen.</p>
+        <p class="hinweis">
+          Alle aktiven Mitglieder werden automatisch als anwesend eingetragen.
+        </p>
       </div>
 
       @if (abende().length === 0) {
@@ -91,45 +94,20 @@ import { Kegelabend } from '../../core/kegelverein/kegelverein.models';
     </div>
   `,
   styles: `
-    .kopf-aktionen {
-      display: flex;
-      align-items: center;
-      gap: var(--abstand-3);
-    }
-    .karte h2 {
-      margin: 0 0 var(--abstand-3);
-      font-size: 1.0625rem;
-      font-weight: 600;
-    }
-    .liste,
-    .leer {
-      margin-top: var(--abstand-6);
-    }
+    .kopf-aktionen { display: flex; align-items: center; gap: var(--abstand-3); }
+    .karte h2 { margin: 0 0 var(--abstand-3); font-size: 1.0625rem; font-weight: 600; }
+    .liste, .leer { margin-top: var(--abstand-6); }
     .formular-zeile {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: flex-end;
-      gap: var(--abstand-3);
+      display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--abstand-3);
     }
     .formular-zeile label {
-      display: flex;
-      flex-direction: column;
-      gap: var(--abstand-1);
-      font-size: 0.8125rem;
-      color: var(--farbe-text-leise);
+      display: flex; flex-direction: column; gap: var(--abstand-1);
+      font-size: 0.8125rem; color: var(--farbe-text-leise);
     }
-    .formular-zeile + .hinweis {
-      margin: var(--abstand-3) 0 0;
-    }
-    a {
-      color: var(--farbe-akzent);
-    }
+    .formular-zeile + .hinweis { margin: var(--abstand-3) 0 0; }
+    a { color: var(--farbe-akzent); }
     .visuell-versteckt {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-      clip-path: inset(50%);
+      position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);
     }
   `,
 })
@@ -148,11 +126,11 @@ export class KegelabendListeComponent {
   );
 
   protected readonly zeilen = computed(() =>
-    this.abende().map((abend) => {
+    this.abende().map(abend => {
       const ergebnisse = this.kegelabendService.ergebnisse(abend);
       return {
         abend,
-        anwesend: abend.teilnehmer.filter((t) => t.anwesend).length,
+        anwesend: abend.teilnehmer.filter(t => t.anwesend).length,
         runden: Object.values(abend.runden).reduce((s, r) => s + (r?.length ?? 0), 0),
         strafen: ergebnisse.reduce((s, z) => s + z.strafeGesamt, 0),
       };
@@ -165,10 +143,7 @@ export class KegelabendListeComponent {
 
   protected datumLang(iso: string): string {
     return new Date(iso).toLocaleDateString('de-DE', {
-      weekday: 'short',
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
+      weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric',
     });
   }
 
@@ -181,8 +156,8 @@ export class KegelabendListeComponent {
       // im Detail gezielt hinzugenommen, wenn sie tatsächlich mitkegeln.
       teilnehmer: this.mitgliederService
         .mitglieder()
-        .filter((m) => m.status === 'aktiv')
-        .map((m) => ({
+        .filter(m => aktuellerStatus(m) === 'aktiv')
+        .map(m => ({
           id: m.id,
           name: m.name,
           anwesend: true,

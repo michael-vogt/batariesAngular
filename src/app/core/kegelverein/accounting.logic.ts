@@ -1,4 +1,5 @@
 import { Buchung, KONTENRAHMEN, Mitglied, MitgliedFinanzen, Salden } from './kegelverein.models';
+import { istBeitragspflichtig, statusZum } from './mitglied.util';
 
 /**
  * Reine Funktionen ohne Store-/DOM-Zugriff — direkt unit-testbar.
@@ -42,8 +43,7 @@ export function berechneSalden(buchungen: Buchung[]): Salden {
 
   // GuV-Saldo auf Vereinsvermögen (200) übertragen
   const guvSaldo = guvSoll - guvHaben;
-  if (guvSaldo > 0)
-    salden['200'].soll += guvSaldo; // Verlust
+  if (guvSaldo > 0) salden['200'].soll += guvSaldo; // Verlust
   else if (guvSaldo < 0) salden['200'].haben += Math.abs(guvSaldo); // Gewinn
 
   return salden;
@@ -53,10 +53,7 @@ export function berechneSalden(buchungen: Buchung[]): Salden {
 // Mitgliedsfinanzen (Forderungen/Restguthaben je Mitglied)
 // =====================================================================
 
-export function berechneMitgliedFinanzen(
-  mitgliedId: string,
-  buchungen: Buchung[],
-): MitgliedFinanzen {
+export function berechneMitgliedFinanzen(mitgliedId: string, buchungen: Buchung[]): MitgliedFinanzen {
   let offeneBeitraege = 0;
   let offeneStrafen = 0;
   let offeneUmlagen = 0;
@@ -112,8 +109,12 @@ export function erstelleBuchung(input: Omit<Buchung, 'id'>): Buchung {
 }
 
 /**
- * Monatsbeiträge für Vereinsmitglieder. Gastkegler bleiben außen vor —
- * sie zahlen keinen Beitrag, sondern nur ihre Strafen aus den Spielabenden.
+ * Monatsbeiträge zum Stichtag `datum`.
+ *
+ * Maßgeblich ist der Status, den ein Mitglied an diesem Tag hatte — nicht
+ * sein heutiger. Dadurch bleiben nachträglich gebuchte oder korrigierte
+ * Monate korrekt: wer im März ausgetreten ist, taucht in der März-Buchung
+ * noch auf, im April nicht mehr. Gastkegler zahlen keinen Beitrag.
  */
 export function journalMonatsbeitraege(params: {
   datum: string;
@@ -122,14 +123,15 @@ export function journalMonatsbeitraege(params: {
   beitragPassiv?: number;
 }): Buchung[] {
   const { datum, mitglieder, beitragAktiv = 8, beitragPassiv = 1 } = params;
+
   return mitglieder
-    .filter((m) => m.status !== 'gastkegler')
-    .map((m) =>
+    .filter(m => istBeitragspflichtig(m, datum))
+    .map(m =>
       erstelleBuchung({
         datum,
         sollKonto: '100',
         habenKonto: '300',
-        betrag: m.status === 'aktiv' ? beitragAktiv : beitragPassiv,
+        betrag: statusZum(m, datum) === 'aktiv' ? beitragAktiv : beitragPassiv,
         buchungstext: `Monatsbeitrag; ${m.name}`,
         mitgliedId: m.id,
       }),
@@ -141,8 +143,8 @@ export function journalStrafen(params: {
   posten: { mitglied: Mitglied; betrag: number }[];
 }): Buchung[] {
   return params.posten
-    .filter((p) => p.betrag > 0)
-    .map((p) =>
+    .filter(p => p.betrag > 0)
+    .map(p =>
       erstelleBuchung({
         datum: params.datum,
         sollKonto: '100',
@@ -174,24 +176,10 @@ export function journalRestguthabenVerrechnung(params: {
     const verrechne = (betrag: number, text: string) => {
       if (betrag <= 0) return;
       out.push(
-        erstelleBuchung({
-          datum: params.datum,
-          sollKonto: '210',
-          habenKonto: '110',
-          betrag,
-          buchungstext: text,
-          mitgliedId: m.id,
-        }),
+        erstelleBuchung({ datum: params.datum, sollKonto: '210', habenKonto: '110', betrag, buchungstext: text, mitgliedId: m.id }),
       );
       out.push(
-        erstelleBuchung({
-          datum: params.datum,
-          sollKonto: '110',
-          habenKonto: '100',
-          betrag,
-          buchungstext: text,
-          mitgliedId: m.id,
-        }),
+        erstelleBuchung({ datum: params.datum, sollKonto: '110', habenKonto: '100', betrag, buchungstext: text, mitgliedId: m.id }),
       );
     };
 

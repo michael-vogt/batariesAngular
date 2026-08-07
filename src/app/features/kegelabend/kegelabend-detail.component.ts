@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { KegelabendService } from '../../core/kegelverein/kegelabend.service';
 import { MitgliederService } from '../../core/kegelverein/mitglieder.service';
 import { findeNamensdublette } from '../../core/kegelverein/namen.util';
+import { aktuellerStatus, istGastkegler, neuesMitglied } from '../../core/kegelverein/mitglied.util';
 import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
 import {
   Kegelabend,
@@ -30,7 +31,12 @@ function neuerTeilnehmer(m: Mitglied): KegelabendTeilnehmer {
 }
 
 /** Reihenfolge beim Durchklicken einer Zelle im Rundenraster. */
-const STATUS_FOLGE: SpielStatus[] = ['nicht_teilgenommen', 'teilgenommen', 'gewonnen', 'verloren'];
+const STATUS_FOLGE: SpielStatus[] = [
+  'nicht_teilgenommen',
+  'teilgenommen',
+  'gewonnen',
+  'verloren',
+];
 
 const STATUS_KURZ: Record<SpielStatus, string> = {
   nicht_teilgenommen: '·',
@@ -104,9 +110,7 @@ const STATUS_TITEL: Record<SpielStatus, string> = {
                 <tr [class.abwesend]="!t.anwesend">
                   <td>
                     {{ t.name }}
-                    @if (istGast(t.id)) {
-                      <span class="marke">Gastkegler</span>
-                    }
+                    @if (istGast(t.id)) { <span class="marke">Gastkegler</span> }
                   </td>
                   <td>
                     <input
@@ -118,46 +122,35 @@ const STATUS_TITEL: Record<SpielStatus, string> = {
                   </td>
                   <td class="zahl">
                     <input
-                      class="zahl-feld"
-                      type="number"
-                      min="0"
-                      step="0.5"
+                      class="zahl-feld" type="number" min="0" step="0.5"
                       [ngModel]="t.verspaetungStunden"
                       (ngModelChange)="statistikGeaendert(t, 'verspaetungStunden', $event)"
                     />
                   </td>
                   <td class="zahl">
                     <input
-                      class="zahl-feld"
-                      type="number"
-                      min="0"
+                      class="zahl-feld" type="number" min="0"
                       [ngModel]="t.pumpen"
                       (ngModelChange)="statistikGeaendert(t, 'pumpen', $event)"
                     />
                   </td>
                   <td class="zahl">
                     <input
-                      class="zahl-feld"
-                      type="number"
-                      min="0"
+                      class="zahl-feld" type="number" min="0"
                       [ngModel]="t.neuner"
                       (ngModelChange)="statistikGeaendert(t, 'neuner', $event)"
                     />
                   </td>
                   <td class="zahl">
                     <input
-                      class="zahl-feld"
-                      type="number"
-                      min="0"
+                      class="zahl-feld" type="number" min="0"
                       [ngModel]="t.eingeholt"
                       (ngModelChange)="statistikGeaendert(t, 'eingeholt', $event)"
                     />
                   </td>
                   <td class="zahl">
                     <input
-                      class="zahl-feld"
-                      type="number"
-                      min="0"
+                      class="zahl-feld" type="number" min="0"
                       [ngModel]="t.schnaps"
                       (ngModelChange)="statistikGeaendert(t, 'schnaps', $event)"
                     />
@@ -181,7 +174,7 @@ const STATUS_TITEL: Record<SpielStatus, string> = {
                     <option value="">– auswählen –</option>
                     @for (m of verfuegbare(); track m.id) {
                       <option [value]="m.id">
-                        {{ m.name }}{{ m.status === 'gastkegler' ? ' (Gastkegler)' : '' }}
+                        {{ m.name }}{{ istGast(m.id) ? ' (Gastkegler)' : '' }}
                       </option>
                     }
                   </select>
@@ -211,8 +204,8 @@ const STATUS_TITEL: Record<SpielStatus, string> = {
               <p class="fehler">{{ text }}</p>
             }
             <p class="hinweis">
-              Gastkegler werden als Mitglied mit dem Status „Gastkegler“ geführt. Sie zahlen keinen
-              Monatsbeitrag, ihre Strafen werden aber wie bei allen anderen verbucht.
+              Gastkegler werden als Mitglied mit dem Status „Gastkegler“ geführt. Sie zahlen
+              keinen Monatsbeitrag, ihre Strafen werden aber wie bei allen anderen verbucht.
             </p>
           </div>
         </section>
@@ -310,9 +303,7 @@ const STATUS_TITEL: Record<SpielStatus, string> = {
                 <tr>
                   <td>
                     {{ nameVon(zeile.teilnehmerId) }}
-                    @if (istGast(zeile.teilnehmerId)) {
-                      <span class="marke">Gastkegler</span>
-                    }
+                    @if (istGast(zeile.teilnehmerId)) { <span class="marke">Gastkegler</span> }
                   </td>
                   <td class="zahl">{{ zeile.siege }}</td>
                   <td class="zahl">{{ zeile.niederlagen }}</td>
@@ -326,9 +317,7 @@ const STATUS_TITEL: Record<SpielStatus, string> = {
             <tfoot>
               <tr>
                 <td colspan="4"><strong>Summe</strong></td>
-                <td class="zahl">
-                  <strong>{{ euro(strafenSumme()) }}</strong>
-                </td>
+                <td class="zahl"><strong>{{ euro(strafenSumme()) }}</strong></td>
               </tr>
             </tfoot>
           </table>
@@ -338,8 +327,8 @@ const STATUS_TITEL: Record<SpielStatus, string> = {
               Strafen in die Buchführung übernehmen
             </button>
             <p class="hinweis">
-              Erzeugt je Teilnehmer eine Buchung (Forderungen an Strafen), auch für Gastkegler.
-              Mehrfaches Übernehmen bucht erneut — nur einmal pro Abend ausführen.
+              Erzeugt je Teilnehmer eine Buchung (Forderungen an Strafen), auch für
+              Gastkegler. Mehrfaches Übernehmen bucht erneut — nur einmal pro Abend ausführen.
             </p>
             @if (uebernahmeMeldung(); as text) {
               <p class="ok">{{ text }}</p>
@@ -350,38 +339,16 @@ const STATUS_TITEL: Record<SpielStatus, string> = {
     </div>
   `,
   styles: `
-    .zurueck {
-      font-size: 0.875rem;
-      color: var(--farbe-text-leise);
-      text-decoration: none;
-    }
-    .zurueck:hover {
-      color: var(--farbe-akzent);
-    }
-    .seiten-kopf h1 {
-      margin: var(--abstand-1) 0 0;
-    }
-    .seiten-kopf .hinweis {
-      margin: var(--abstand-1) 0 0;
-    }
-    .kopf-aktionen {
-      display: flex;
-      align-items: center;
-      gap: var(--abstand-3);
-    }
+    .zurueck { font-size: 0.875rem; color: var(--farbe-text-leise); text-decoration: none; }
+    .zurueck:hover { color: var(--farbe-akzent); }
+    .seiten-kopf h1 { margin: var(--abstand-1) 0 0; }
+    .seiten-kopf .hinweis { margin: var(--abstand-1) 0 0; }
+    .kopf-aktionen { display: flex; align-items: center; gap: var(--abstand-3); }
 
-    .karte {
-      margin-bottom: var(--abstand-6);
-    }
-    .karte h2 {
-      margin: 0 0 var(--abstand-3);
-      font-size: 1.0625rem;
-      font-weight: 600;
-    }
+    .karte { margin-bottom: var(--abstand-6); }
+    .karte h2 { margin: 0 0 var(--abstand-3); font-size: 1.0625rem; font-weight: 600; }
 
-    tr.abwesend td {
-      opacity: 0.45;
-    }
+    tr.abwesend td { opacity: 0.45; }
     .marke {
       margin-left: var(--abstand-2);
       padding: 0 var(--abstand-2);
@@ -390,44 +357,23 @@ const STATUS_TITEL: Record<SpielStatus, string> = {
       color: var(--farbe-akzent);
       font-size: 0.75rem;
     }
-    .zahl-feld {
-      width: 4.5rem;
-      text-align: right;
-      font-family: var(--schrift-zahl);
-    }
+    .zahl-feld { width: 4.5rem; text-align: right; font-family: var(--schrift-zahl); }
 
     .formular-zeile {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: flex-end;
-      gap: var(--abstand-3);
+      display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--abstand-3);
     }
     .formular-zeile label {
-      display: flex;
-      flex-direction: column;
-      gap: var(--abstand-1);
-      font-size: 0.8125rem;
-      color: var(--farbe-text-leise);
+      display: flex; flex-direction: column; gap: var(--abstand-1);
+      font-size: 0.8125rem; color: var(--farbe-text-leise);
     }
-    .hinzufuegen {
-      margin-top: var(--abstand-4);
-      display: grid;
-      gap: var(--abstand-3);
-    }
-    .hinzufuegen .hinweis {
-      margin: 0;
-      max-width: 46rem;
-    }
+    .hinzufuegen { margin-top: var(--abstand-4); display: grid; gap: var(--abstand-3); }
+    .hinzufuegen .hinweis { margin: 0; max-width: 46rem; }
 
     .spiel-tabs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--abstand-2);
+      display: flex; flex-wrap: wrap; gap: var(--abstand-2);
       margin-bottom: var(--abstand-4);
     }
-    .spiel-tabs button {
-      font-size: 0.875rem;
-    }
+    .spiel-tabs button { font-size: 0.875rem; }
     .spiel-tabs button.aktiv {
       background: var(--farbe-akzent-hell);
       border-color: var(--farbe-akzent);
@@ -442,63 +388,31 @@ const STATUS_TITEL: Record<SpielStatus, string> = {
     }
 
     /* Bei vielen Runden horizontal scrollen statt die Tabelle zu quetschen */
-    .raster-umschlag {
-      overflow-x: auto;
-    }
-    .raster th,
-    .raster td {
-      white-space: nowrap;
-    }
+    .raster-umschlag { overflow-x: auto; }
+    .raster th, .raster td { white-space: nowrap; }
 
     button.status {
-      width: 2rem;
-      padding: var(--abstand-1) 0;
-      font-family: var(--schrift-zahl);
-      font-size: 0.875rem;
-      border-color: transparent;
-      background: transparent;
+      width: 2rem; padding: var(--abstand-1) 0;
+      font-family: var(--schrift-zahl); font-size: 0.875rem;
+      border-color: transparent; background: transparent;
     }
-    button.status[data-status='nicht_teilgenommen'] {
-      color: var(--farbe-text-leise);
-      opacity: 0.5;
-    }
-    button.status[data-status='teilgenommen'] {
-      color: var(--farbe-text);
-    }
+    button.status[data-status='nicht_teilgenommen'] { color: var(--farbe-text-leise); opacity: 0.5; }
+    button.status[data-status='teilgenommen'] { color: var(--farbe-text); }
     button.status[data-status='gewonnen'] {
-      background: var(--farbe-akzent-hell);
-      color: var(--farbe-haben);
-      font-weight: 700;
+      background: var(--farbe-akzent-hell); color: var(--farbe-haben); font-weight: 700;
     }
-    button.status[data-status='verloren'] {
-      color: var(--farbe-soll);
-      font-weight: 700;
-    }
+    button.status[data-status='verloren'] { color: var(--farbe-soll); font-weight: 700; }
 
-    .legende {
-      margin: var(--abstand-3) 0 0;
-      font-size: 0.8125rem;
-    }
+    .legende { margin: var(--abstand-3) 0 0; font-size: 0.8125rem; }
     .runden-aktionen {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--abstand-3);
+      display: flex; flex-wrap: wrap; gap: var(--abstand-3);
       margin-top: var(--abstand-4);
     }
-    .uebernahme {
-      margin-top: var(--abstand-4);
-    }
-    .uebernahme .hinweis {
-      margin: var(--abstand-2) 0 0;
-      max-width: 46rem;
-    }
+    .uebernahme { margin-top: var(--abstand-4); }
+    .uebernahme .hinweis { margin: var(--abstand-2) 0 0; max-width: 46rem; }
 
     .visuell-versteckt {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-      clip-path: inset(50%);
+      position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);
     }
   `,
 })
@@ -519,15 +433,18 @@ export class KegelabendDetailComponent {
   protected readonly uebernahmeMeldung = signal<string | null>(null);
 
   protected readonly abend = computed(() =>
-    this.kegelabendService.kegelabende().find((ka) => ka.id === this.id()),
+    this.kegelabendService.kegelabende().find(ka => ka.id === this.id()),
   );
 
   protected readonly runden = computed(() => this.abend()?.runden[this.aktivesSpiel()] ?? []);
 
   /** Mitglieder, die an diesem Abend noch nicht eingetragen sind. */
   protected readonly verfuegbare = computed(() => {
-    const vorhanden = new Set(this.abend()?.teilnehmer.map((t) => t.id) ?? []);
-    return this.mitgliederService.mitglieder().filter((m) => !vorhanden.has(m.id));
+    const vorhanden = new Set(this.abend()?.teilnehmer.map(t => t.id) ?? []);
+    // Ausgetretene stehen nicht zur Auswahl; historische Abende behalten sie.
+    return this.mitgliederService
+      .mitglieder()
+      .filter(m => !vorhanden.has(m.id) && aktuellerStatus(m) !== 'ausgetreten');
   });
 
   protected readonly auswertung = computed(() => {
@@ -540,7 +457,7 @@ export class KegelabendDetailComponent {
   );
 
   protected aktivesSpielName(): string {
-    return SPIELE.find((s) => s.key === this.aktivesSpiel())!.name;
+    return SPIELE.find(s => s.key === this.aktivesSpiel())!.name;
   }
 
   protected rundenAnzahl(key: SpielKey): number {
@@ -560,14 +477,12 @@ export class KegelabendDetailComponent {
   }
 
   protected nameVon(teilnehmerId: string): string {
-    return this.abend()?.teilnehmer.find((t) => t.id === teilnehmerId)?.name ?? '—';
+    return this.abend()?.teilnehmer.find(t => t.id === teilnehmerId)?.name ?? '—';
   }
 
   protected istGast(teilnehmerId: string): boolean {
-    return (
-      this.mitgliederService.mitglieder().find((m) => m.id === teilnehmerId)?.status ===
-      'gastkegler'
-    );
+    const m = this.mitgliederService.mitglieder().find(x => x.id === teilnehmerId);
+    return m ? istGastkegler(m) : false;
   }
 
   protected euro(betrag: number): string {
@@ -576,10 +491,7 @@ export class KegelabendDetailComponent {
 
   protected datumLang(iso: string): string {
     return new Date(iso).toLocaleDateString('de-DE', {
-      weekday: 'long',
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
+      weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
     });
   }
 
@@ -596,9 +508,9 @@ export class KegelabendDetailComponent {
 
   protected anwesenheitGeaendert(t: KegelabendTeilnehmer, event: Event): void {
     const anwesend = (event.target as HTMLInputElement).checked;
-    this.aendern((ka) => ({
+    this.aendern(ka => ({
       ...ka,
-      teilnehmer: ka.teilnehmer.map((x) => (x.id === t.id ? { ...x, anwesend } : x)),
+      teilnehmer: ka.teilnehmer.map(x => (x.id === t.id ? { ...x, anwesend } : x)),
     }));
   }
 
@@ -608,17 +520,17 @@ export class KegelabendDetailComponent {
     wert: unknown,
   ): void {
     const zahl = Math.max(0, Number(wert) || 0);
-    this.aendern((ka) => ({
+    this.aendern(ka => ({
       ...ka,
-      teilnehmer: ka.teilnehmer.map((x) => (x.id === t.id ? { ...x, [feld]: zahl } : x)),
+      teilnehmer: ka.teilnehmer.map(x => (x.id === t.id ? { ...x, [feld]: zahl } : x)),
     }));
   }
 
   protected teilnehmerHinzufuegen(): void {
-    const mitglied = this.mitgliederService.mitglieder().find((m) => m.id === this.auswahlId());
+    const mitglied = this.mitgliederService.mitglieder().find(m => m.id === this.auswahlId());
     if (!mitglied) return;
 
-    this.aendern((ka) => ({ ...ka, teilnehmer: [...ka.teilnehmer, neuerTeilnehmer(mitglied)] }));
+    this.aendern(ka => ({ ...ka, teilnehmer: [...ka.teilnehmer, neuerTeilnehmer(mitglied)] }));
     this.auswahlId.set('');
   }
 
@@ -631,7 +543,7 @@ export class KegelabendDetailComponent {
     // Mitgliederverwaltung (findeNamensdublette).
     const dublette = findeNamensdublette(this.mitgliederService.mitglieder(), name);
     if (dublette) {
-      const schonDabei = this.abend()?.teilnehmer.some((t) => t.id === dublette.id);
+      const schonDabei = this.abend()?.teilnehmer.some(t => t.id === dublette.id);
       this.gastFehler.set(
         schonDabei
           ? `„${dublette.name}“ nimmt an diesem Abend bereits teil.`
@@ -640,9 +552,11 @@ export class KegelabendDetailComponent {
       return;
     }
 
-    const gast: Mitglied = { id: crypto.randomUUID(), name, status: 'gastkegler' };
+    // Eintritt auf das Datum des Abends datieren — an dem Tag hat er
+    // erstmals mitgekegelt.
+    const gast = neuesMitglied(name, 'gastkegler', this.abend()!.datum);
     this.mitgliederService.hinzufuegen(gast);
-    this.aendern((ka) => ({ ...ka, teilnehmer: [...ka.teilnehmer, neuerTeilnehmer(gast)] }));
+    this.aendern(ka => ({ ...ka, teilnehmer: [...ka.teilnehmer, neuerTeilnehmer(gast)] }));
 
     this.gastName.set('');
     this.gastFehler.set(null);
@@ -651,14 +565,14 @@ export class KegelabendDetailComponent {
   protected teilnehmerEntfernen(t: KegelabendTeilnehmer): void {
     if (!confirm(`${t.name} von diesem Abend entfernen?`)) return;
 
-    this.aendern((ka) => ({
+    this.aendern(ka => ({
       ...ka,
-      teilnehmer: ka.teilnehmer.filter((x) => x.id !== t.id),
+      teilnehmer: ka.teilnehmer.filter(x => x.id !== t.id),
       // Auch aus allen Runden entfernen, sonst blieben verwaiste Ergebnisse zurück.
       runden: Object.fromEntries(
         Object.entries(ka.runden).map(([spiel, runden]) => [
           spiel,
-          (runden ?? []).map((r) => {
+          (runden ?? []).map(r => {
             const { [t.id]: _entfernt, ...rest } = r.ergebnisse;
             return { ...r, ergebnisse: rest };
           }),
@@ -670,7 +584,7 @@ export class KegelabendDetailComponent {
   protected rundeHinzufuegen(): void {
     const spiel = this.aktivesSpiel();
 
-    this.aendern((ka) => {
+    this.aendern(ka => {
       // Anwesende starten als "mitgespielt", Abwesende als "nicht dabei" —
       // das ist in den meisten Runden die richtige Ausgangslage.
       const ergebnisse: Record<string, SpielStatus> = {};
@@ -688,7 +602,7 @@ export class KegelabendDetailComponent {
 
   protected letzteRundeEntfernen(): void {
     const spiel = this.aktivesSpiel();
-    this.aendern((ka) => ({
+    this.aendern(ka => ({
       ...ka,
       runden: { ...ka.runden, [spiel]: (ka.runden[spiel] ?? []).slice(0, -1) },
     }));
@@ -699,11 +613,11 @@ export class KegelabendDetailComponent {
     const naechster = STATUS_FOLGE[(STATUS_FOLGE.indexOf(aktuell) + 1) % STATUS_FOLGE.length];
     const spiel = this.aktivesSpiel();
 
-    this.aendern((ka) => ({
+    this.aendern(ka => ({
       ...ka,
       runden: {
         ...ka.runden,
-        [spiel]: (ka.runden[spiel] ?? []).map((r) =>
+        [spiel]: (ka.runden[spiel] ?? []).map(r =>
           r.id === runde.id
             ? { ...r, ergebnisse: { ...r.ergebnisse, [teilnehmerId]: naechster } }
             : r,

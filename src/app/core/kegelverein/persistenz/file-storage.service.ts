@@ -2,13 +2,19 @@ import { Injectable, inject, signal } from '@angular/core';
 import { PERSISTENZ_ADAPTER } from './persistenz-adapter.token';
 import {
   KegeljahrDatei,
+  MITGLIEDER_DATEI,
   Manifest,
+  MitgliederDatei,
   SCHEMA_VERSION,
   dateinameFuerKegeljahr,
   leeresManifest,
 } from './file-storage.models';
-import { pruefeKegeljahrDatei, pruefeManifest } from './file-storage.validation';
-import { Kegeljahr } from '../kegelverein.models';
+import {
+  pruefeKegeljahrDatei,
+  pruefeManifest,
+  pruefeMitgliederDatei,
+} from './file-storage.validation';
+import { Kegeljahr, Mitglied } from '../kegelverein.models';
 
 const MAX_BACKUPS_PRO_DATEI = 15;
 
@@ -73,27 +79,58 @@ export class FileStorageService {
   }
 
   private async manifestSchreiben(manifest: Manifest): Promise<void> {
-    await this.adapter.dateiSchreiben('manifest.json', JSON.stringify(manifest, null, 2));
+    // Beim Schreiben immer auf die aktuelle Version heben: sobald alle
+    // Dateien im neuen Format vorliegen, darf das Manifest nicht länger
+    // eine ältere Version melden — sonst liefe die Migration erneut an.
+    const aktuell: Manifest = { ...manifest, schemaVersion: SCHEMA_VERSION };
+    await this.adapter.dateiSchreiben('manifest.json', JSON.stringify(aktuell, null, 2));
   }
 
-  async kegeljahrLaden(datei: string): Promise<Kegeljahr> {
+  async kegeljahrLaden(datei: string, bekannteMitgliedIds?: Set<string>): Promise<Kegeljahr> {
     this.pruefeVerbunden();
     const inhalt = await this.adapter.dateiLesen(`kegeljahre/${datei}`);
     if (inhalt === null) throw new Error(`Kegeljahr-Datei "${datei}" nicht gefunden.`);
-    const geparst = pruefeKegeljahrDatei(JSON.parse(inhalt));
+    const geparst = pruefeKegeljahrDatei(JSON.parse(inhalt), bekannteMitgliedIds);
     return geparst.kegeljahr;
+  }
+
+  /** Ungeprüfter Zugriff — nur für die Migration älterer Schema-Versionen. */
+  async kegeljahrRohLaden(datei: string): Promise<unknown | null> {
+    this.pruefeVerbunden();
+    const inhalt = await this.adapter.dateiLesen(`kegeljahre/${datei}`);
+    return inhalt === null ? null : JSON.parse(inhalt);
+  }
+
+  // --- Vereinsweite Stammdaten ---------------------------------------
+
+  /** `null`, wenn noch keine Stammdatendatei existiert (frischer Server). */
+  async mitgliederLaden(): Promise<Mitglied[] | null> {
+    this.pruefeVerbunden();
+    const inhalt = await this.adapter.dateiLesen(MITGLIEDER_DATEI);
+    if (inhalt === null) return null;
+    return pruefeMitgliederDatei(JSON.parse(inhalt)).mitglieder;
+  }
+
+  async mitgliederSpeichern(mitglieder: Mitglied[]): Promise<void> {
+    this.pruefeVerbunden();
+
+    const datei: MitgliederDatei = { schemaVersion: SCHEMA_VERSION, mitglieder };
+    pruefeMitgliederDatei(datei);
+
+    await this.backupErstellen(MITGLIEDER_DATEI, MITGLIEDER_DATEI);
+    await this.adapter.dateiSchreiben(MITGLIEDER_DATEI, JSON.stringify(datei, null, 2));
   }
 
   /**
    * Speichert ein Kegeljahr: validiert -> sichert bisherigen Stand als
    * Backup -> schreibt neue Version -> aktualisiert Manifest.
    */
-  async kegeljahrSpeichern(kegeljahr: Kegeljahr): Promise<void> {
+  async kegeljahrSpeichern(kegeljahr: Kegeljahr, bekannteMitgliedIds?: Set<string>): Promise<void> {
     this.pruefeVerbunden();
 
     const datei: KegeljahrDatei = { schemaVersion: SCHEMA_VERSION, kegeljahr };
     // Wirft ValidierungsFehler, falls Daten inkonsistent sind — bricht VOR dem Schreiben ab.
-    pruefeKegeljahrDatei(datei);
+    pruefeKegeljahrDatei(datei, bekannteMitgliedIds);
 
     const dateiname = dateinameFuerKegeljahr(kegeljahr.bezeichnung, `kegeljahr-${kegeljahr.id}`);
     const pfad = `kegeljahre/${dateiname}`;

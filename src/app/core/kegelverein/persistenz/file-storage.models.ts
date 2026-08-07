@@ -1,29 +1,42 @@
-import { Kegeljahr } from '../kegelverein.models';
+import { Kegeljahr, Mitglied } from '../kegelverein.models';
 
 /**
- * Aktuelle Schema-Version des eigenen (nicht-Legacy) Dateiformats.
- * Bei strukturellen Änderungen hochzählen + Migration in migrations.ts ergänzen.
+ * Schema-Version des Dateiformats.
+ *
+ * 1: Mitglieder lagen als Kopie in jeder Kegeljahr-Datei, Status war ein
+ *    einzelner Wert.
+ * 2: Mitglieder liegen vereinsweit in mitglieder.json, Status als Verlauf.
+ *    Migration siehe file-storage.migration.ts.
  */
-export const SCHEMA_VERSION = 1 as const;
+export const SCHEMA_VERSION = 2 as const;
+
+/** Dateiname der vereinsweiten Stammdaten, relativ zum Datenverzeichnis. */
+export const MITGLIEDER_DATEI = 'mitglieder.json';
 
 export interface KegeljahrRef {
   id: string;
   bezeichnung: string;
-  /** Dateiname relativ zu kegeljahre/, z.B. "2025-2026.json" */
+  /** Dateiname relativ zu kegeljahre/, z.B. "kegeljahr-2025-2026.json" */
   datei: string;
 }
 
 /** manifest.json im Wurzelverzeichnis */
 export interface Manifest {
-  schemaVersion: typeof SCHEMA_VERSION;
+  schemaVersion: number;
   appName: 'BatariesVerwaltungApp';
   aktuellesKegeljahrId: string;
   kegeljahre: KegeljahrRef[];
 }
 
-/** kegeljahre/<jahr>.json — ein Kegeljahr pro Datei */
+/** mitglieder.json — vereinsweite Stammdaten, jahresübergreifend */
+export interface MitgliederDatei {
+  schemaVersion: number;
+  mitglieder: Mitglied[];
+}
+
+/** kegeljahre/<jahr>.json — ein Kegeljahr pro Datei, ohne Mitglieder */
 export interface KegeljahrDatei {
-  schemaVersion: typeof SCHEMA_VERSION;
+  schemaVersion: number;
   kegeljahr: Kegeljahr;
 }
 
@@ -46,20 +59,14 @@ export function leeresManifest(): Manifest {
  */
 export function dateinameFuerKegeljahr(bezeichnung: string, fallbackId = 'kegeljahr'): string {
   const umlaute: Record<string, string> = {
-    ä: 'ae',
-    ö: 'oe',
-    ü: 'ue',
-    Ä: 'ae',
-    Ö: 'oe',
-    Ü: 'ue',
-    ß: 'ss',
+    ä: 'ae', ö: 'oe', ü: 'ue', Ä: 'ae', Ö: 'oe', Ü: 'ue', ß: 'ss',
   };
 
   const slug = bezeichnung
-    .replace(/[äöüÄÖÜß]/g, (treffer) => umlaute[treffer])
+    .replace(/[äöüÄÖÜß]/g, treffer => umlaute[treffer])
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-') // alles Übrige (inkl. Leerzeichen, "/") zu "-"
-    .replace(/^-+|-+$/g, ''); // führende/abschließende Bindestriche weg
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 
   return `${slug || fallbackId}.json`;
 }

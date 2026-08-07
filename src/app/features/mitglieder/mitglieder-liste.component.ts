@@ -5,11 +5,15 @@ import { AccountingService } from '../../core/kegelverein/accounting.service';
 import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
 import { Mitglied, MitgliedStatus } from '../../core/kegelverein/kegelverein.models';
 import { findeNamensdublette } from '../../core/kegelverein/namen.util';
+import {
+  STATUS_BEZEICHNUNG,
+  aktuellerStatus,
+  mitStatusaenderung,
+  neuesMitglied,
+  sortierterVerlauf,
+} from '../../core/kegelverein/mitglied.util';
 
-/** Statusbezeichnung für Meldungen, damit klar wird, wo eine Dublette steckt. */
-function statusText(status: MitgliedStatus): string {
-  return status === 'gastkegler' ? 'Gastkegler' : status;
-}
+const HEUTE = () => new Date().toISOString().slice(0, 10);
 
 @Component({
   selector: 'app-mitglieder-liste',
@@ -84,12 +88,13 @@ function statusText(status: MitgliedStatus): string {
                       </td>
                       <td>
                         <select
-                          [ngModel]="zeile.mitglied.status"
+                          [ngModel]="zeile.status"
                           (ngModelChange)="statusGeaendert(zeile.mitglied, $event)"
                         >
                           <option value="aktiv">aktiv</option>
                           <option value="passiv">passiv</option>
                           <option value="gastkegler">Gastkegler</option>
+                          <option value="ausgetreten">ausgetreten</option>
                         </select>
                       </td>
                       <td class="leise">{{ zeile.mitglied.rolle || '—' }}</td>
@@ -107,11 +112,7 @@ function statusText(status: MitgliedStatus): string {
                       </td>
                       <td>
                         @if (bearbeiteId() === zeile.mitglied.id) {
-                          <button
-                            type="button"
-                            class="leise-aktion"
-                            (click)="bearbeitungSpeichern()"
-                          >
+                          <button type="button" class="leise-aktion" (click)="bearbeitungSpeichern()">
                             Fertig
                           </button>
                         } @else {
@@ -125,26 +126,81 @@ function statusText(status: MitgliedStatus): string {
                           <button
                             type="button"
                             class="leise-aktion"
-                            (click)="loeschen(zeile.mitglied)"
+                            (click)="verlaufUmschalten(zeile.mitglied.id)"
                           >
-                            Entfernen
+                            {{ verlaufOffen() === zeile.mitglied.id ? 'Verlauf zu' : 'Verlauf' }}
                           </button>
                         }
                       </td>
                     </tr>
+
+                    @if (verlaufOffen() === zeile.mitglied.id) {
+                      <tr class="verlauf">
+                        <td colspan="9">
+                          <h3>Statusverlauf</h3>
+                          <ol>
+                            @for (e of verlaufVon(zeile.mitglied); track e.ab + e.status) {
+                              <li>
+                                <span class="datum">{{ datumKurz(e.ab) }}</span>
+                                <span>{{ statusText(e.status) }}</span>
+                                @if (e.notiz) { <span class="leise">— {{ e.notiz }}</span> }
+                              </li>
+                            }
+                          </ol>
+                          <div class="formular-zeile">
+                            <label>
+                              Status ab
+                              <input
+                                type="date"
+                                [ngModel]="wechselDatum()"
+                                (ngModelChange)="wechselDatum.set($event)"
+                              />
+                            </label>
+                            <label>
+                              neuer Status
+                              <select
+                                [ngModel]="wechselStatus()"
+                                (ngModelChange)="wechselStatus.set($event)"
+                              >
+                                <option value="aktiv">aktiv</option>
+                                <option value="passiv">passiv</option>
+                                <option value="gastkegler">Gastkegler</option>
+                                <option value="ausgetreten">ausgetreten</option>
+                              </select>
+                            </label>
+                            <label>
+                              Notiz (optional)
+                              <input
+                                type="text"
+                                [ngModel]="wechselNotiz()"
+                                (ngModelChange)="wechselNotiz.set($event)"
+                              />
+                            </label>
+                            <button type="button" (click)="wechselEintragen(zeile.mitglied)">
+                              Eintragen
+                            </button>
+                            <button
+                              type="button"
+                              class="leise-aktion"
+                              (click)="loeschen(zeile.mitglied)"
+                            >
+                              Mitglied entfernen
+                            </button>
+                          </div>
+                          <p class="hinweis">
+                            Rückwirkende Einträge sind möglich — Monatsbeiträge werden nach dem
+                            Status zum jeweiligen Buchungsdatum berechnet.
+                          </p>
+                        </td>
+                      </tr>
+                    }
                   }
                 </tbody>
                 <tfoot>
                   <tr>
-                    <td colspan="6">
-                      <strong>Summe {{ gruppe.titel }}</strong>
-                    </td>
-                    <td class="zahl">
-                      <strong>{{ euro(gruppe.summeOffen) }}</strong>
-                    </td>
-                    <td class="zahl">
-                      <strong>{{ euro(gruppe.summeGuthaben) }}</strong>
-                    </td>
+                    <td colspan="6"><strong>Summe {{ gruppe.titel }}</strong></td>
+                    <td class="zahl"><strong>{{ euro(gruppe.summeOffen) }}</strong></td>
+                    <td class="zahl"><strong>{{ euro(gruppe.summeGuthaben) }}</strong></td>
                     <td></td>
                   </tr>
                 </tfoot>
@@ -198,16 +254,10 @@ function statusText(status: MitgliedStatus): string {
       align-items: center;
       gap: var(--abstand-3);
     }
-    .gruppe {
-      margin-top: var(--abstand-6);
-    }
+    .gruppe { margin-top: var(--abstand-6); }
     .gruppe h2 {
-      display: flex;
-      align-items: center;
-      gap: var(--abstand-2);
-      margin: 0 0 var(--abstand-3);
-      font-size: 1.0625rem;
-      font-weight: 600;
+      display: flex; align-items: center; gap: var(--abstand-2);
+      margin: 0 0 var(--abstand-3); font-size: 1.0625rem; font-weight: 600;
     }
     .gruppe .anzahl {
       padding: 0 var(--abstand-2);
@@ -217,14 +267,19 @@ function statusText(status: MitgliedStatus): string {
       font-family: var(--schrift-zahl);
       font-size: 0.75rem;
     }
-    .neu {
-      margin-top: var(--abstand-6);
+    tr.verlauf > td { background: var(--farbe-flaeche); }
+    tr.verlauf h3 { margin: 0 0 var(--abstand-2); font-size: 0.875rem; font-weight: 600; }
+    tr.verlauf ol {
+      margin: 0 0 var(--abstand-3); padding-left: var(--abstand-4);
+      font-size: 0.875rem;
     }
-    .neu h2 {
-      margin: 0 0 var(--abstand-3);
-      font-size: 1.0625rem;
-      font-weight: 600;
+    tr.verlauf .datum {
+      display: inline-block; min-width: 6.5rem;
+      font-family: var(--schrift-zahl); color: var(--farbe-text-leise);
     }
+    tr.verlauf .hinweis { margin: var(--abstand-2) 0 0; font-size: 0.8125rem; }
+    .neu { margin-top: var(--abstand-6); }
+    .neu h2 { margin: 0 0 var(--abstand-3); font-size: 1.0625rem; font-weight: 600; }
     .formular-zeile {
       display: flex;
       flex-wrap: wrap;
@@ -240,8 +295,7 @@ function statusText(status: MitgliedStatus): string {
     }
     .visuell-versteckt {
       position: absolute;
-      width: 1px;
-      height: 1px;
+      width: 1px; height: 1px;
       overflow: hidden;
       clip-path: inset(50%);
     }
@@ -257,16 +311,19 @@ export class MitgliederListeComponent {
   /** Stammdaten und berechnete Finanzen paarweise für die Tabelle. */
   protected readonly zeilen = computed(() => {
     const finanzen = this.accounting.finanzenAlleMitglieder();
-    return this.mitglieder().map((mitglied) => ({
+    return this.mitglieder().map(mitglied => ({
       mitglied,
-      finanzen: finanzen.find((f) => f.mitgliedId === mitglied.id) ?? {
-        mitgliedId: mitglied.id,
-        offeneBeitraege: 0,
-        offeneStrafen: 0,
-        offeneUmlagen: 0,
-        offeneForderungenGesamt: 0,
-        restguthaben: 0,
-      },
+      status: aktuellerStatus(mitglied),
+      finanzen:
+        finanzen.find(f => f.mitgliedId === mitglied.id) ??
+        {
+          mitgliedId: mitglied.id,
+          offeneBeitraege: 0,
+          offeneStrafen: 0,
+          offeneUmlagen: 0,
+          offeneForderungenGesamt: 0,
+          restguthaben: 0,
+        },
     }));
   });
 
@@ -288,13 +345,11 @@ export class MitgliederListeComponent {
     return [
       bauen(
         'Vereinsmitglieder',
-        alle.filter((z) => z.mitglied.status !== 'gastkegler'),
+        alle.filter(z => z.status === 'aktiv' || z.status === 'passiv' || z.status === null),
       ),
-      bauen(
-        'Gastkegler',
-        alle.filter((z) => z.mitglied.status === 'gastkegler'),
-      ),
-    ].filter((g) => g.zeilen.length > 0 || g.titel === 'Vereinsmitglieder');
+      bauen('Gastkegler', alle.filter(z => z.status === 'gastkegler')),
+      bauen('Ausgetreten', alle.filter(z => z.status === 'ausgetreten')),
+    ].filter(g => g.zeilen.length > 0 || g.titel === 'Vereinsmitglieder');
   });
 
   protected readonly bearbeiteId = signal<string | null>(null);
@@ -304,6 +359,10 @@ export class MitgliederListeComponent {
   protected readonly neuRolle = signal('');
   protected readonly anlegeFehler = signal<string | null>(null);
   protected readonly bearbeitenFehler = signal<string | null>(null);
+  protected readonly verlaufOffen = signal<string | null>(null);
+  protected readonly wechselDatum = signal(HEUTE());
+  protected readonly wechselStatus = signal<MitgliedStatus>('passiv');
+  protected readonly wechselNotiz = signal('');
   protected readonly speichert = signal(false);
 
   protected euro(betrag: number): string {
@@ -316,18 +375,16 @@ export class MitgliederListeComponent {
 
     const dublette = findeNamensdublette(this.mitglieder(), name);
     if (dublette) {
+      const status = aktuellerStatus(dublette);
       this.anlegeFehler.set(
-        `„${dublette.name}“ ist bereits erfasst (${statusText(dublette.status)}).`,
+        `„${dublette.name}“ ist bereits erfasst${status ? ` (${this.statusText(status)})` : ''}.`,
       );
       return;
     }
 
-    this.mitgliederService.hinzufuegen({
-      id: crypto.randomUUID(),
-      name,
-      status: this.neuStatus(),
-      rolle: this.neuRolle().trim() || undefined,
-    });
+    this.mitgliederService.hinzufuegen(
+      neuesMitglied(name, this.neuStatus(), HEUTE(), this.neuRolle().trim() || undefined),
+    );
 
     this.neuName.set('');
     this.neuRolle.set('');
@@ -343,7 +400,7 @@ export class MitgliederListeComponent {
   protected bearbeitungSpeichern(): void {
     const id = this.bearbeiteId();
     const name = this.entwurfName().trim();
-    const mitglied = this.mitglieder().find((m) => m.id === id);
+    const mitglied = this.mitglieder().find(m => m.id === id);
 
     if (!mitglied || !name || name === mitglied.name) {
       this.bearbeitungAbbrechen();
@@ -369,20 +426,52 @@ export class MitgliederListeComponent {
     this.bearbeitenFehler.set(null);
   }
 
+  /** Schnellwechsel aus der Tabelle: gilt ab heute. Für rückwirkende
+   *  Änderungen den Verlauf aufklappen. */
   protected statusGeaendert(m: Mitglied, status: MitgliedStatus): void {
-    if (m.status === status) return;
-    this.mitgliederService.aktualisieren({ ...m, status });
+    if (aktuellerStatus(m) === status) return;
+    this.mitgliederService.aktualisieren(mitStatusaenderung(m, status, HEUTE()));
     this.daten.aenderungVorgemerkt();
   }
 
+  protected verlaufUmschalten(id: string): void {
+    this.verlaufOffen.update(offen => (offen === id ? null : id));
+    this.wechselDatum.set(HEUTE());
+    this.wechselNotiz.set('');
+  }
+
+  protected verlaufVon(m: Mitglied) {
+    return sortierterVerlauf(m);
+  }
+
+  protected statusText(status: MitgliedStatus): string {
+    return STATUS_BEZEICHNUNG[status];
+  }
+
+  protected datumKurz(iso: string): string {
+    return new Date(iso).toLocaleDateString('de-DE');
+  }
+
+  protected wechselEintragen(m: Mitglied): void {
+    const ab = this.wechselDatum();
+    if (!ab) return;
+
+    this.mitgliederService.aktualisieren(
+      mitStatusaenderung(m, this.wechselStatus(), ab, this.wechselNotiz().trim() || undefined),
+    );
+    this.daten.aenderungVorgemerkt();
+    this.wechselNotiz.set('');
+  }
+
   protected loeschen(m: Mitglied): void {
-    const finanzen = this.accounting.finanzenAlleMitglieder().find((f) => f.mitgliedId === m.id);
+    const finanzen = this.accounting.finanzenAlleMitglieder().find(f => f.mitgliedId === m.id);
     const hatBewegungen =
       (finanzen?.offeneForderungenGesamt ?? 0) !== 0 || (finanzen?.restguthaben ?? 0) !== 0;
 
     const text = hatBewegungen
-      ? `${m.name} hat offene Beträge. Buchungen bleiben erhalten, verlieren aber die Zuordnung. Trotzdem entfernen?`
-      : `${m.name} entfernen?`;
+      ? `${m.name} hat offene Beträge. Buchungen und Spielabende verlieren die Zuordnung. `
+        + `Für Austritte besser den Status auf „ausgetreten“ setzen. Trotzdem endgültig entfernen?`
+      : `${m.name} endgültig entfernen? Für Austritte genügt der Status „ausgetreten“.`;
 
     if (!confirm(text)) return;
 

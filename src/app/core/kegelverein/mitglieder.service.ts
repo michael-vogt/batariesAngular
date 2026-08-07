@@ -23,4 +23,8 @@ export class MitgliederService {
   loeschen(id: string): void {
     this.store.deleteMitglied(id);
   }
+
+  setzeAlle(mitglieder: Mitglied[]): void {
+    this.store.setMitglieder(mitglieder);
+  }
 }
