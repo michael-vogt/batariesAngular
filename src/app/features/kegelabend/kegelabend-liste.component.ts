@@ -177,15 +177,14 @@ export class KegelabendListeComponent {
       id: crypto.randomUUID(),
       datum: this.neuDatum(),
       ort: this.neuOrt().trim() || undefined,
-      // Aktive Mitglieder als anwesend vorbelegen; Passive bleiben außen vor,
-      // Gäste kommen im Detail dazu.
+      // Nur aktive Mitglieder vorbelegen. Passive und Gastkegler werden
+      // im Detail gezielt hinzugenommen, wenn sie tatsächlich mitkegeln.
       teilnehmer: this.mitgliederService
         .mitglieder()
         .filter((m) => m.status === 'aktiv')
         .map((m) => ({
           id: m.id,
           name: m.name,
-          istGast: false,
           anwesend: true,
           verspaetungStunden: 0,
           pumpen: 0,

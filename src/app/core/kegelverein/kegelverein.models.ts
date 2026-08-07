@@ -61,7 +61,7 @@ export const KONTENRAHMEN: readonly Konto[] = [
 // 2. Mitglied
 // =====================================================================
 
-export type MitgliedStatus = 'aktiv' | 'passiv';
+export type MitgliedStatus = 'aktiv' | 'passiv' | 'gastkegler';
 
 export interface Mitglied {
   id: string;
@@ -120,10 +120,15 @@ export const SPIELE: readonly { key: SpielKey; name: string }[] = [
 export type SpielStatus = 'teilgenommen' | 'gewonnen' | 'verloren' | 'nicht_teilgenommen';
 
 export interface KegelabendTeilnehmer {
-  /** = Mitglied.id bei Vereinsmitgliedern, sonst generierte Gast-ID */
+  /** = Mitglied.id (auch für Gastkegler, die als Mitglied mit Status 'gastkegler' geführt werden) */
   id: string;
+  /**
+   * Name zum Zeitpunkt des Abends. Bewusst mitgeschrieben, damit alte
+   * Protokolle lesbar bleiben, falls ein Mitglied später entfernt wird.
+   * Ob jemand Gastkegler ist, wird NICHT hier gespeichert, sondern über
+   * Mitglied.status ermittelt — sonst könnten beide auseinanderlaufen.
+   */
   name: string;
-  istGast: boolean;
   anwesend: boolean;
   verspaetungStunden: number;
   pumpen: number;

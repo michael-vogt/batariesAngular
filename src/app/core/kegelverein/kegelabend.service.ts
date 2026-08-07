@@ -34,8 +34,11 @@ export class KegelabendService {
 
   /**
    * Überträgt die berechneten Strafen eines Kegelabends als Buchungen in
-   * die Buchführung. Teilnehmer, die keine Mitglieder sind (Gäste), werden
-   * übersprungen — für sie gibt es kein Forderungskonto.
+   * die Buchführung — für Vereinsmitglieder wie für Gastkegler, da beide
+   * als Mitglied geführt werden und ein Forderungskonto haben.
+   *
+   * Übersprungen werden nur Teilnehmer, deren Mitgliedseintrag inzwischen
+   * gelöscht wurde; für sie gäbe es keine gültige Zuordnung.
    */
   strafenUebernehmen(ka: Kegelabend, datum: string): number {
     const mitgliedNachId = new Map(this.store.mitglieder().map((m) => [m.id, m]));

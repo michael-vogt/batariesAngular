@@ -25,7 +25,10 @@ function istZahl(v: unknown): v is number {
 export function pruefeMitglied(v: unknown): asserts v is Mitglied {
   const m = v as Mitglied;
   pruefe(!!m && istString(m.id) && istString(m.name), 'Mitglied: id/name fehlen oder ungültig');
-  pruefe(m.status === 'aktiv' || m.status === 'passiv', `Mitglied "${m.name}": ungültiger status`);
+  pruefe(
+    m.status === 'aktiv' || m.status === 'passiv' || m.status === 'gastkegler',
+    `Mitglied "${m.name}": ungültiger status`,
+  );
 }
 
 export function pruefeBuchung(v: unknown): asserts v is Buchung {

@@ -111,6 +111,10 @@ export function erstelleBuchung(input: Omit<Buchung, 'id'>): Buchung {
   return { id: uid('b'), ...input };
 }
 
+/**
+ * Monatsbeiträge für Vereinsmitglieder. Gastkegler bleiben außen vor —
+ * sie zahlen keinen Beitrag, sondern nur ihre Strafen aus den Spielabenden.
+ */
 export function journalMonatsbeitraege(params: {
   datum: string;
   mitglieder: Mitglied[];
@@ -118,16 +122,18 @@ export function journalMonatsbeitraege(params: {
   beitragPassiv?: number;
 }): Buchung[] {
   const { datum, mitglieder, beitragAktiv = 8, beitragPassiv = 1 } = params;
-  return mitglieder.map((m) =>
-    erstelleBuchung({
-      datum,
-      sollKonto: '100',
-      habenKonto: '300',
-      betrag: m.status === 'aktiv' ? beitragAktiv : beitragPassiv,
-      buchungstext: `Monatsbeitrag; ${m.name}`,
-      mitgliedId: m.id,
-    }),
-  );
+  return mitglieder
+    .filter((m) => m.status !== 'gastkegler')
+    .map((m) =>
+      erstelleBuchung({
+        datum,
+        sollKonto: '100',
+        habenKonto: '300',
+        betrag: m.status === 'aktiv' ? beitragAktiv : beitragPassiv,
+        buchungstext: `Monatsbeitrag; ${m.name}`,
+        mitgliedId: m.id,
+      }),
+    );
 }
 
 export function journalStrafen(params: {

@@ -10,6 +10,7 @@ import {
   SpielStatus,
 } from '../kegelverein.models';
 import { berechneKegelabendErgebnisse } from '../kegelabend.logic';
+import { nameSchluessel } from '../namen.util';
 
 /**
  * Wandelt einen Export der Legacy-App (version "1.0"/"2.0", flacher
@@ -126,7 +127,28 @@ function mapKegeljahr(kj: LegacyKegeljahr, warnungen: string[]): Kegeljahr {
     rolle: m.role || undefined,
   }));
 
-  const mitgliedNachName = new Map(mitglieder.map((m) => [m.name, m]));
+  // Schlüssel statt Rohname: "Müller"/"mueller"/" Müller " sind dieselbe
+  // Person, sonst entstünden beim Import Dubletten.
+  const mitgliedNachName = new Map(mitglieder.map((m) => [nameSchluessel(m.name), m]));
+
+  // In den Altdaten waren Gäste nur Namen in einzelnen Spielabenden. Sie
+  // werden hier zu vollwertigen Mitgliedern mit Status 'gastkegler', damit
+  // Teilnehmer-IDs auflösbar sind und ihre Strafen buchbar werden.
+  // Gleiche Namen über mehrere Abende hinweg werden zusammengeführt.
+  for (const legacyKa of kj.kegelabende) {
+    for (const spieler of legacyKa.players) {
+      if (!spieler.isGuest || mitgliedNachName.has(nameSchluessel(spieler.name))) continue;
+
+      const gast: Mitglied = {
+        id: crypto.randomUUID(),
+        name: spieler.name.trim(),
+        status: 'gastkegler',
+      };
+      mitglieder.push(gast);
+      mitgliedNachName.set(nameSchluessel(gast.name), gast);
+      warnungen.push(`Gastkegler „${gast.name}“ aus Spielabenden als Mitglied angelegt.`);
+    }
+  }
 
   return {
     id: String(kj.id),
@@ -166,11 +188,9 @@ function findeMitgliedInText(
   text: string,
   mitgliedNachName: Map<string, Mitglied>,
 ): string | undefined {
-  const namenAbsteigendNachLaenge = [...mitgliedNachName.keys()].sort(
-    (a, b) => b.length - a.length,
-  );
-  const treffer = namenAbsteigendNachLaenge.find((name) => text.includes(name));
-  return treffer ? mitgliedNachName.get(treffer)!.id : undefined;
+  const mitglieder = [...mitgliedNachName.values()].sort((a, b) => b.name.length - a.name.length);
+  const treffer = mitglieder.find((m) => text.includes(m.name));
+  return treffer?.id;
 }
 
 function istPersonenbezogenerText(text: string): boolean {
@@ -182,17 +202,15 @@ function mapKegelabend(
   mitgliedNachName: Map<string, Mitglied>,
   warnungen: string[],
 ): Kegelabend {
-  const teilnehmer: KegelabendTeilnehmer[] = ka.players.map((p, index) => {
-    const mitglied = mitgliedNachName.get(p.name);
-    if (!mitglied && !p.isGuest) {
-      warnungen.push(
-        `Kegelabend ${ka.id}: Teilnehmer "${p.name}" nicht in Mitgliederliste gefunden.`,
-      );
+  const teilnehmer: KegelabendTeilnehmer[] = ka.players.map((p) => {
+    const mitglied = mitgliedNachName.get(nameSchluessel(p.name));
+    if (!mitglied) {
+      // Sollte nach der Gastkegler-Anlage in mapKegeljahr nicht mehr vorkommen.
+      warnungen.push(`Kegelabend ${ka.id}: Teilnehmer "${p.name}" konnte nicht zugeordnet werden.`);
     }
     return {
-      id: mitglied?.id ?? `gast_${ka.id}_${index}`,
+      id: mitglied?.id ?? `unbekannt_${ka.id}_${p.name}`,
       name: p.name,
-      istGast: p.isGuest,
       anwesend: p.present,
       verspaetungStunden: p.stats.verspaetung,
       pumpen: p.stats.pumpen,
