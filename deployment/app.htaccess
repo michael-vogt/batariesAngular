@@ -1,0 +1,69 @@
+# .htaccess für die gebaute Angular-App
+# Ablage: in denselben Ordner wie die index.html (z.B. /angular/)
+
+# ---------------------------------------------------------------
+# SPA-Routing
+# ---------------------------------------------------------------
+# Angular verwaltet Pfade wie /angular/mitglieder clientseitig. Ohne diese
+# Regeln würde Apache dort nach echten Dateien suchen und 404 liefern —
+# spürbar wird das erst beim direkten Aufruf oder beim Neuladen (F5).
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /angular/
+
+  # Vorhandene Dateien und Ordner unverändert ausliefern
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # api.php und alles darunter nicht umleiten
+  RewriteRule ^api/ - [L]
+
+  # Alles Übrige an die index.html
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# ---------------------------------------------------------------
+# Zwischenspeicherung
+# ---------------------------------------------------------------
+# Die Dateinamen der Bundles enthalten einen Hash, dürfen also lange
+# zwischengespeichert werden. Die index.html darf das NICHT — sonst
+# verweist sie nach einem Neu-Deployment auf nicht mehr existierende
+# Dateien und die App bleibt weiß.
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 month"
+</IfModule>
+
+<Files "index.html">
+  <IfModule mod_headers.c>
+    Header set Cache-Control "no-cache, must-revalidate"
+  </IfModule>
+</Files>
+
+# ---------------------------------------------------------------
+# Komprimierung
+# ---------------------------------------------------------------
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain
+  AddOutputFilterByType DEFLATE application/javascript application/json
+  AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+# ---------------------------------------------------------------
+# Grundlegende Absicherung
+# ---------------------------------------------------------------
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set Referrer-Policy "same-origin"
+</IfModule>
+
+# Quellkarten nicht öffentlich ausliefern (falls doch mitgebaut)
+<FilesMatch "\.map$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+</FilesMatch>

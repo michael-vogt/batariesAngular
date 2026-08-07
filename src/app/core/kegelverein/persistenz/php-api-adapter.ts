@@ -13,7 +13,7 @@ export interface ServerVerbindung {
 
 /**
  * Implementiert PersistenzAdapter über HTTP gegen das PHP-Backend
- * (siehe server-php/public_html/api.php). Funktioniert in jedem Browser.
+ * (siehe deployment/api.php). Funktioniert in jedem Browser.
  *
  * Die Zugangsdaten (baseUrl + apiKey) kommen aus einem Einstellungen-
  * Formular und werden nach erfolgreichem Verbindungstest im localStorage

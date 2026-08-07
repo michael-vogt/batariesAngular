@@ -8,12 +8,16 @@
     <label>
       API-Adresse
       <input
-        type="url"
+        type="text"
         name="baseUrl"
-        placeholder="https://verein.example.org/api.php"
+        inputmode="url"
+        placeholder="api/api.php"
         [ngModel]="baseUrl()"
         (ngModelChange)="baseUrl.set($event)"
       />
+      <small class="leise">
+        Relativ (z.B. <code>api/api.php</code>), wenn die App auf demselben Server liegt - sonst vollständig mit https://
+      </small>
     </label>
 
     <label>
