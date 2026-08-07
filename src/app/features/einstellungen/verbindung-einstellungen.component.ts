@@ -12,46 +12,7 @@ import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service
 @Component({
   selector: 'app-verbindung-einstellungen',
   imports: [FormsModule],
-  template: `
-    <section class="verbindung">
-      <h2>Serververbindung</h2>
-
-      @if (storage.status() === 'verbunden') {
-        <p class="ok">Verbunden mit {{ baseUrl() }}</p>
-        <button type="button" (click)="trennen()">Verbindung trennen</button>
-      } @else {
-        <label>
-          API-Adresse
-          <input
-            type="url"
-            name="baseUrl"
-            placeholder="https://verein.example.org/api.php"
-            [ngModel]="baseUrl()"
-            (ngModelChange)="baseUrl.set($event)"
-          />
-        </label>
-
-        <label>
-          API-Key
-          <input
-            type="password"
-            name="apiKey"
-            autocomplete="current-password"
-            [ngModel]="apiKey()"
-            (ngModelChange)="apiKey.set($event)"
-          />
-        </label>
-
-        <button type="button" [disabled]="laeuft()" (click)="verbinden()">
-          {{ laeuft() ? 'Verbinde…' : 'Verbinden' }}
-        </button>
-
-        @if (fehler()) {
-          <p class="fehler">{{ fehler() }}</p>
-        }
-      }
-    </section>
-  `,
+  templateUrl: 'verbindung-einstellungen.component.html'
 })
 export class VerbindungEinstellungenComponent {
   private readonly adapter = inject(PhpApiAdapter);

@@ -1,0 +1,75 @@
+.zurueck { font-size: 0.875rem; color: var(--farbe-text-leise); text-decoration: none; }
+.zurueck:hover { color: var(--farbe-akzent); }
+.seiten-kopf h1 { margin: var(--abstand-1) 0 0; }
+.seiten-kopf .hinweis { margin: var(--abstand-1) 0 0; }
+.kopf-aktionen { display: flex; align-items: center; gap: var(--abstand-3); }
+
+.karte { margin-bottom: var(--abstand-6); }
+.karte h2 { margin: 0 0 var(--abstand-3); font-size: 1.0625rem; font-weight: 600; }
+
+tr.abwesend td { opacity: 0.45; }
+.marke {
+  margin-left: var(--abstand-2);
+  padding: 0 var(--abstand-2);
+  border-radius: 999px;
+  background: var(--farbe-akzent-hell);
+  color: var(--farbe-akzent);
+  font-size: 0.75rem;
+}
+.zahl-feld { width: 4.5rem; text-align: right; font-family: var(--schrift-zahl); }
+
+.formular-zeile {
+  display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--abstand-3);
+}
+.formular-zeile label {
+  display: flex; flex-direction: column; gap: var(--abstand-1);
+  font-size: 0.8125rem; color: var(--farbe-text-leise);
+}
+.hinzufuegen { margin-top: var(--abstand-4); display: grid; gap: var(--abstand-3); }
+.hinzufuegen .hinweis { margin: 0; max-width: 46rem; }
+
+.spiel-tabs {
+  display: flex; flex-wrap: wrap; gap: var(--abstand-2);
+  margin-bottom: var(--abstand-4);
+}
+.spiel-tabs button { font-size: 0.875rem; }
+.spiel-tabs button.aktiv {
+  background: var(--farbe-akzent-hell);
+  border-color: var(--farbe-akzent);
+  color: var(--farbe-akzent);
+  font-weight: 600;
+}
+.spiel-tabs .anzahl {
+  margin-left: var(--abstand-1);
+  font-family: var(--schrift-zahl);
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+/* Bei vielen Runden horizontal scrollen statt die Tabelle zu quetschen */
+.raster-umschlag { overflow-x: auto; }
+.raster th, .raster td { white-space: nowrap; }
+
+button.status {
+  width: 2rem; padding: var(--abstand-1) 0;
+  font-family: var(--schrift-zahl); font-size: 0.875rem;
+  border-color: transparent; background: transparent;
+}
+button.status[data-status='nicht_teilgenommen'] { color: var(--farbe-text-leise); opacity: 0.5; }
+button.status[data-status='teilgenommen'] { color: var(--farbe-text); }
+button.status[data-status='gewonnen'] {
+  background: var(--farbe-akzent-hell); color: var(--farbe-haben); font-weight: 700;
+}
+button.status[data-status='verloren'] { color: var(--farbe-soll); font-weight: 700; }
+
+.legende { margin: var(--abstand-3) 0 0; font-size: 0.8125rem; }
+.runden-aktionen {
+  display: flex; flex-wrap: wrap; gap: var(--abstand-3);
+  margin-top: var(--abstand-4);
+}
+.uebernahme { margin-top: var(--abstand-4); }
+.uebernahme .hinweis { margin: var(--abstand-2) 0 0; max-width: 46rem; }
+
+.visuell-versteckt {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);
+}
