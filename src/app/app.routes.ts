@@ -7,8 +7,14 @@ import { BuchungenJournalComponent } from './features/buchfuehrung/buchungen-jou
 import { KontenUebersichtComponent } from './features/buchfuehrung/konten-uebersicht.component';
 import { GeschaeftsvorfaelleComponent } from './features/buchfuehrung/geschaeftsvorfaelle.component';
 import { JahresabschlussComponent } from './features/buchfuehrung/jahresabschluss.component';
+import { HauptnavigationComponent } from './features/hauptnavigation/hauptnavigation.component';
 
 export const routes: Routes = [
+  {
+    path: '',
+    redirectTo: 'mitglieder',
+    pathMatch: 'full'
+  },
   {
     path: 'buchfuehrung/journal',
     component: BuchungenJournalComponent
@@ -46,10 +52,5 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/einstellungen/verbindung-einstellungen.component')
         .then(m => m.VerbindungEinstellungenComponent),
-  },
-  {
-    path: '',
-    redirectTo: 'einstellungen',
-    pathMatch: 'full'
   }
 ];

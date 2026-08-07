@@ -63,3 +63,51 @@
   overflow: hidden;
   clip-path: inset(50%);
 }
+
+/* Das Formular wechselt sichtbar in den Bearbeitungsmodus, damit nicht
+   versehentlich eine neue Buchung entsteht, wo eine geändert werden soll. */
+.karte.im-bearbeiten {
+  border-left: 3px solid var(--farbe-akzent);
+  background: var(--farbe-akzent-hell);
+}
+
+tr.wird-bearbeitet {
+  background: var(--farbe-akzent-hell);
+}
+
+.aktionen-spalte {
+  white-space: nowrap;
+}
+
+.blaettern {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--abstand-3);
+  margin-top: var(--abstand-4);
+  padding-top: var(--abstand-3);
+  border-top: 1px solid var(--farbe-rand);
+  font-size: 0.875rem;
+  color: var(--farbe-text-leise);
+}
+
+.blaettern .knoepfe {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-3);
+}
+
+.blaettern .seitenzahl {
+  font-variant-numeric: tabular-nums;
+}
+
+.blaettern .bereich {
+  font-family: var(--schrift-zahl);
+}
+
+.blaettern .groesse {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-2);
+}

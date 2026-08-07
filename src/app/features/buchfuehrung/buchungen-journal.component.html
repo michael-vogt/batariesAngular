@@ -20,16 +20,17 @@
     <p class="fehler">{{ text }}</p>
   }
 
-  <div class="karte">
-    <h2>Neue Buchung</h2>
+  <div class="karte" [class.im-bearbeiten]="bearbeiteId()">
+    <h2>{{ bearbeiteId() ? 'Buchung bearbeiten' : 'Neue Buchung' }}</h2>
+
     <div class="formular-zeile">
       <label>
         Datum
-        <input type="date" [ngModel]="neuDatum()" (ngModelChange)="neuDatum.set($event)" />
+        <input type="date" [ngModel]="formDatum()" (ngModelChange)="formDatum.set($event)" />
       </label>
       <label>
         Soll
-        <select [ngModel]="neuSoll()" (ngModelChange)="neuSoll.set($event)">
+        <select [ngModel]="formSoll()" (ngModelChange)="formSoll.set($event)">
           @for (k of konten; track k.nummer) {
             <option [value]="k.nummer">{{ k.nummer }} · {{ k.name }}</option>
           }
@@ -37,7 +38,7 @@
       </label>
       <label>
         Haben
-        <select [ngModel]="neuHaben()" (ngModelChange)="neuHaben.set($event)">
+        <select [ngModel]="formHaben()" (ngModelChange)="formHaben.set($event)">
           @for (k of konten; track k.nummer) {
             <option [value]="k.nummer">{{ k.nummer }} · {{ k.name }}</option>
           }
@@ -50,38 +51,46 @@
           type="number"
           min="0"
           step="0.01"
-          [ngModel]="neuBetrag()"
-          (ngModelChange)="neuBetrag.set($event)"
+          [ngModel]="formBetrag()"
+          (ngModelChange)="formBetrag.set($event)"
         />
       </label>
       <label class="breit">
         Buchungstext
         <input
           type="text"
-          [ngModel]="neuText()"
-          (ngModelChange)="neuText.set($event)"
-          (keyup.enter)="buchen()"
+          [ngModel]="formText()"
+          (ngModelChange)="formText.set($event)"
+          (keyup.enter)="uebernehmen()"
         />
       </label>
       <label>
         Mitglied (optional)
-        <select [ngModel]="neuMitgliedId()" (ngModelChange)="neuMitgliedId.set($event)">
+        <select [ngModel]="formMitgliedId()" (ngModelChange)="formMitgliedId.set($event)">
           <option value="">– keines –</option>
           @for (m of mitglieder(); track m.id) {
             <option [value]="m.id">{{ m.name }}</option>
           }
         </select>
       </label>
-      <button type="button" (click)="buchen()">Buchen</button>
+
+      <button type="button" [class.primaer]="bearbeiteId()" (click)="uebernehmen()">
+        {{ bearbeiteId() ? 'Änderung übernehmen' : 'Buchen' }}
+      </button>
+      @if (bearbeiteId()) {
+        <button type="button" class="leise-aktion" (click)="bearbeitenAbbrechen()">Abbrechen</button>
+      }
     </div>
 
     @if (formularFehler(); as text) {
       <p class="fehler">{{ text }}</p>
     }
-    <p class="hinweis">
-      Für Monatsbeiträge, Zahlungseingänge und Umlagen die Geschäftsvorfälle nutzen — dort
-      werden die Gegenkonten automatisch richtig gesetzt.
-    </p>
+    @if (!bearbeiteId()) {
+      <p class="hinweis">
+        Für Monatsbeiträge, Zahlungseingänge und Umlagen die Geschäftsvorfälle nutzen — dort
+        werden die Gegenkonten automatisch richtig gesetzt.
+      </p>
+    }
   </div>
 
   <div class="karte">
@@ -92,12 +101,20 @@
           type="search"
           placeholder="Buchungstext"
           [ngModel]="suche()"
-          (ngModelChange)="suche.set($event)"
+          (ngModelChange)="filterSetzen('suche', $event)"
         />
       </label>
       <label>
+        Datum ab
+        <input type="date" [ngModel]="datumVon()" (ngModelChange)="filterSetzen('von', $event)" />
+      </label>
+      <label>
+        Datum bis
+        <input type="date" [ngModel]="datumBis()" (ngModelChange)="filterSetzen('bis', $event)" />
+      </label>
+      <label>
         Konto
-        <select [ngModel]="filterKonto()" (ngModelChange)="filterKonto.set($event)">
+        <select [ngModel]="filterKonto()" (ngModelChange)="filterSetzen('konto', $event)">
           <option value="">alle</option>
           @for (k of konten; track k.nummer) {
             <option [value]="k.nummer">{{ k.nummer }} · {{ k.name }}</option>
@@ -106,7 +123,7 @@
       </label>
       <label>
         Mitglied
-        <select [ngModel]="filterMitgliedId()" (ngModelChange)="filterMitgliedId.set($event)">
+        <select [ngModel]="filterMitgliedId()" (ngModelChange)="filterSetzen('mitglied', $event)">
           <option value="">alle</option>
           @for (m of mitglieder(); track m.id) {
             <option [value]="m.id">{{ m.name }}</option>
@@ -138,15 +155,18 @@
         </tr>
         </thead>
         <tbody>
-          @for (b of gefiltert(); track b.id) {
-            <tr>
+          @for (b of sichtbar(); track b.id) {
+            <tr [class.wird-bearbeitet]="bearbeiteId() === b.id">
               <td class="zahl leise">{{ datumKurz(b.datum) }}</td>
               <td>{{ b.buchungstext }}</td>
               <td class="leise">{{ mitgliedName(b.mitgliedId) || '—' }}</td>
               <td class="leise">{{ b.sollKonto }} · {{ kontoName(b.sollKonto) }}</td>
               <td class="leise">{{ b.habenKonto }} · {{ kontoName(b.habenKonto) }}</td>
               <td class="zahl">{{ euro(b.betrag) }}</td>
-              <td>
+              <td class="aktionen-spalte">
+                <button type="button" class="leise-aktion" (click)="bearbeitenStarten(b)">
+                  Bearbeiten
+                </button>
                 <button type="button" class="leise-aktion" (click)="loeschen(b)">Löschen</button>
               </td>
             </tr>
@@ -155,13 +175,47 @@
         <tfoot>
         <tr>
           <td colspan="5">
-            <strong>{{ gefiltert().length }} Buchungen{{ istGefiltert() ? ' (gefiltert)' : '' }}</strong>
+            <strong>
+              {{ gefiltert().length }} Buchungen{{ istGefiltert() ? ' (gefiltert)' : '' }}
+            </strong>
           </td>
           <td class="zahl"><strong>{{ euro(summe()) }}</strong></td>
           <td></td>
         </tr>
         </tfoot>
       </table>
+
+      <div class="blaettern">
+        <span class="bereich">
+          {{ ersteNummer() }}–{{ letzteNummer() }} von {{ gefiltert().length }}
+        </span>
+
+        <div class="knoepfe">
+          <button type="button" [disabled]="aktuelleSeite() <= 1" (click)="blaettern(-1)">
+            Zurück
+          </button>
+          <span class="seitenzahl">Seite {{ aktuelleSeite() }} von {{ seitenAnzahl() }}</span>
+          <button
+            type="button"
+            [disabled]="aktuelleSeite() >= seitenAnzahl()"
+            (click)="blaettern(1)"
+          >
+            Weiter
+          </button>
+        </div>
+
+        <label class="groesse">
+          pro Seite
+          <select
+            [ngModel]="seitenGroesse()"
+            (ngModelChange)="seitenGroesseGesetzt($event)"
+          >
+            @for (g of seitengroessen; track g) {
+              <option [value]="g">{{ g }}</option>
+            }
+          </select>
+        </label>
+      </div>
     }
   </div>
 </div>

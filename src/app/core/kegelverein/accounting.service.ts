@@ -10,7 +10,7 @@ import {
   journalRestguthabenVerrechnung,
   journalStrafen,
 } from './accounting.logic';
-import { KontoNummer, Mitglied } from './kegelverein.models';
+import { Buchung, KontoNummer, Mitglied } from './kegelverein.models';
 
 /**
  * Buchhaltung: kombiniert Store-Daten (buchungen$) mit der reinen Logik
@@ -83,6 +83,23 @@ export class AccountingService {
     mitgliedId?: string;
   }): void {
     this.store.addBuchungen([erstelleBuchung(input)]);
+  }
+
+  /**
+   * Ändert eine bestehende Buchung. Nützlich vor allem, um eine fehlende
+   * Mitgliedszuordnung nachzutragen — Löschen und Neuanlegen würde die
+   * Buchungs-id ändern und damit den Bezug zu Backups erschweren.
+   */
+  buchungAktualisieren(b: Buchung): void {
+    this.store.updateBuchung(b);
+  }
+
+  /**
+   * Ändert eine bestehende Buchung. Die id bleibt erhalten, damit Verweise
+   * und Sortierung stabil bleiben.
+   */
+  aktualisiereBuchung(buchung: Buchung): void {
+    this.store.updateBuchung(buchung);
   }
 
   loescheBuchung(id: string): void {
