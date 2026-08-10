@@ -26,6 +26,7 @@ export class HauptnavigationComponent {
 
   protected readonly menueOffen = signal(false);
   protected readonly jahrWechselt = signal(false);
+  protected readonly verwirft = signal(false);
 
   protected readonly punkte: NavPunkt[] = [
     { pfad: '/mitglieder', titel: 'Mitglieder' },
@@ -47,6 +48,28 @@ export class HauptnavigationComponent {
 
   protected menueSchliessen(): void {
     this.menueOffen.set(false);
+  }
+
+  /**
+   * Setzt auf den zuletzt gespeicherten Stand zurück. Die Rückfrage nennt
+   * ausdrücklich, dass nichts wiederhergestellt werden kann — der Schritt
+   * ist nicht umkehrbar.
+   */
+  protected async verwerfen(): Promise<void> {
+    const bestaetigt = confirm(
+      'Alle nicht gespeicherten Änderungen verwerfen und den zuletzt gespeicherten Stand laden?\n\n' +
+        'Das lässt sich nicht rückgängig machen.',
+    );
+    if (!bestaetigt) return;
+
+    this.verwirft.set(true);
+    try {
+      await this.daten.verwerfen();
+    } catch {
+      // Fehlertext steht in daten.fehler() und wird auf den Seiten angezeigt.
+    } finally {
+      this.verwirft.set(false);
+    }
   }
 
   protected async jahrWechseln(event: Event): Promise<void> {

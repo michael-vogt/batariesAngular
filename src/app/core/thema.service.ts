@@ -13,7 +13,7 @@ export const THEMEN: readonly { wert: Thema; name: string; beschreibung: string 
  * Verwaltet das gewählte Erscheinungsbild.
  *
  * Die Umsetzung liegt vollständig in CSS: der Dienst setzt lediglich
- * `data-thema` am <html>-Element, die Farbwerte kommen aus tokens.css.
+ * `data-thema` am <html>-Element, die Farbwerte kommen aus tokens.scss.
  * Dadurch braucht keine Komponente das Thema zu kennen.
  */
 @Injectable({ providedIn: 'root' })

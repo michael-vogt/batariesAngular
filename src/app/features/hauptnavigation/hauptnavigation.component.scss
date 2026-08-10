@@ -166,3 +166,16 @@
   color: var(--farbe-akzent);
   border-color: var(--farbe-akzent);
 }
+
+/* Nur sichtbar, solange es etwas zu verwerfen gibt — direkt neben dem
+   Ungespeichert-Punkt, damit Hinweis und Gegenmaßnahme zusammenstehen. */
+.verwerfen {
+  padding: var(--abstand-1) var(--abstand-3);
+  font-size: 0.8125rem;
+  color: var(--farbe-text-leise);
+}
+
+.verwerfen:hover:not(:disabled) {
+  color: var(--farbe-soll);
+  border-color: var(--farbe-soll);
+}

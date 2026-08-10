@@ -67,6 +67,12 @@
 
         @if (daten.ungespeichert()) {
           <span class="ungespeichert" title="Es gibt nicht gespeicherte Änderungen">•</span>
+          <button
+            type="button"
+            class="verwerfen"
+            [disabled]="verwirft()"
+            (click)="verwerfen()"
+          >{{ verwirft() ? 'Setzt zurück…' : 'Verwerfen' }}</button>
         }
       }
     </div>

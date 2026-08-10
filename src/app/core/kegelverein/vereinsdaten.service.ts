@@ -186,6 +186,45 @@ export class VereinsdatenService {
     }
   }
 
+  /**
+   * Verwirft alle nicht gespeicherten Änderungen und lädt den zuletzt
+   * gespeicherten Stand vom Server neu.
+   *
+   * Bewusst über einen echten Neuladevorgang statt über einen
+   * Rückgängig-Verlauf: der Server ist die Wahrheit, und ein zweiter
+   * Zustandsspeicher im Browser könnte davon abweichen.
+   */
+  async verwerfen(): Promise<void> {
+    const bisherigeId = this.store.aktuellesKegeljahr()?.id;
+
+    this._status.set('laedt');
+    this._fehler.set(null);
+
+    try {
+      this.store.setMitglieder((await this.storage.mitgliederLaden()) ?? []);
+
+      const ref =
+        this._verfuegbareJahre().find((k) => k.id === bisherigeId) ??
+        this._verfuegbareJahre()[this._verfuegbareJahre().length - 1];
+
+      if (ref) {
+        const kegeljahr = await this.storage.kegeljahrLaden(ref.datei, this.mitgliedIds());
+        this.store.setKegeljahre([kegeljahr], kegeljahr.id);
+      } else {
+        // Auf dem Server liegt noch kein Kegeljahr — dann ist der
+        // verworfene Stand ein leerer.
+        this.store.setKegeljahre([]);
+      }
+
+      this._ungespeichert.set(false);
+      this._status.set('bereit');
+    } catch (e) {
+      this._fehler.set(e instanceof Error ? e.message : 'Zurücksetzen fehlgeschlagen');
+      this._status.set('fehler');
+      throw e;
+    }
+  }
+
   private mitgliedIds(): Set<string> {
     return new Set(this.store.mitglieder().map((m) => m.id));
   }

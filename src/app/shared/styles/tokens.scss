@@ -1,5 +1,5 @@
 /* Design-Tokens für die Vereinsverwaltung.
-   In src/styles.css importieren:  @import './app/shared/styles/tokens.css';
+   In src/styles.scss importieren:  @use './app/shared/styles/tokens';
 
    Bewusst nüchtern gehalten: das hier ist ein Arbeitswerkzeug für
    Kassenwart und Schriftführer, keine Schauseite. Priorität haben
