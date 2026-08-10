@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { FileStorageService } from './core/kegelverein/persistenz/file-storage.service';
 import { VereinsdatenService } from './core/kegelverein/vereinsdaten.service';
@@ -8,6 +8,7 @@ import { HauptnavigationComponent } from './features/hauptnavigation/hauptnaviga
   selector: 'app-root',
   imports: [RouterOutlet, HauptnavigationComponent],
   templateUrl: './app.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app.scss',
 })
 export class App implements OnInit {

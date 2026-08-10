@@ -1,4 +1,11 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MitgliederService } from '../../core/kegelverein/mitglieder.service';
 import { AccountingService } from '../../core/kegelverein/accounting.service';

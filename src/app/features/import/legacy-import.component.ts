@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FileStorageService } from '../../core/kegelverein/persistenz/file-storage.service';
 import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
 import {
@@ -33,7 +33,7 @@ export class LegacyImportComponent {
   protected readonly buchungenOhneMitglied = computed(
     () =>
       this.ergebnis()?.kegeljahre.reduce(
-        (summe, kj) => summe + kj.buchungen.filter(b => !b.mitgliedId).length,
+        (summe, kj) => summe + kj.buchungen.filter((b) => !b.mitgliedId).length,
         0,
       ) ?? 0,
   );
@@ -53,7 +53,9 @@ export class LegacyImportComponent {
       this.phase.set('geprueft');
     } catch (e) {
       this.fehlertext.set(
-        e instanceof Error ? `Datei konnte nicht gelesen werden: ${e.message}` : 'Unbekannter Fehler',
+        e instanceof Error
+          ? `Datei konnte nicht gelesen werden: ${e.message}`
+          : 'Unbekannter Fehler',
       );
       this.phase.set('fehler');
     }
@@ -70,7 +72,7 @@ export class LegacyImportComponent {
       // Stammdaten zuerst: die Kegeljahre verweisen per mitgliedId darauf,
       // die referentielle Prüfung beim Speichern würde sonst fehlschlagen.
       await this.storage.mitgliederSpeichern(erg.mitglieder);
-      const ids = new Set(erg.mitglieder.map(m => m.id));
+      const ids = new Set(erg.mitglieder.map((m) => m.id));
 
       for (const kj of erg.kegeljahre) {
         await this.storage.kegeljahrSpeichern(kj, ids);

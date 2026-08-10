@@ -2,7 +2,7 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 
 import { routes } from './app.routes';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { PERSISTENZ_ADAPTER } from './core/kegelverein/persistenz/persistenz-adapter.token';
 import { PhpApiAdapter } from './core/kegelverein/persistenz/php-api-adapter';
 
@@ -10,9 +10,10 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes, withComponentInputBinding()),
-    provideHttpClient(),
+    provideHttpClient(withXhr()),
     {
-      provide: PERSISTENZ_ADAPTER, useExisting: PhpApiAdapter
-    }
-  ]
+      provide: PERSISTENZ_ADAPTER,
+      useExisting: PhpApiAdapter,
+    },
+  ],
 };

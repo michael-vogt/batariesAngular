@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AccountingService } from '../../core/kegelverein/accounting.service';
 import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
@@ -151,4 +151,3 @@ export class KontenUebersichtComponent {
     };
   });
 }
-

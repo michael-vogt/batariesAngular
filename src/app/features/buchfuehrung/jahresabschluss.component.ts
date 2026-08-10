@@ -1,4 +1,11 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { AccountingService } from '../../core/kegelverein/accounting.service';
 import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
 import { AbschlussVorschau } from '../../core/kegelverein/jahresabschluss.logic';
