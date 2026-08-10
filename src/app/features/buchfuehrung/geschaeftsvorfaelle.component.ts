@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AccountingService } from '../../core/kegelverein/accounting.service';
 import { MitgliederService } from '../../core/kegelverein/mitglieder.service';
@@ -28,6 +28,15 @@ export class GeschaeftsvorfaelleComponent {
   private readonly accounting = inject(AccountingService);
   private readonly mitgliederService = inject(MitgliederService);
   protected readonly daten = inject(VereinsdatenService);
+
+  constructor() {
+    // Läuft bei jedem vollständigen Datenaustausch (Laden, Verwerfen,
+    // Jahreswechsel) und räumt die Bedienzustände auf.
+    effect(() => {
+      this.daten.datenstand();
+      this.bedienzustandZuruecksetzen();
+    });
+  }
 
   protected readonly aktiverVorgang = signal<Vorgang>('beitraege');
   protected readonly meldung = signal<string | null>(null);
@@ -269,5 +278,13 @@ export class GeschaeftsvorfaelleComponent {
     } finally {
       this.speichert.set(false);
     }
+  }
+
+  private bedienzustandZuruecksetzen(): void {
+    // Erfasste Beträge gelten für den alten Stand der offenen Posten.
+    this.zahlungen.set({});
+    this.gaeste.set({});
+    this.ausrichterId.set('');
+    this.meldung.set(null);
   }
 }

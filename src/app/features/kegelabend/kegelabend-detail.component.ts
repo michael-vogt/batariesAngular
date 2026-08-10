@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { KegelabendService } from '../../core/kegelverein/kegelabend.service';
@@ -69,6 +69,15 @@ export class KegelabendDetailComponent {
   private readonly kegelabendService = inject(KegelabendService);
   private readonly mitgliederService = inject(MitgliederService);
   protected readonly daten = inject(VereinsdatenService);
+
+  constructor() {
+    // Läuft bei jedem vollständigen Datenaustausch (Laden, Verwerfen,
+    // Jahreswechsel) und räumt die Bedienzustände auf.
+    effect(() => {
+      this.daten.datenstand();
+      this.bedienzustandZuruecksetzen();
+    });
+  }
 
   protected readonly spiele = SPIELE;
   protected readonly aktivesSpiel = signal<SpielKey>(SPIELE[0].key);
@@ -319,6 +328,15 @@ export class KegelabendDetailComponent {
     } finally {
       this.speichert.set(false);
     }
+  }
+
+  private bedienzustandZuruecksetzen(): void {
+    // Auswahl und Meldungen beziehen sich auf den vorherigen Datenstand.
+    this.auswahlId.set('');
+    this.gastName.set('');
+    this.gastFehler.set(null);
+    this.uebernahmeMeldung.set(null);
+    this.uebernahmeFehler.set(null);
   }
 
   protected readonly datumKurz = datumKurz;

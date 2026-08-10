@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { AccountingService } from '../../core/kegelverein/accounting.service';
 import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
 import { AbschlussVorschau } from '../../core/kegelverein/jahresabschluss.logic';
@@ -16,6 +16,15 @@ export class JahresabschlussComponent {
   protected readonly datumKurz = datumKurz;
   private readonly accounting = inject(AccountingService);
   protected readonly daten = inject(VereinsdatenService);
+
+  constructor() {
+    // Läuft bei jedem vollständigen Datenaustausch (Laden, Verwerfen,
+    // Jahreswechsel) und räumt die Bedienzustände auf.
+    effect(() => {
+      this.daten.datenstand();
+      this.bedienzustandZuruecksetzen();
+    });
+  }
 
   protected readonly vorschau = signal<AbschlussVorschau | null>(null);
   protected readonly pruefFehler = signal<string | null>(null);
@@ -76,5 +85,12 @@ export class JahresabschlussComponent {
       this.laeuft.set(false);
     }
   }
-}
 
+  private bedienzustandZuruecksetzen(): void {
+    // Eine erstellte Vorschau bezieht sich auf die vorherigen Buchungen
+    // und wäre nach einem Neuladen nicht mehr belastbar.
+    this.vorschau.set(null);
+    this.pruefFehler.set(null);
+    this.abgeschlossen.set(false);
+  }
+}

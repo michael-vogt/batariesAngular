@@ -27,6 +27,22 @@ export class KegeljahrStore {
   readonly kegeljahre = this._kegeljahre.asReadonly();
   readonly aktuellesKegeljahrId = this._aktuellesKegeljahrId.asReadonly();
 
+  /**
+   * Zähler, der bei jedem vollständigen Austausch der Daten hochgezählt
+   * wird — also beim Laden vom Server, beim Verwerfen und beim Wechsel des
+   * Kegeljahres, nicht bei einzelnen Änderungen.
+   *
+   * Komponenten beobachten ihn per effect() und setzen daraufhin ihre
+   * Bedienzustände zurück: eine offene Bearbeitung zeigt sonst auf einen
+   * Datensatz, den es nach dem Neuladen möglicherweise nicht mehr gibt.
+   */
+  private readonly _datenstand = signal(0);
+  readonly datenstand = this._datenstand.asReadonly();
+
+  private datenstandErhoehen(): void {
+    this._datenstand.update((n) => n + 1);
+  }
+
   readonly aktuellesKegeljahr = computed(
     () => this._kegeljahre().find((kj) => kj.id === this._aktuellesKegeljahrId()) ?? null,
   );
@@ -41,15 +57,19 @@ export class KegeljahrStore {
   setKegeljahre(kegeljahre: Kegeljahr[], aktuellesId?: string): void {
     this._kegeljahre.set(kegeljahre);
     this._aktuellesKegeljahrId.set(aktuellesId ?? kegeljahre[0]?.id ?? null);
+    this.datenstandErhoehen();
   }
 
   addKegeljahr(kj: Kegeljahr): void {
     this._kegeljahre.update((list) => [...list, kj]);
     this._aktuellesKegeljahrId.set(kj.id);
+    this.datenstandErhoehen();
   }
 
   setAktuellesKegeljahr(id: string): void {
+    if (id === this._aktuellesKegeljahrId()) return;
     this._aktuellesKegeljahrId.set(id);
+    this.datenstandErhoehen();
   }
 
   findKegeljahrByDatum(datum: string): Kegeljahr | undefined {
@@ -62,6 +82,7 @@ export class KegeljahrStore {
 
   setMitglieder(mitglieder: Mitglied[]): void {
     this._mitglieder.set(mitglieder);
+    this.datenstandErhoehen();
   }
 
   addMitglied(m: Mitglied): void {

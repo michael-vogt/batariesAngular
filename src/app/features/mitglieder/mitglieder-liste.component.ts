@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MitgliederService } from '../../core/kegelverein/mitglieder.service';
 import { AccountingService } from '../../core/kegelverein/accounting.service';
@@ -31,6 +31,15 @@ export class MitgliederListeComponent {
   private readonly mitgliederService = inject(MitgliederService);
   private readonly accounting = inject(AccountingService);
   protected readonly daten = inject(VereinsdatenService);
+
+  constructor() {
+    // Läuft bei jedem vollständigen Datenaustausch (Laden, Verwerfen,
+    // Jahreswechsel) und räumt die Bedienzustände auf.
+    effect(() => {
+      this.daten.datenstand();
+      this.bedienzustandZuruecksetzen();
+    });
+  }
 
   protected readonly mitglieder = this.mitgliederService.mitglieder;
 
@@ -232,5 +241,15 @@ export class MitgliederListeComponent {
     } finally {
       this.speichert.set(false);
     }
+  }
+
+  private bedienzustandZuruecksetzen(): void {
+    // Offene Umbenennung und aufgeklappter Verlauf zeigen sonst auf ein
+    // Mitglied, das es nach dem Neuladen nicht mehr geben muss.
+    this.bearbeiteId.set(null);
+    this.entwurfName.set('');
+    this.verlaufOffen.set(null);
+    this.bearbeitenFehler.set(null);
+    this.anlegeFehler.set(null);
   }
 }

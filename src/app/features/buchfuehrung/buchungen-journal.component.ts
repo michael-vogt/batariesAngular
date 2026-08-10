@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AccountingService } from '../../core/kegelverein/accounting.service';
 import { MitgliederService } from '../../core/kegelverein/mitglieder.service';
@@ -22,6 +22,15 @@ export class BuchungenJournalComponent {
   private readonly accounting = inject(AccountingService);
   private readonly mitgliederService = inject(MitgliederService);
   protected readonly daten = inject(VereinsdatenService);
+
+  constructor() {
+    // Läuft bei jedem vollständigen Datenaustausch (Laden, Verwerfen,
+    // Jahreswechsel) und räumt die Bedienzustände auf.
+    effect(() => {
+      this.daten.datenstand();
+      this.bedienzustandZuruecksetzen();
+    });
+  }
 
   protected readonly konten = KONTENRAHMEN;
   protected readonly seitengroessen = SEITENGROESSEN;
@@ -233,5 +242,13 @@ export class BuchungenJournalComponent {
     } finally {
       this.speichert.set(false);
     }
+  }
+
+  private bedienzustandZuruecksetzen(): void {
+    // Nach einem Neuladen kann die bearbeitete Buchung verschwunden sein;
+    // ein "Änderung übernehmen" liefe dann ins Leere.
+    this.bearbeiteId.set(null);
+    this.formularLeeren();
+    this.seite.set(1);
   }
 }

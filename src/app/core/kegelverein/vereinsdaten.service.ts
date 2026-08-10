@@ -39,6 +39,13 @@ export class VereinsdatenService {
 
   readonly aktuellesJahr = computed(() => this.store.aktuellesKegeljahr());
 
+  /**
+   * Wird bei jedem vollständigen Datenaustausch hochgezählt (Laden,
+   * Verwerfen, Jahreswechsel). Komponenten setzen darauf ihre offenen
+   * Bearbeitungen zurück — siehe KegeljahrStore.datenstand.
+   */
+  readonly datenstand = this.store.datenstand;
+
   /** Nach hergestellter Serververbindung aufrufen. */
   async initialisieren(): Promise<void> {
     this._status.set('laedt');
