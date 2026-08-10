@@ -4,8 +4,13 @@ import { RouterLink } from '@angular/router';
 import { KegelabendService } from '../../core/kegelverein/kegelabend.service';
 import { MitgliederService } from '../../core/kegelverein/mitglieder.service';
 import { findeNamensdublette } from '../../core/kegelverein/namen.util';
-import { aktuellerStatus, istGastkegler, neuesMitglied } from '../../core/kegelverein/mitglied.util';
+import {
+  aktuellerStatus,
+  istGastkegler,
+  neuesMitglied,
+} from '../../core/kegelverein/mitglied.util';
 import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
+import { datumLang, euro } from '../../shared/format.util';
 import {
   Kegelabend,
   KegelabendTeilnehmer,
@@ -31,12 +36,7 @@ function neuerTeilnehmer(m: Mitglied): KegelabendTeilnehmer {
 }
 
 /** Reihenfolge beim Durchklicken einer Zelle im Rundenraster. */
-const STATUS_FOLGE: SpielStatus[] = [
-  'nicht_teilgenommen',
-  'teilgenommen',
-  'gewonnen',
-  'verloren',
-];
+const STATUS_FOLGE: SpielStatus[] = ['nicht_teilgenommen', 'teilgenommen', 'gewonnen', 'verloren'];
 
 const STATUS_KURZ: Record<SpielStatus, string> = {
   nicht_teilgenommen: '·',
@@ -54,11 +54,15 @@ const STATUS_TITEL: Record<SpielStatus, string> = {
 
 @Component({
   selector: 'app-kegelabend-detail',
+  templateUrl: './kegelabend-detail.component.html',
+  styleUrl: './kegelabend-detail.component.scss',
   imports: [FormsModule, RouterLink],
-  templateUrl: 'kegelabend-detail.component.html',
-  styleUrl: './kegelabend-detail.component.scss'
 })
 export class KegelabendDetailComponent {
+  // Formatierung zentral aus shared/format.util — als Feld gebunden,
+  // damit die Templates darauf zugreifen können.
+  protected readonly euro = euro;
+  protected readonly datumLang = datumLang;
   /** Kommt aus der Route (withComponentInputBinding). */
   readonly id = input.required<string>();
 
@@ -75,18 +79,18 @@ export class KegelabendDetailComponent {
   protected readonly uebernahmeMeldung = signal<string | null>(null);
 
   protected readonly abend = computed(() =>
-    this.kegelabendService.kegelabende().find(ka => ka.id === this.id()),
+    this.kegelabendService.kegelabende().find((ka) => ka.id === this.id()),
   );
 
   protected readonly runden = computed(() => this.abend()?.runden[this.aktivesSpiel()] ?? []);
 
   /** Mitglieder, die an diesem Abend noch nicht eingetragen sind. */
   protected readonly verfuegbare = computed(() => {
-    const vorhanden = new Set(this.abend()?.teilnehmer.map(t => t.id) ?? []);
+    const vorhanden = new Set(this.abend()?.teilnehmer.map((t) => t.id) ?? []);
     // Ausgetretene stehen nicht zur Auswahl; historische Abende behalten sie.
     return this.mitgliederService
       .mitglieder()
-      .filter(m => !vorhanden.has(m.id) && aktuellerStatus(m) !== 'ausgetreten');
+      .filter((m) => !vorhanden.has(m.id) && aktuellerStatus(m) !== 'ausgetreten');
   });
 
   protected readonly auswertung = computed(() => {
@@ -99,7 +103,7 @@ export class KegelabendDetailComponent {
   );
 
   protected aktivesSpielName(): string {
-    return SPIELE.find(s => s.key === this.aktivesSpiel())!.name;
+    return SPIELE.find((s) => s.key === this.aktivesSpiel())!.name;
   }
 
   protected rundenAnzahl(key: SpielKey): number {
@@ -119,22 +123,12 @@ export class KegelabendDetailComponent {
   }
 
   protected nameVon(teilnehmerId: string): string {
-    return this.abend()?.teilnehmer.find(t => t.id === teilnehmerId)?.name ?? '—';
+    return this.abend()?.teilnehmer.find((t) => t.id === teilnehmerId)?.name ?? '—';
   }
 
   protected istGast(teilnehmerId: string): boolean {
-    const m = this.mitgliederService.mitglieder().find(x => x.id === teilnehmerId);
+    const m = this.mitgliederService.mitglieder().find((x) => x.id === teilnehmerId);
     return m ? istGastkegler(m) : false;
-  }
-
-  protected euro(betrag: number): string {
-    return betrag.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
-
-  protected datumLang(iso: string): string {
-    return new Date(iso).toLocaleDateString('de-DE', {
-      weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
-    });
   }
 
   // --- Änderungen ------------------------------------------------------
@@ -150,9 +144,9 @@ export class KegelabendDetailComponent {
 
   protected anwesenheitGeaendert(t: KegelabendTeilnehmer, event: Event): void {
     const anwesend = (event.target as HTMLInputElement).checked;
-    this.aendern(ka => ({
+    this.aendern((ka) => ({
       ...ka,
-      teilnehmer: ka.teilnehmer.map(x => (x.id === t.id ? { ...x, anwesend } : x)),
+      teilnehmer: ka.teilnehmer.map((x) => (x.id === t.id ? { ...x, anwesend } : x)),
     }));
   }
 
@@ -162,17 +156,17 @@ export class KegelabendDetailComponent {
     wert: unknown,
   ): void {
     const zahl = Math.max(0, Number(wert) || 0);
-    this.aendern(ka => ({
+    this.aendern((ka) => ({
       ...ka,
-      teilnehmer: ka.teilnehmer.map(x => (x.id === t.id ? { ...x, [feld]: zahl } : x)),
+      teilnehmer: ka.teilnehmer.map((x) => (x.id === t.id ? { ...x, [feld]: zahl } : x)),
     }));
   }
 
   protected teilnehmerHinzufuegen(): void {
-    const mitglied = this.mitgliederService.mitglieder().find(m => m.id === this.auswahlId());
+    const mitglied = this.mitgliederService.mitglieder().find((m) => m.id === this.auswahlId());
     if (!mitglied) return;
 
-    this.aendern(ka => ({ ...ka, teilnehmer: [...ka.teilnehmer, neuerTeilnehmer(mitglied)] }));
+    this.aendern((ka) => ({ ...ka, teilnehmer: [...ka.teilnehmer, neuerTeilnehmer(mitglied)] }));
     this.auswahlId.set('');
   }
 
@@ -185,7 +179,7 @@ export class KegelabendDetailComponent {
     // Mitgliederverwaltung (findeNamensdublette).
     const dublette = findeNamensdublette(this.mitgliederService.mitglieder(), name);
     if (dublette) {
-      const schonDabei = this.abend()?.teilnehmer.some(t => t.id === dublette.id);
+      const schonDabei = this.abend()?.teilnehmer.some((t) => t.id === dublette.id);
       this.gastFehler.set(
         schonDabei
           ? `„${dublette.name}“ nimmt an diesem Abend bereits teil.`
@@ -198,7 +192,7 @@ export class KegelabendDetailComponent {
     // erstmals mitgekegelt.
     const gast = neuesMitglied(name, 'gastkegler', this.abend()!.datum);
     this.mitgliederService.hinzufuegen(gast);
-    this.aendern(ka => ({ ...ka, teilnehmer: [...ka.teilnehmer, neuerTeilnehmer(gast)] }));
+    this.aendern((ka) => ({ ...ka, teilnehmer: [...ka.teilnehmer, neuerTeilnehmer(gast)] }));
 
     this.gastName.set('');
     this.gastFehler.set(null);
@@ -207,14 +201,14 @@ export class KegelabendDetailComponent {
   protected teilnehmerEntfernen(t: KegelabendTeilnehmer): void {
     if (!confirm(`${t.name} von diesem Abend entfernen?`)) return;
 
-    this.aendern(ka => ({
+    this.aendern((ka) => ({
       ...ka,
-      teilnehmer: ka.teilnehmer.filter(x => x.id !== t.id),
+      teilnehmer: ka.teilnehmer.filter((x) => x.id !== t.id),
       // Auch aus allen Runden entfernen, sonst blieben verwaiste Ergebnisse zurück.
       runden: Object.fromEntries(
         Object.entries(ka.runden).map(([spiel, runden]) => [
           spiel,
-          (runden ?? []).map(r => {
+          (runden ?? []).map((r) => {
             const { [t.id]: _entfernt, ...rest } = r.ergebnisse;
             return { ...r, ergebnisse: rest };
           }),
@@ -226,7 +220,7 @@ export class KegelabendDetailComponent {
   protected rundeHinzufuegen(): void {
     const spiel = this.aktivesSpiel();
 
-    this.aendern(ka => {
+    this.aendern((ka) => {
       // Anwesende starten als "mitgespielt", Abwesende als "nicht dabei" —
       // das ist in den meisten Runden die richtige Ausgangslage.
       const ergebnisse: Record<string, SpielStatus> = {};
@@ -244,7 +238,7 @@ export class KegelabendDetailComponent {
 
   protected letzteRundeEntfernen(): void {
     const spiel = this.aktivesSpiel();
-    this.aendern(ka => ({
+    this.aendern((ka) => ({
       ...ka,
       runden: { ...ka.runden, [spiel]: (ka.runden[spiel] ?? []).slice(0, -1) },
     }));
@@ -255,11 +249,11 @@ export class KegelabendDetailComponent {
     const naechster = STATUS_FOLGE[(STATUS_FOLGE.indexOf(aktuell) + 1) % STATUS_FOLGE.length];
     const spiel = this.aktivesSpiel();
 
-    this.aendern(ka => ({
+    this.aendern((ka) => ({
       ...ka,
       runden: {
         ...ka.runden,
-        [spiel]: (ka.runden[spiel] ?? []).map(r =>
+        [spiel]: (ka.runden[spiel] ?? []).map((r) =>
           r.id === runde.id
             ? { ...r, ergebnisse: { ...r.ergebnisse, [teilnehmerId]: naechster } }
             : r,

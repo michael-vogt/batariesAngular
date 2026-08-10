@@ -4,6 +4,7 @@ import { AccountingService } from '../../core/kegelverein/accounting.service';
 import { MitgliederService } from '../../core/kegelverein/mitglieder.service';
 import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
 import { erzeugeAbrechnung } from '../../core/kegelverein/abrechnung.logic';
+import { datumKurz, euro } from '../../shared/format.util';
 
 @Component({
   selector: 'app-abrechnung',
@@ -12,6 +13,10 @@ import { erzeugeAbrechnung } from '../../core/kegelverein/abrechnung.logic';
   styleUrl: './abrechnung.component.scss',
 })
 export class AbrechnungComponent {
+  // Formatierung zentral aus shared/format.util — als Feld gebunden,
+  // damit die Templates darauf zugreifen können.
+  protected readonly euro = euro;
+  protected readonly datumKurz = datumKurz;
   private readonly accounting = inject(AccountingService);
   private readonly mitgliederService = inject(MitgliederService);
   protected readonly daten = inject(VereinsdatenService);
@@ -43,14 +48,6 @@ export class AbrechnungComponent {
     const brutto = s.beitraege + s.strafen + s.umlagen;
     return Math.round((kontoForderungen - brutto) * 100) / 100;
   });
-
-  protected euro(betrag: number): string {
-    return betrag.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
-
-  protected datumKurz(iso: string): string {
-    return new Date(iso).toLocaleDateString('de-DE');
-  }
 
   /**
    * jsPDF wird erst beim Klick geladen (dynamischer Import). Die Bibliothek

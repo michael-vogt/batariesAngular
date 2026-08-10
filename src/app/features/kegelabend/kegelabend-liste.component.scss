@@ -1,15 +1,36 @@
-.kopf-aktionen { display: flex; align-items: center; gap: var(--abstand-3); }
-.karte h2 { margin: 0 0 var(--abstand-3); font-size: 1.0625rem; font-weight: 600; }
-.liste, .leer { margin-top: var(--abstand-6); }
+.kopf-aktionen {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-3);
+}
+
+.karte h2 {
+  margin: 0 0 var(--abstand-3);
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+.liste, .leer {
+  margin-top: var(--abstand-6);
+}
+
 .formular-zeile {
   display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--abstand-3);
 }
+
 .formular-zeile label {
   display: flex; flex-direction: column; gap: var(--abstand-1);
   font-size: 0.8125rem; color: var(--farbe-text-leise);
 }
-.formular-zeile + .hinweis { margin: var(--abstand-3) 0 0; }
-a { color: var(--farbe-akzent); }
+
+.formular-zeile + .hinweis {
+  margin: var(--abstand-3) 0 0;
+}
+
+a {
+  color: var(--farbe-akzent);
+}
+
 .visuell-versteckt {
   position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);
 }

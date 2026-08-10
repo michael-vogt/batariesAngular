@@ -3,11 +3,16 @@
   align-items: center;
   gap: var(--abstand-3);
 }
-.gruppe { margin-top: var(--abstand-6); }
+
+.gruppe {
+  margin-top: var(--abstand-6);
+}
+
 .gruppe h2 {
   display: flex; align-items: center; gap: var(--abstand-2);
   margin: 0 0 var(--abstand-3); font-size: 1.0625rem; font-weight: 600;
 }
+
 .gruppe .anzahl {
   padding: 0 var(--abstand-2);
   border-radius: 999px;
@@ -16,25 +21,49 @@
   font-family: var(--schrift-zahl);
   font-size: 0.75rem;
 }
-tr.verlauf > td { background: var(--farbe-flaeche); }
-tr.verlauf h3 { margin: 0 0 var(--abstand-2); font-size: 0.875rem; font-weight: 600; }
+
+tr.verlauf > td {
+  background: var(--farbe-flaeche);
+}
+
+tr.verlauf h3 {
+  margin: 0 0 var(--abstand-2);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
 tr.verlauf ol {
   margin: 0 0 var(--abstand-3); padding-left: var(--abstand-4);
   font-size: 0.875rem;
 }
+
 tr.verlauf .datum {
   display: inline-block; min-width: 6.5rem;
   font-family: var(--schrift-zahl); color: var(--farbe-text-leise);
 }
-tr.verlauf .hinweis { margin: var(--abstand-2) 0 0; font-size: 0.8125rem; }
-.neu { margin-top: var(--abstand-6); }
-.neu h2 { margin: 0 0 var(--abstand-3); font-size: 1.0625rem; font-weight: 600; }
+
+tr.verlauf .hinweis {
+  margin: var(--abstand-2) 0 0;
+  font-size: 0.8125rem;
+}
+
+.neu {
+  margin-top: var(--abstand-6);
+}
+
+.neu h2 {
+  margin: 0 0 var(--abstand-3);
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
 .formular-zeile {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
   gap: var(--abstand-3);
 }
+
 .formular-zeile label {
   display: flex;
   flex-direction: column;
@@ -42,6 +71,7 @@ tr.verlauf .hinweis { margin: var(--abstand-2) 0 0; font-size: 0.8125rem; }
   font-size: 0.8125rem;
   color: var(--farbe-text-leise);
 }
+
 .visuell-versteckt {
   position: absolute;
   width: 1px; height: 1px;

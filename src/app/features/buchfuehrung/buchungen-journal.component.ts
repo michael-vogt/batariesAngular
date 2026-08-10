@@ -4,6 +4,7 @@ import { AccountingService } from '../../core/kegelverein/accounting.service';
 import { MitgliederService } from '../../core/kegelverein/mitglieder.service';
 import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
 import { Buchung, KONTENRAHMEN, KontoNummer } from '../../core/kegelverein/kegelverein.models';
+import { datumKurz, euro } from '../../shared/format.util';
 
 const SEITENGROESSEN = [25, 50, 100, 250] as const;
 
@@ -14,6 +15,10 @@ const SEITENGROESSEN = [25, 50, 100, 250] as const;
   styleUrl: './buchungen-journal.component.scss',
 })
 export class BuchungenJournalComponent {
+  // Formatierung zentral aus shared/format.util — als Feld gebunden,
+  // damit die Templates darauf zugreifen können.
+  protected readonly euro = euro;
+  protected readonly datumKurz = datumKurz;
   private readonly accounting = inject(AccountingService);
   private readonly mitgliederService = inject(MitgliederService);
   protected readonly daten = inject(VereinsdatenService);
@@ -217,14 +222,6 @@ export class BuchungenJournalComponent {
   protected mitgliedName(id: string | undefined): string {
     if (!id) return '';
     return this.mitglieder().find((m) => m.id === id)?.name ?? 'unbekannt';
-  }
-
-  protected euro(betrag: number): string {
-    return betrag.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
-
-  protected datumKurz(iso: string): string {
-    return new Date(iso).toLocaleDateString('de-DE');
   }
 
   protected async speichern(): Promise<void> {

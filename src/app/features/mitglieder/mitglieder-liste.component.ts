@@ -5,23 +5,29 @@ import { AccountingService } from '../../core/kegelverein/accounting.service';
 import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
 import { Mitglied, MitgliedStatus } from '../../core/kegelverein/kegelverein.models';
 import { findeNamensdublette } from '../../core/kegelverein/namen.util';
+import { datumKurz, euro } from '../../shared/format.util';
 import {
   STATUS_BEZEICHNUNG,
   aktuellerStatus,
   mitStatusaenderung,
   neuesMitglied,
-  sortierterVerlauf, ohneStatuseintrag,
+  ohneStatuseintrag,
+  sortierterVerlauf,
 } from '../../core/kegelverein/mitglied.util';
 
 const HEUTE = () => new Date().toISOString().slice(0, 10);
 
 @Component({
   selector: 'app-mitglieder-liste',
-  imports: [FormsModule],
   templateUrl: './mitglieder-liste.component.html',
   styleUrl: './mitglieder-liste.component.scss',
+  imports: [FormsModule],
 })
 export class MitgliederListeComponent {
+  // Formatierung zentral aus shared/format.util — als Feld gebunden,
+  // damit die Templates darauf zugreifen können.
+  protected readonly euro = euro;
+  protected readonly datumKurz = datumKurz;
   private readonly mitgliederService = inject(MitgliederService);
   private readonly accounting = inject(AccountingService);
   protected readonly daten = inject(VereinsdatenService);
@@ -89,10 +95,6 @@ export class MitgliederListeComponent {
   protected readonly wechselStatus = signal<MitgliedStatus>('passiv');
   protected readonly wechselNotiz = signal('');
   protected readonly speichert = signal(false);
-
-  protected euro(betrag: number): string {
-    return betrag.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
 
   protected anlegen(): void {
     const name = this.neuName().trim();
@@ -179,14 +181,12 @@ export class MitgliederListeComponent {
     return STATUS_BEZEICHNUNG[status];
   }
 
-  protected datumKurz(iso: string): string {
-    return new Date(iso).toLocaleDateString('de-DE');
-  }
-
   /** Entfernt einen Verlaufseintrag, etwa nach einer Fehleingabe. */
   protected eintragEntfernen(m: Mitglied, ab: string): void {
     if (m.statusVerlauf.length <= 1) {
-      this.bearbeitenFehler.set('Der letzte Statuseintrag lässt sich nicht entfernen — sonst hätte das Mitglied keinen Status.');
+      this.bearbeitenFehler.set(
+        'Der letzte Statuseintrag lässt sich nicht entfernen — sonst hätte das Mitglied keinen Status.',
+      );
       return;
     }
     if (!confirm(`Eintrag vom ${this.datumKurz(ab)} entfernen?`)) return;

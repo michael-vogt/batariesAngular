@@ -6,14 +6,19 @@ import { MitgliederService } from '../../core/kegelverein/mitglieder.service';
 import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
 import { Kegelabend } from '../../core/kegelverein/kegelverein.models';
 import { aktuellerStatus } from '../../core/kegelverein/mitglied.util';
+import { datumMitTag, euro } from '../../shared/format.util';
 
 @Component({
   selector: 'app-kegelabend-liste',
+  templateUrl: './kegelabend-liste.component.html',
+  styleUrl: './kegelabend-liste.component.scss',
   imports: [FormsModule, RouterLink],
-  templateUrl: 'kegelabend-liste.component.html',
-  styleUrl: './kegelabend-liste.component.scss'
 })
 export class KegelabendListeComponent {
+  // Formatierung zentral aus shared/format.util — als Feld gebunden,
+  // damit die Templates darauf zugreifen können.
+  protected readonly euro = euro;
+  protected readonly datumMitTag = datumMitTag;
   private readonly kegelabendService = inject(KegelabendService);
   private readonly mitgliederService = inject(MitgliederService);
   protected readonly daten = inject(VereinsdatenService);
@@ -28,26 +33,16 @@ export class KegelabendListeComponent {
   );
 
   protected readonly zeilen = computed(() =>
-    this.abende().map(abend => {
+    this.abende().map((abend) => {
       const ergebnisse = this.kegelabendService.ergebnisse(abend);
       return {
         abend,
-        anwesend: abend.teilnehmer.filter(t => t.anwesend).length,
+        anwesend: abend.teilnehmer.filter((t) => t.anwesend).length,
         runden: Object.values(abend.runden).reduce((s, r) => s + (r?.length ?? 0), 0),
         strafen: ergebnisse.reduce((s, z) => s + z.strafeGesamt, 0),
       };
     }),
   );
-
-  protected euro(betrag: number): string {
-    return betrag.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
-
-  protected datumLang(iso: string): string {
-    return new Date(iso).toLocaleDateString('de-DE', {
-      weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric',
-    });
-  }
 
   protected anlegen(): void {
     const abend: Kegelabend = {
@@ -58,8 +53,8 @@ export class KegelabendListeComponent {
       // im Detail gezielt hinzugenommen, wenn sie tatsächlich mitkegeln.
       teilnehmer: this.mitgliederService
         .mitglieder()
-        .filter(m => aktuellerStatus(m) === 'aktiv')
-        .map(m => ({
+        .filter((m) => aktuellerStatus(m) === 'aktiv')
+        .map((m) => ({
           id: m.id,
           name: m.name,
           anwesend: true,
@@ -78,7 +73,7 @@ export class KegelabendListeComponent {
   }
 
   protected loeschen(abend: Kegelabend): void {
-    if (!confirm(`Kegelabend vom ${this.datumLang(abend.datum)} löschen?`)) return;
+    if (!confirm(`Kegelabend vom ${this.datumMitTag(abend.datum)} löschen?`)) return;
     this.kegelabendService.loeschen(abend.id);
     this.daten.aenderungVorgemerkt();
   }

@@ -1,10 +1,13 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { AccountingService } from '../../core/kegelverein/accounting.service';
 import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
+import { berechneSalden } from '../../core/kegelverein/accounting.logic';
 import { KONTENRAHMEN, KontoArt, KontoNummer } from '../../core/kegelverein/kegelverein.models';
+import { datumKurz, euro } from '../../shared/format.util';
 
 interface KontoZeile {
-  nummer: string;
+  nummer: KontoNummer;
   name: string;
   soll: number;
   haben: number;
@@ -20,21 +23,71 @@ interface KontoGruppe {
 
 @Component({
   selector: 'app-konten-uebersicht',
+  imports: [FormsModule],
   templateUrl: './konten-uebersicht.component.html',
   styleUrl: './konten-uebersicht.component.scss',
 })
 export class KontenUebersichtComponent {
+  // Formatierung zentral aus shared/format.util — als Feld gebunden,
+  // damit die Templates darauf zugreifen können.
+  protected readonly euro = euro;
+  protected readonly datumKurz = datumKurz;
   private readonly accounting = inject(AccountingService);
   protected readonly daten = inject(VereinsdatenService);
 
+  protected readonly datumVon = signal('');
+  protected readonly datumBis = signal('');
+
+  protected readonly istGefiltert = computed(() => !!this.datumVon() || !!this.datumBis());
+
+  protected readonly gefilterteBuchungen = computed(() => {
+    const von = this.datumVon();
+    const bis = this.datumBis();
+    if (!von && !bis) return this.accounting.buchungen();
+
+    // ISO-Daten sind als Zeichenketten korrekt vergleichbar.
+    return this.accounting
+      .buchungen()
+      .filter((b) => (!von || b.datum >= von) && (!bis || b.datum <= bis));
+  });
+
+  /**
+   * Salden werden hier lokal gerechnet statt über AccountingService.salden(),
+   * weil dieser immer das gesamte Kegeljahr auswertet. Dieselbe reine
+   * Funktion, nur mit eingeschränkter Buchungsmenge.
+   */
+  private readonly salden = computed(() => berechneSalden(this.gefilterteBuchungen()));
+
+  protected readonly anzahlBuchungen = computed(() => this.gefilterteBuchungen().length);
+  protected readonly anzahlGesamt = computed(() => this.accounting.buchungen().length);
+
+  /** Zeitraum auf das Kegeljahr zurücksetzen. */
+  protected zeitraumZuruecksetzen(): void {
+    this.datumVon.set('');
+    this.datumBis.set('');
+  }
+
+  protected ganzesJahrSetzen(): void {
+    const jahr = this.daten.aktuellesJahr();
+    if (!jahr) return;
+    this.datumVon.set(jahr.startDatum);
+    this.datumBis.set(jahr.endDatum);
+  }
+
   private readonly zeilen = computed<KontoZeile[]>(() => {
-    const salden = this.accounting.salden();
+    const salden = this.salden();
     return KONTENRAHMEN.map((konto) => {
       const { soll, haben } = salden[konto.nummer];
       // Aktiv- und Aufwandskonten haben Sollsaldo, Passiv- und
-      // Ertragskonten Habensaldo. Damit alle Zahlen positiv und
-      // vergleichbar erscheinen, wird je Art gedreht.
-      const habenseitig = konto.art === 'Passiv' || konto.art === 'Ertrag';
+      // Ertragskonten Habensaldo. Vereinsvermögen (200) und GuV (250)
+      // sind formal "Sonstige", verhalten sich aber habenseitig — ohne
+      // Sonderfall stünden sie mit negativem Vorzeichen da, während die
+      // Gegenprobe darunter denselben Wert positiv ausweist.
+      const habenseitig =
+        konto.art === 'Passiv' ||
+        konto.art === 'Ertrag' ||
+        konto.nummer === '200' ||
+        konto.nummer === '250';
       return {
         nummer: konto.nummer,
         name: konto.name,
@@ -65,23 +118,20 @@ export class KontenUebersichtComponent {
     ].filter((g) => g.zeilen.some((z) => z.soll !== 0 || z.haben !== 0));
   });
 
-  /** Ertragsüberschuss bzw. -fehlbetrag des laufenden Jahres. */
+  /** Ertragsüberschuss bzw. -fehlbetrag im ausgewerteten Zeitraum. */
   protected readonly ergebnis = computed(() => {
-    const salden = this.accounting.salden();
+    const salden = this.salden();
     return salden['250'].haben - salden['250'].soll;
   });
 
   /**
    * Bilanzprobe: Vermögen = Verbindlichkeiten + Vereinsvermögen (inkl.
-   * Jahresergebnis). Geht das nicht auf, fehlen Gegenbuchungen oder das
-   * Eröffnungsbilanzkonto wurde beim Jahreswechsel nicht ausgeglichen.
-   *
-   * Bewusst nicht die Summe aller Soll- gegen alle Habenbeträge: die ist
-   * per Konstruktion immer gleich (jede Buchung erhöht beide um denselben
-   * Betrag) und würde daher nie etwas aufdecken.
+   * Ergebnis). Sie gilt auch für Teilzeiträume, weil jede Buchung beide
+   * Seiten gleichermaßen erhöht — geht sie nicht auf, fehlt eine
+   * Gegenbuchung oder das Eröffnungsbilanzkonto wurde nicht ausgeglichen.
    */
   protected readonly probe = computed(() => {
-    const salden = this.accounting.salden();
+    const salden = this.salden();
     const sollseitig = (nummer: KontoNummer) => salden[nummer].soll - salden[nummer].haben;
     const habenseitig = (nummer: KontoNummer) => salden[nummer].haben - salden[nummer].soll;
 
@@ -100,10 +150,5 @@ export class KontenUebersichtComponent {
       stimmt: Math.abs(differenz) < 0.005,
     };
   });
-
-  protected readonly anzahlBuchungen = computed(() => this.accounting.buchungen().length);
-
-  protected euro(betrag: number): string {
-    return betrag.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
 }
+

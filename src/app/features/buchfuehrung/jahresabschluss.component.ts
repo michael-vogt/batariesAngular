@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { AccountingService } from '../../core/kegelverein/accounting.service';
 import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
 import { AbschlussVorschau } from '../../core/kegelverein/jahresabschluss.logic';
+import { datumKurz, euro } from '../../shared/format.util';
 
 @Component({
   selector: 'app-jahresabschluss',
@@ -9,6 +10,10 @@ import { AbschlussVorschau } from '../../core/kegelverein/jahresabschluss.logic'
   styleUrl: './jahresabschluss.component.scss',
 })
 export class JahresabschlussComponent {
+  // Formatierung zentral aus shared/format.util — als Feld gebunden,
+  // damit die Templates darauf zugreifen können.
+  protected readonly euro = euro;
+  protected readonly datumKurz = datumKurz;
   private readonly accounting = inject(AccountingService);
   protected readonly daten = inject(VereinsdatenService);
 
@@ -71,12 +76,5 @@ export class JahresabschlussComponent {
       this.laeuft.set(false);
     }
   }
-
-  protected euro(betrag: number): string {
-    return betrag.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
-
-  protected datumKurz(iso: string): string {
-    return new Date(iso).toLocaleDateString('de-DE');
-  }
 }
+

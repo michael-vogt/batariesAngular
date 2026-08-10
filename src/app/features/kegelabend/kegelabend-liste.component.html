@@ -60,7 +60,7 @@
             <tr>
               <td>
                 <a [routerLink]="['/kegelabende', zeile.abend.id]">
-                  {{ datumLang(zeile.abend.datum) }}
+                  {{ datumMitTag(zeile.abend.datum) }}
                 </a>
               </td>
               <td class="leise">{{ zeile.abend.ort || '—' }}</td>

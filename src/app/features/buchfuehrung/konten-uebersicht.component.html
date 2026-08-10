@@ -3,7 +3,10 @@
     <div>
       <h1>Kontenübersicht</h1>
       @if (daten.aktuellesJahr(); as jahr) {
-        <p class="hinweis">{{ jahr.bezeichnung }} · {{ anzahlBuchungen() }} Buchungen</p>
+        <p class="hinweis">
+          {{ jahr.bezeichnung }} ·
+          {{ anzahlBuchungen() }}{{ istGefiltert() ? ' von ' + anzahlGesamt() : '' }} Buchungen
+        </p>
       }
     </div>
   </header>
@@ -12,14 +15,44 @@
     <p class="fehler">{{ text }}</p>
   }
 
+  <div class="karte zeitraum">
+    <label>
+      Datum ab
+      <input type="date" [ngModel]="datumVon()" (ngModelChange)="datumVon.set($event)" />
+    </label>
+    <label>
+      Datum bis
+      <input type="date" [ngModel]="datumBis()" (ngModelChange)="datumBis.set($event)" />
+    </label>
+    <button type="button" (click)="ganzesJahrSetzen()">Ganzes Kegeljahr</button>
+    @if (istGefiltert()) {
+      <button type="button" class="leise-aktion" (click)="zeitraumZuruecksetzen()">
+        Zeitraum aufheben
+      </button>
+    }
+  </div>
+
+  @if (istGefiltert()) {
+    <p class="warnung zeitraum-hinweis">
+      Eingeschränkter Zeitraum
+      @if (datumVon()) { ab {{ datumKurz(datumVon()) }} }
+      @if (datumBis()) { bis {{ datumKurz(datumBis()) }} }:
+      Die Zahlen zeigen die <strong>Bewegungen in diesem Zeitraum</strong>, nicht die Bestände.
+      Liegen die Eröffnungsbuchungen außerhalb, können Werte negativ sein — das ist dann kein Fehler.
+    </p>
+  }
+
   @if (anzahlBuchungen() === 0) {
     <div class="karte">
-      <p>Noch keine Buchungen erfasst.</p>
+      <p>
+        {{ istGefiltert() ? 'Keine Buchungen in diesem Zeitraum.' : 'Noch keine Buchungen erfasst.' }}
+      </p>
     </div>
   } @else {
     <div class="karte ergebnis" [class.verlust]="ergebnis() < 0">
       <span class="beschriftung">
-        {{ ergebnis() >= 0 ? 'Überschuss' : 'Fehlbetrag' }} im laufenden Kegeljahr
+        {{ ergebnis() >= 0 ? 'Überschuss' : 'Fehlbetrag' }}
+        {{ istGefiltert() ? 'im gewählten Zeitraum' : 'im laufenden Kegeljahr' }}
       </span>
       <span class="wert">{{ euro(ergebnis()) }} €</span>
     </div>
@@ -34,7 +67,7 @@
             <th>Bezeichnung</th>
             <th class="zahl">Soll</th>
             <th class="zahl">Haben</th>
-            <th class="zahl">Saldo</th>
+            <th class="zahl">{{ istGefiltert() ? 'Bewegung' : 'Saldo' }}</th>
           </tr>
           </thead>
           <tbody>
@@ -60,6 +93,7 @@
 
     <div class="karte probe" [class.warnung]="!probe().stimmt">
       <h2>Gegenprobe</h2>
+
       <dl class="bilanz">
         <div>
           <dt>Vermögen</dt>
@@ -77,11 +111,12 @@
 
       @if (probe().stimmt) {
         <p class="ok">
-          Die Bilanz geht auf: Vermögen entspricht Verbindlichkeiten zuzüglich Vereinsvermögen.
+          Soll und Haben gleichen sich aus: Vermögen entspricht Verbindlichkeiten zuzüglich
+          Vereinsvermögen.
         </p>
       } @else {
         <p>
-          Die Bilanz weicht um {{ euro(probe().differenz) }} € ab.
+          Die Gegenprobe weicht um {{ euro(probe().differenz) }} € ab.
           @if (probe().eroeffnungsrest !== 0) {
             Auf dem Eröffnungsbilanzkonto stehen noch {{ euro(probe().eroeffnungsrest) }} € —
               beim Jahreswechsel wurden vermutlich nicht alle Posten übernommen.

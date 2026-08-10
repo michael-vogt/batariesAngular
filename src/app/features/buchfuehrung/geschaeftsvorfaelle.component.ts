@@ -9,6 +9,7 @@ import {
 } from '../../core/kegelverein/accounting.logic';
 import { aktuellerStatus, istGastkegler } from '../../core/kegelverein/mitglied.util';
 import { Mitglied } from '../../core/kegelverein/kegelverein.models';
+import { euro } from '../../shared/format.util';
 
 type Vorgang = 'beitraege' | 'einnahmen' | 'restguthaben' | 'geburtstag';
 
@@ -21,6 +22,9 @@ const HEUTE = () => new Date().toISOString().slice(0, 10);
   styleUrl: './geschaeftsvorfaelle.component.scss',
 })
 export class GeschaeftsvorfaelleComponent {
+  // Formatierung zentral aus shared/format.util — als Feld gebunden,
+  // damit die Templates darauf zugreifen können.
+  protected readonly euro = euro;
   private readonly accounting = inject(AccountingService);
   private readonly mitgliederService = inject(MitgliederService);
   protected readonly daten = inject(VereinsdatenService);
@@ -83,10 +87,14 @@ export class GeschaeftsvorfaelleComponent {
   // ---------------------------------------------------------------
 
   protected readonly einnahmeDatum = signal(HEUTE());
-  /** Eingegebene Beträge je Mitglieds-id. */
+  /**
+   * Eingegebene Beträge je Mitglieds-id. Bewusst `number | undefined`:
+   * für die meisten Mitglieder existiert kein Eintrag, und ein Typ, der
+   * das verschweigt, führt zu falschen Annahmen im Template.
+   */
   protected readonly zahlungen = signal<Record<string, number | undefined>>({});
 
-  /** Eingetragener Betrag oder null, wenn nichts erfasst wurde */
+  /** Eingetragener Betrag oder null, wenn nichts erfasst wurde. */
   protected zahlungVon(mitgliedId: string): number | null {
     return this.zahlungen()[mitgliedId] ?? null;
   }
@@ -98,7 +106,7 @@ export class GeschaeftsvorfaelleComponent {
         mitglied: m,
         offen: finanzen.find((f) => f.mitgliedId === m.id)?.offeneForderungenGesamt ?? 0,
       }))
-      .filter((z) => z.offen > 0 || (this.zahlungen()[z.mitglied.id] ?? 0) > 0)
+      .filter((z) => z.offen > 0 || (this.zahlungVon(z.mitglied.id) ?? 0) > 0)
       .sort((a, b) => b.offen - a.offen);
   });
 
@@ -119,10 +127,10 @@ export class GeschaeftsvorfaelleComponent {
     const eintraege = Object.entries(this.zahlungen())
       .filter((eintrag): eintrag is [string, number] => (eintrag[1] ?? 0) > 0)
       .map(([id, betrag]) => ({
-        mitglied: this.mitglieder().find((m) => m.id === id)!,
+        mitglied: this.mitglieder().find((m) => m.id === id),
         betrag,
       }))
-      .filter((z) => !!z.mitglied);
+      .filter((z): z is { mitglied: Mitglied; betrag: number } => !!z.mitglied);
 
     if (eintraege.length === 0) return;
     if (!confirm(`Zahlungseingänge über ${this.euro(this.zahlungSumme())} € buchen?`)) return;
@@ -178,13 +186,15 @@ export class GeschaeftsvorfaelleComponent {
 
   protected readonly geburtstagDatum = signal(HEUTE());
   protected readonly ausrichterId = signal('');
-  /** Zusatzpersonen je Gast-Mitglieds-id; Eintrag = nimmt teil. */
+  /** Zusatzpersonen je Gast-Mitglieds-id; vorhandener Eintrag = nimmt teil. */
   protected readonly gaeste = signal<Record<string, number | undefined>>({});
 
+  /** Zusatzpersonen eines Teilnehmers, 0 wenn nicht erfasst. */
   protected zusatzVon(mitgliedId: string): number {
     return this.gaeste()[mitgliedId] ?? 0;
   }
 
+  /** Umlagebetrag eines Teilnehmers: 10 € je Person inklusive ihm selbst. */
   protected umlageFuer(mitgliedId: string): number {
     return 10 * (this.zusatzVon(mitgliedId) + 1);
   }
@@ -217,10 +227,12 @@ export class GeschaeftsvorfaelleComponent {
 
   protected umlageBuchen(): void {
     const ausrichter = this.mitglieder().find((m) => m.id === this.ausrichterId());
-    const eintraege = Object.entries(this.gaeste()).map(([id, zusatz]) => ({
-      mitglied: this.mitglieder().find((m) => m.id === id)!,
-      anzahlZusatzpersonen: zusatz ?? 0,
-    }));
+    const eintraege = Object.entries(this.gaeste())
+      .map(([id, zusatz]) => ({
+        mitglied: this.mitglieder().find((m) => m.id === id),
+        anzahlZusatzpersonen: zusatz ?? 0,
+      }))
+      .filter((z): z is { mitglied: Mitglied; anzahlZusatzpersonen: number } => !!z.mitglied);
 
     if (!ausrichter || eintraege.length === 0) return;
     if (
@@ -240,10 +252,6 @@ export class GeschaeftsvorfaelleComponent {
 
   protected name(m: Mitglied): string {
     return m.name;
-  }
-
-  protected euro(betrag: number): string {
-    return betrag.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
   private fertig(text: string): void {

@@ -62,3 +62,25 @@
   font-size: 1.125rem;
   font-variant-numeric: tabular-nums;
 }
+
+.zeitraum {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--abstand-3);
+}
+
+.zeitraum label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--abstand-1);
+  font-size: 0.8125rem;
+  color: var(--farbe-text-leise);
+}
+
+/* Deutlich sichtbar, weil die Zahlen bei aktivem Filter etwas anderes
+   bedeuten als sonst — das ist leicht zu übersehen. */
+.zeitraum-hinweis {
+  margin-bottom: var(--abstand-6);
+  max-width: 60rem;
+}
