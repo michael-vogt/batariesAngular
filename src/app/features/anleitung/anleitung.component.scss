@@ -1,0 +1,152 @@
+/* Die Anleitung ist ein Fließtext-Dokument, kein Formular. Die Gestaltung
+   orientiert sich an der PDF-Fassung: begrenzte Zeilenlänge, ruhige
+   Abstände, Tabellen als Träger der eigentlichen Information. */
+
+.seiten-kopf {
+  align-items: flex-start;
+}
+
+.seiten-kopf .hinweis {
+  margin: var(--abstand-1) 0 0;
+}
+
+.dokument {
+  /* Rund 80 Zeichen je Zeile — darüber wird Fließtext mühsam zu lesen. */
+  max-width: 52rem;
+  padding: var(--abstand-6);
+  line-height: 1.6;
+}
+
+.dokument h2 {
+  margin: var(--abstand-8) 0 var(--abstand-3);
+  padding-bottom: var(--abstand-2);
+  border-bottom: 1px solid var(--farbe-rand);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--farbe-akzent);
+}
+
+.dokument > h2:first-of-type {
+  margin-top: 0;
+}
+
+.dokument h3 {
+  margin: var(--abstand-6) 0 var(--abstand-2);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.dokument p {
+  margin: 0 0 var(--abstand-3);
+}
+
+.dokument ul,
+.dokument ol {
+  margin: 0 0 var(--abstand-3);
+  padding-left: var(--abstand-6);
+}
+
+.dokument li {
+  margin-bottom: var(--abstand-1);
+}
+
+.dokument table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 var(--abstand-4);
+  font-size: 0.9375rem;
+}
+
+.dokument th {
+  background: var(--farbe-akzent-hell);
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 1px solid var(--farbe-rand);
+}
+
+.dokument th,
+.dokument td {
+  padding: var(--abstand-2) var(--abstand-3);
+  border-bottom: 1px solid var(--farbe-rand);
+  vertical-align: top;
+}
+
+.dokument code {
+  padding: 0 var(--abstand-1);
+  border-radius: 3px;
+  background: var(--farbe-flaeche);
+  font-family: var(--schrift-zahl);
+  font-size: 0.875em;
+}
+
+/* Markdown-Zitate werden für Warnhinweise verwendet */
+.dokument blockquote {
+  margin: 0 0 var(--abstand-4);
+  padding: var(--abstand-3) var(--abstand-4);
+  border-left: 3px solid var(--farbe-warnung);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: var(--farbe-warnung-hell);
+  color: var(--farbe-warnung);
+}
+
+.dokument blockquote p {
+  margin: 0;
+}
+
+.dokument hr {
+  height: 0;
+  margin: var(--abstand-8) 0;
+  border: none;
+  border-top: 1px solid var(--farbe-rand);
+}
+
+.drucken {
+  flex-shrink: 0;
+}
+
+/* ---------------------------------------------------------------
+   Druckausgabe
+   ---------------------------------------------------------------
+   Über den Druckdialog entsteht damit eine Fassung, die der
+   mitgelieferten PDF-Datei nahekommt: ohne Navigation und Knopf,
+   auf ganzer Seitenbreite, mit sinnvollen Umbrüchen. */
+@media print {
+  :host {
+    color: #000;
+  }
+
+  .seite {
+    max-width: none;
+    padding: 0;
+  }
+
+  .dokument {
+    max-width: none;
+    padding: 0;
+    border: none;
+    background: none;
+  }
+
+  .drucken {
+    display: none;
+  }
+
+  .dokument h2,
+  .dokument h3 {
+    /* Überschriften nicht allein am Seitenende stehen lassen */
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .dokument table,
+  .dokument blockquote {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .dokument th {
+    background: #eef2ee !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

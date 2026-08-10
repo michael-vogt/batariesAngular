@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FileStorageService } from '../../core/kegelverein/persistenz/file-storage.service';
 import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
 import {
@@ -18,7 +18,8 @@ type Phase = 'leer' | 'geprueft' | 'speichert' | 'fertig' | 'fehler';
  */
 @Component({
   selector: 'app-legacy-import',
-  templateUrl: './legacy-import.component.html'
+  templateUrl: './legacy-import.component.html',
+  styleUrl: './legacy-import.component.scss',
 })
 export class LegacyImportComponent {
   protected readonly storage = inject(FileStorageService);

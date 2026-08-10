@@ -179,3 +179,13 @@
   color: var(--farbe-soll);
   border-color: var(--farbe-soll);
 }
+
+/* Beim Drucken gehört die Bedienung des Programms nicht aufs Papier —
+   relevant vor allem für die Anleitungsseite. */
+@media print {
+  .kopfleiste,
+  .lade-hinweis,
+  .migration {
+    display: none;
+  }
+}

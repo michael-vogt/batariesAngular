@@ -8,8 +8,13 @@ import { KontenUebersichtComponent } from './features/buchfuehrung/konten-uebers
 import { GeschaeftsvorfaelleComponent } from './features/buchfuehrung/geschaeftsvorfaelle.component';
 import { JahresabschlussComponent } from './features/buchfuehrung/jahresabschluss.component';
 import { HauptnavigationComponent } from './features/hauptnavigation/hauptnavigation.component';
+import { AnleitungComponent } from './features/anleitung/anleitung.component';
 
 export const routes: Routes = [
+  {
+    path: 'anleitung',
+    component: AnleitungComponent
+  },
   {
     path: 'abrechnung',
     loadComponent: () =>

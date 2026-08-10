@@ -1,0 +1,52 @@
+.karte {
+  margin-bottom: var(--abstand-4);
+}
+
+.karte h2 {
+  margin: 0 0 var(--abstand-3);
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+.karte p {
+  margin: 0 0 var(--abstand-3);
+  max-width: 52rem;
+}
+
+.karte p:last-child {
+  margin-bottom: 0;
+}
+
+.jahre {
+  margin: 0 0 var(--abstand-3);
+  padding-left: var(--abstand-4);
+}
+
+.jahre li {
+  margin-bottom: var(--abstand-1);
+}
+
+/* Warnungen können zahlreich sein — begrenzte Höhe mit eigenem Bildlauf,
+   damit der Speichern-Knopf erreichbar bleibt. */
+.meldungen {
+  max-height: 16rem;
+  overflow-y: auto;
+  margin: 0;
+  padding-left: var(--abstand-4);
+  font-size: 0.875rem;
+  color: var(--farbe-text-leise);
+}
+
+.meldungen li {
+  margin-bottom: var(--abstand-1);
+}
+
+input[type='file'] {
+  display: block;
+  margin-bottom: var(--abstand-3);
+}
+
+code {
+  font-family: var(--schrift-zahl);
+  font-size: 0.875em;
+}

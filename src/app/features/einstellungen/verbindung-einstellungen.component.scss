@@ -1,0 +1,44 @@
+.karte h2 {
+  margin: 0 0 var(--abstand-3);
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+/* Eingabefelder untereinander statt nebeneinander: hier werden zwei
+   zusammengehörige Werte einmalig eingetragen, keine Tabelle gefüllt. */
+.formular {
+  display: grid;
+  gap: var(--abstand-4);
+  max-width: 32rem;
+}
+
+.formular label {
+  display: grid;
+  gap: var(--abstand-1);
+  font-size: 0.8125rem;
+  color: var(--farbe-text-leise);
+}
+
+.formular small {
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.formular button {
+  justify-self: start;
+}
+
+.verbunden {
+  margin: 0 0 var(--abstand-3);
+}
+
+.karte > .hinweis,
+.karte > .fehler {
+  margin: var(--abstand-3) 0 0;
+  max-width: 40rem;
+}
+
+code {
+  font-family: var(--schrift-zahl);
+  font-size: 0.875em;
+}

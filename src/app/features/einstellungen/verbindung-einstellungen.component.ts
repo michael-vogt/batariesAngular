@@ -1,4 +1,4 @@
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PhpApiAdapter } from '../../core/kegelverein/persistenz/php-api-adapter';
 import { FileStorageService } from '../../core/kegelverein/persistenz/file-storage.service';
@@ -8,11 +8,15 @@ import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service
  * Einmalige Eingabe der Serverzugangsdaten. Nach erfolgreichem Test
  * merkt sich PhpApiAdapter die Daten im localStorage, sodass dieses
  * Formular danach nur noch zum Ändern/Trennen gebraucht wird.
+ *
+ * Direkt im Anschluss werden die Vereinsdaten geladen — sonst wären die
+ * Feature-Seiten bis zum nächsten Neuladen der Anwendung leer.
  */
 @Component({
   selector: 'app-verbindung-einstellungen',
   imports: [FormsModule],
-  templateUrl: 'verbindung-einstellungen.component.html'
+  templateUrl: './verbindung-einstellungen.component.html',
+  styleUrl: './verbindung-einstellungen.component.scss',
 })
 export class VerbindungEinstellungenComponent {
   protected readonly adapter = inject(PhpApiAdapter);
@@ -46,6 +50,7 @@ export class VerbindungEinstellungenComponent {
       // Danach die eigentlichen Vereinsdaten in den Store laden, damit
       // die Feature-Seiten ohne Neuladen der Anwendung nutzbar sind.
       await this.daten.initialisieren();
+
       this.apiKey.set('');
     } catch (e) {
       this.fehler.set(e instanceof Error ? e.message : 'Unbekannter Fehler');

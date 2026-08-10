@@ -1,4 +1,4 @@
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
 import { FileStorageService } from '../../core/kegelverein/persistenz/file-storage.service';
@@ -37,6 +37,7 @@ export class HauptnavigationComponent {
   ];
 
   protected readonly weitere: NavPunkt[] = [
+    { pfad: '/anleitung', titel: 'Anleitung' },
     { pfad: '/import', titel: 'Altdaten importieren' },
     { pfad: '/einstellungen', titel: 'Einstellungen' },
   ];

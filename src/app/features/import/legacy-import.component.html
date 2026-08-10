@@ -1,83 +1,102 @@
-<section class="import">
-  <h2>Altdaten importieren</h2>
+<div class="seite">
+  <header class="seiten-kopf">
+    <h1>Altdaten importieren</h1>
+  </header>
 
   @if (storage.status() !== 'verbunden') {
-    <p class="fehler">
-      Keine Serververbindung — bitte zuerst unter Einstellungen verbinden.
-    </p>
+    <div class="karte">
+      <p class="fehler">
+        Keine Serververbindung — bitte zuerst unter Einstellungen verbinden.
+      </p>
+    </div>
   } @else {
-    <p class="hinweis">
-      Datei <code>daten.json</code> der alten Anwendung auswählen. Die Daten werden
-      zunächst nur geprüft und angezeigt, gespeichert wird erst auf Knopfdruck.
-    </p>
+    <div class="karte">
+      <p class="hinweis">
+        Datei <code>daten.json</code> der alten Anwendung auswählen. Die Daten werden zunächst
+        nur geprüft und angezeigt, gespeichert wird erst auf Knopfdruck.
+      </p>
 
-    <input type="file" accept="application/json,.json" (change)="dateiGewaehlt($event)" />
+      <input type="file" accept="application/json,.json" (change)="dateiGewaehlt($event)" />
 
-    @if (fehlertext(); as text) {
-      <p class="fehler">{{ text }}</p>
-    }
+      @if (fehlertext(); as text) {
+        <p class="fehler">{{ text }}</p>
+      }
+    </div>
 
     @if (ergebnis(); as erg) {
-      <h3>Vorschau</h3>
-      <p>
-        <strong>{{ erg.mitglieder.length }}</strong> Mitglieder (vereinsweit, jahresübergreifend
-        zusammengeführt)
-      </p>
-      <ul class="jahre">
-        @for (kj of erg.kegeljahre; track kj.id) {
-          <li>
-            <strong>{{ kj.bezeichnung }}</strong>
-            ({{ kj.startDatum }} bis {{ kj.endDatum }}) —
-            {{ kj.buchungen.length }} Buchungen,
-            {{ kj.kegelabende.length }} Kegelabende
-          </li>
-        }
-      </ul>
+      <div class="karte">
+        <h2>Vorschau</h2>
 
-      <p>
-        Buchungen ohne Mitgliedszuordnung: {{ buchungenOhneMitglied() }}
-        <span class="hinweis">
-              (normal für allgemeine Vereinsbuchungen wie Bahnmiete)
-            </span>
-      </p>
+        <p>
+          <strong>{{ erg.mitglieder.length }}</strong> Mitglieder, vereinsweit und
+          jahresübergreifend zusammengeführt
+        </p>
+
+        <ul class="jahre">
+          @for (kj of erg.kegeljahre; track kj.id) {
+            <li>
+              <strong>{{ kj.bezeichnung }}</strong>
+              <span class="leise">({{ kj.startDatum }} bis {{ kj.endDatum }})</span> —
+              {{ kj.buchungen.length }} Buchungen, {{ kj.kegelabende.length }} Kegelabende
+            </li>
+          }
+        </ul>
+
+        <p>
+          Buchungen ohne Mitgliedszuordnung: <strong>{{ buchungenOhneMitglied() }}</strong>
+          <span class="hinweis">— normal für allgemeine Vereinsbuchungen wie Bahnmiete</span>
+        </p>
+      </div>
 
       @if (erg.warnungen.length) {
-        <h4>Warnungen ({{ erg.warnungen.length }})</h4>
-        <p class="hinweis">
-          Kein Blocker — die Daten werden trotzdem importiert. Meist verweisen sie
-          auf ausgetretene Mitglieder, die noch in alten Buchungen auftauchen.
-        </p>
-        <ul class="warnungen">
-          @for (w of erg.warnungen; track w) {
-            <li>{{ w }}</li>
-          }
-        </ul>
+        <div class="karte">
+          <h2>Warnungen ({{ erg.warnungen.length }})</h2>
+          <p class="hinweis">
+            Kein Hindernis — die Daten werden trotzdem importiert. Meist verweisen sie auf
+            ausgetretene Mitglieder, die noch in alten Buchungen auftauchen.
+          </p>
+          <ul class="meldungen">
+            @for (w of erg.warnungen; track w) {
+              <li>{{ w }}</li>
+            }
+          </ul>
+        </div>
       }
 
-      @if (abweichungen().length) {
-        <h4>Abweichende Spielabend-Auswertungen ({{ abweichungen().length }})</h4>
-        <p class="hinweis">
-          Die in den Altdaten gespeicherten Strafen passen hier nicht zu den
-          zugrundeliegenden Runden. Übernommen werden die neu berechneten Werte.
-        </p>
-        <ul class="warnungen">
-          @for (a of abweichungen(); track a) {
-            <li>{{ a }}</li>
-          }
-        </ul>
-      } @else {
-        <p class="ok">
-          Spielabend-Auswertungen stimmen mit den Altdaten überein.
-        </p>
-      }
+      <div class="karte">
+        <h2>Spielabend-Auswertungen</h2>
+        @if (abweichungen().length) {
+          <p class="hinweis">
+            Die in den Altdaten gespeicherten Strafen passen bei {{ abweichungen().length }}
+            Einträgen nicht zu den zugrundeliegenden Runden. Übernommen werden die neu
+            berechneten Werte.
+          </p>
+          <ul class="meldungen">
+            @for (a of abweichungen(); track a) {
+              <li>{{ a }}</li>
+            }
+          </ul>
+        } @else {
+          <p class="ok">Alle Auswertungen stimmen mit den Altdaten überein.</p>
+        }
+      </div>
 
-      <button type="button" [disabled]="phase() === 'speichert'" (click)="speichern()">
-        {{ phase() === 'speichert' ? 'Speichere…' : 'Auf Server speichern' }}
-      </button>
-    }
+      <div class="karte">
+        <button
+          type="button"
+          class="primaer"
+          [disabled]="phase() === 'speichert'"
+          (click)="speichern()"
+        >
+          {{ phase() === 'speichert' ? 'Speichere…' : 'Auf Server speichern' }}
+        </button>
 
-    @if (phase() === 'fertig') {
-      <p class="ok">Import abgeschlossen — {{ gespeicherteJahre() }} Kegeljahr(e) gespeichert.</p>
+        @if (phase() === 'fertig') {
+          <p class="ok">
+            Import abgeschlossen — {{ gespeicherteJahre() }} Kegeljahr(e) gespeichert.
+          </p>
+        }
+      </div>
     }
   }
-</section>
+</div>

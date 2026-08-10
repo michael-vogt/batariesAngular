@@ -1,42 +1,58 @@
-<section class="verbindung">
-  <h2>Serververbindung</h2>
+<div class="seite">
+  <header class="seiten-kopf">
+    <h1>Einstellungen</h1>
+  </header>
 
-  @if (storage.status() === 'verbunden') {
-    <p class="ok">Verbunden mit {{ adapter.aktiveBaseUrl() }}</p>
-    <button type="button" (click)="trennen()">Verbindung trennen</button>
-  } @else {
-    <label>
-      API-Adresse
-      <input
-        type="text"
-        name="baseUrl"
-        inputmode="url"
-        placeholder="api/api.php"
-        [ngModel]="baseUrl()"
-        (ngModelChange)="baseUrl.set($event)"
-      />
-      <small class="leise">
-        Relativ (z.B. <code>api/api.php</code>), wenn die App auf demselben Server liegt - sonst vollständig mit https://
-      </small>
-    </label>
+  <div class="karte">
+    <h2>Serververbindung</h2>
 
-    <label>
-      API-Key
-      <input
-        type="password"
-        name="apiKey"
-        autocomplete="current-password"
-        [ngModel]="apiKey()"
-        (ngModelChange)="apiKey.set($event)"
-      />
-    </label>
+    @if (storage.status() === 'verbunden') {
+      <p class="ok verbunden">
+        Verbunden mit <code>{{ adapter.aktiveBaseUrl() }}</code>
+      </p>
+      <button type="button" (click)="trennen()">Verbindung trennen</button>
+      <p class="hinweis">
+        Nach dem Trennen sind die Vereinsdaten erst wieder erreichbar, wenn Adresse und
+        Schlüssel erneut eingetragen wurden.
+      </p>
+    } @else {
+      <div class="formular">
+        <label>
+          API-Adresse
+          <input
+            type="text"
+            name="baseUrl"
+            inputmode="url"
+            placeholder="api/api.php"
+            [ngModel]="baseUrl()"
+            (ngModelChange)="baseUrl.set($event)"
+          />
+          <small class="leise">
+            Relativ (z.B. <code>api/api.php</code>), wenn die Anwendung auf demselben Server
+            liegt — sonst vollständig mit https://
+          </small>
+        </label>
 
-    <button type="button" [disabled]="laeuft()" (click)="verbinden()">
-      {{ laeuft() ? 'Verbinde…' : 'Verbinden' }}
-    </button>
+        <label>
+          API-Key
+          <input
+            type="password"
+            name="apiKey"
+            autocomplete="current-password"
+            [ngModel]="apiKey()"
+            (ngModelChange)="apiKey.set($event)"
+          />
+          <small class="leise">Steht in der Datei <code>config.php</code> auf dem Server.</small>
+        </label>
 
-    @if (fehler()) {
-      <p class="fehler">{{ fehler() }}</p>
+        <button type="button" class="primaer" [disabled]="laeuft()" (click)="verbinden()">
+          {{ laeuft() ? 'Verbinde…' : 'Verbinden' }}
+        </button>
+      </div>
+
+      @if (fehler()) {
+        <p class="fehler">{{ fehler() }}</p>
+      }
     }
-  }
-</section>
+  </div>
+</div>

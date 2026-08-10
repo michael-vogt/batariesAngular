@@ -1,0 +1,576 @@
+<div class="seite anleitung">
+  <header class="seiten-kopf">
+    <div>
+      <h1>Bedienung</h1>
+      <p class="hinweis">Anleitung zur täglichen Arbeit mit der Vereinsverwaltung</p>
+    </div>
+    <button type="button" class="drucken" (click)="drucken()">Drucken oder als PDF sichern</button>
+  </header>
+
+  <article class="karte dokument">
+    <p>Diese Anleitung beschreibt die tägliche Arbeit mit der Anwendung:
+      Kegelabende erfassen, Beiträge buchen, abrechnen und das Kegeljahr
+      abschließen.</p>
+    <hr />
+    <h2 id="grundlegendes">Grundlegendes</h2>
+    <h3 id="speichern">Speichern</h3>
+    <p>Die Anwendung speichert <strong>nicht</strong> automatisch.
+      Änderungen bleiben zunächst nur im Browser und wandern erst auf den
+      Server, wenn du auf <strong>„Änderungen speichern“</strong> drückst. Der
+      Knopf steht oben rechts auf jeder Seite und ist nur aktiv, wenn es etwas
+      zu speichern gibt.</p>
+    <p>Zwei Anzeigen helfen dabei:</p>
+    <ul>
+      <li>Ein oranger Punkt in der oberen Leiste bedeutet: es gibt
+        ungespeicherte Änderungen.</li>
+      <li>Daneben erscheint dann der Knopf <strong>„Verwerfen“</strong>, der
+        alles seit dem letzten Speichern rückgängig macht und den Serverstand
+        neu lädt.</li>
+    </ul>
+    <p>Das ist bewusst so: Bei jedem Speichern legt der Server zusätzlich
+      eine Sicherungskopie an. Automatisches Speichern nach jedem Tastendruck
+      würde diese Sicherungen nach kurzer Zeit unbrauchbar machen.</p>
+    <blockquote>
+      <p><strong>Wichtig:</strong> Schließt du den Browser ohne zu speichern,
+        sind die Änderungen weg.</p>
+    </blockquote>
+    <h3 id="kegeljahr-wechseln">Kegeljahr wechseln</h3>
+    <p>Gibt es mehr als ein Kegeljahr, steht oben rechts eine Auswahlliste.
+      Der Wechsel verwirft ungespeicherte Änderungen — die Anwendung fragt
+      vorher nach.</p>
+    <h3 id="darstellung-umschalten">Darstellung umschalten</h3>
+    <p>Der kleine Knopf <code>&gt;_</code> in der oberen Leiste wechselt
+      zwischen hellem Erscheinungsbild und dunklem Terminal-Thema. Die Wahl
+      bleibt gespeichert.</p>
+    <hr />
+    <h2 id="einmalige-einrichtung">Einmalige Einrichtung</h2>
+    <p>Beim ersten Aufruf ist die Anwendung noch nicht mit dem Server
+      verbunden. In der oberen Leiste steht dann <strong>„Nicht
+        verbunden“</strong>.</p>
+    <ol type="1">
+      <li><strong>Einstellungen</strong> öffnen.</li>
+      <li><strong>API-Adresse</strong> eintragen:
+        <code>api/api.php</code></li>
+      <li><strong>API-Key</strong> eintragen (steht in der Datei
+        <code>config.php</code> auf dem Server).</li>
+      <li><strong>Verbinden</strong> drücken.</li>
+    </ol>
+    <p>Die Zugangsdaten merkt sich der Browser. Beim nächsten Start
+      verbindet sich die Anwendung von selbst. Zum Wechseln auf einen anderen
+      Server oder Browser trägst du sie erneut ein.</p>
+    <hr />
+    <h2 id="mitglieder">Mitglieder</h2>
+    <p>Die Seite zeigt zwei bis drei Gruppen:
+      <strong>Vereinsmitglieder</strong>, <strong>Gastkegler</strong> und —
+      sofern vorhanden — <strong>Ausgetreten</strong>. Jede Gruppe hat ihre
+      eigene Summenzeile, damit Gästeforderungen die Vereinssumme nicht
+      verfälschen.</p>
+    <h3 id="mitglied-aufnehmen">Mitglied aufnehmen</h3>
+    <p>Unten Name, Status, optional das Amt und das Eintrittsdatum
+      eintragen, dann <strong>Aufnehmen</strong>.</p>
+    <p>Das Eintrittsdatum ist wichtiger, als es aussieht: Beiträge werden
+      anhand des Status <strong>zum jeweiligen Buchungsdatum</strong>
+      berechnet. Wer im März eintritt, zahlt ab März.</p>
+    <p>Gleiche Namen werden abgewiesen — auch bei abweichender Schreibweise.
+      „Müller“, „mueller“ und „ Müller “ gelten als dieselbe Person.</p>
+    <h3 id="status-ändern">Status ändern</h3>
+    <p>Die Auswahlliste in der Tabelle setzt den neuen Status <strong>ab
+      heute</strong>. Für rückwirkende Änderungen den Verlauf verwenden.</p>
+    <table>
+      <thead>
+      <tr class="header">
+        <th>Status</th>
+        <th>Bedeutung</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr class="odd">
+        <td>aktiv</td>
+        <td>volles Mitglied, zahlt den vollen Beitrag</td>
+      </tr>
+      <tr class="even">
+        <td>passiv</td>
+        <td>zahlt den ermäßigten Beitrag</td>
+      </tr>
+      <tr class="odd">
+        <td>Gastkegler</td>
+        <td>zahlt keinen Beitrag, aber Strafen aus Spielabenden</td>
+      </tr>
+      <tr class="even">
+        <td>ausgetreten</td>
+        <td>zahlt nichts mehr, bleibt mit seiner Historie erhalten</td>
+      </tr>
+      </tbody>
+    </table>
+    <h3 id="statusverlauf">Statusverlauf</h3>
+    <p>Über <strong>„Verlauf“</strong> klappt die Historie eines Mitglieds
+      auf. Dort lassen sich Statuswechsel mit beliebigem Datum eintragen —
+      auch rückwirkend — und falsche Einträge wieder entfernen. Der letzte
+      verbleibende Eintrag kann nicht gelöscht werden.</p>
+    <h3 id="entfernen">Entfernen</h3>
+    <p>Für Austritte den Status auf „ausgetreten“ setzen,
+      <strong>nicht</strong> entfernen. Ein gelöschtes Mitglied verliert die
+      Verbindung zu seinen Buchungen und Spielabenden. Endgültiges Entfernen
+      ist nur für Fehleingaben gedacht.</p>
+    <hr />
+    <h2 id="kegelabende">Kegelabende</h2>
+    <h3 id="abend-anlegen">Abend anlegen</h3>
+    <p>Auf der Übersichtsseite Datum und optional den Ort eintragen, dann
+      <strong>Anlegen</strong>. Alle aktiven Mitglieder werden automatisch als
+      anwesend eingetragen.</p>
+    <p>Die Statusspalte zeigt, ob ein Abend bereits
+      <strong>abgerechnet</strong> oder noch <strong>offen</strong> ist.</p>
+    <h3 id="teilnehmer">Teilnehmer</h3>
+    <p>In der Detailansicht (Klick auf das Datum):</p>
+    <ul>
+      <li><strong>Anwesend</strong> abhaken oder entfernen.</li>
+      <li><strong>Verspätung, Pumpen, Neuner, Eingeholt, Schnaps</strong> je
+        Teilnehmer eintragen.</li>
+      <li>Weitere Mitglieder über die Auswahlliste <strong>hinzufügen</strong>
+        — etwa passive Mitglieder, die diesmal mitkegeln.</li>
+      <li>Neue Gäste über <strong>„Neuer Gastkegler“</strong> anlegen; sie
+        werden dabei automatisch als Mitglied mit dem Status „Gastkegler“
+        geführt.</li>
+    </ul>
+    <h3 id="spielrunden-erfassen">Spielrunden erfassen</h3>
+    <p>Oben ein Spiel auswählen, dann <strong>„Runde hinzufügen“</strong>.
+      Es entsteht eine Spalte im Raster, in der alle Anwesenden zunächst als
+      „mitgespielt“ stehen.</p>
+    <p>Ein Klick auf eine Zelle schaltet weiter:</p>
+    <table>
+      <thead>
+      <tr class="header">
+        <th>Zeichen</th>
+        <th>Bedeutung</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr class="odd">
+        <td><code>·</code></td>
+        <td>nicht dabei</td>
+      </tr>
+      <tr class="even">
+        <td><code>○</code></td>
+        <td>mitgespielt</td>
+      </tr>
+      <tr class="odd">
+        <td><code>S</code></td>
+        <td>Sieg</td>
+      </tr>
+      <tr class="even">
+        <td><code>N</code></td>
+        <td>Niederlage</td>
+      </tr>
+      </tbody>
+    </table>
+    <p>In der Regel musst du also nur Sieger und Verlierer markieren.</p>
+    <h3 id="auswertung-und-strafen">Auswertung und Strafen</h3>
+    <p>Unten stehen Siege, Niederlagen und die Strafsumme je Teilnehmer,
+      laufend aktualisiert. Die Strafsätze:</p>
+    <table>
+      <thead>
+      <tr class="header">
+        <th>Anlass</th>
+        <th>Betrag</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr class="odd">
+        <td>Verspätung</td>
+        <td>1,00 € je Stunde</td>
+      </tr>
+      <tr class="even">
+        <td>Pumpe</td>
+        <td>0,10 € (nur bei Anwesenheit)</td>
+      </tr>
+      <tr class="odd">
+        <td>Teilnahme</td>
+        <td>0,10 €</td>
+      </tr>
+      <tr class="even">
+        <td>Niederlage</td>
+        <td>0,25 €</td>
+      </tr>
+      <tr class="odd">
+        <td>Niederlage bei Fuchsjagd oder Totenkiste</td>
+        <td>0,50 €</td>
+      </tr>
+      <tr class="even">
+        <td>Fuchsjagd, Teilnahme in einer Runde mit Sieger</td>
+        <td>0,25 €</td>
+      </tr>
+      </tbody>
+    </table>
+    <p>Sonderfälle: Reine Teilnahme an der Totenkiste ist straffrei, ebenso
+      Fuchsjagd ohne Sieger. Neuner, Eingeholt und Schnaps werden nur gezählt,
+      nicht berechnet.</p>
+    <h3 id="abrechnen">Abrechnen</h3>
+    <p><strong>„Strafen in die Buchführung übernehmen“</strong> erzeugt je
+      Teilnehmer eine Buchung: Forderungen (100) an Strafen (310).</p>
+    <p>Danach ist der Abend <strong>schreibgeschützt</strong> — Runden und
+      Statistiken lassen sich nicht mehr ändern, weil die Beträge jetzt in der
+      Buchführung stehen.</p>
+    <p>Muss doch etwas korrigiert werden:</p>
+    <ol type="1">
+      <li><strong>„Abrechnung zurücknehmen“</strong> — löscht die zugehörigen
+        Buchungen wieder.</li>
+      <li>Korrigieren.</li>
+      <li>Erneut übernehmen.</li>
+    </ol>
+    <p>Von Hand ergänzte Buchungen bleiben dabei unberührt.</p>
+    <hr />
+    <h2 id="geschäftsvorfälle">Geschäftsvorfälle</h2>
+    <p>Die vier wiederkehrenden Vorgänge, jeweils mit Vorschau vor dem
+      Buchen.</p>
+    <p>Jeder Vorgang setzt die Buchungskonten automatisch. Wer die Buchungen
+      im Journal nachvollziehen möchte, findet sie hier aufgeschlüsselt — die
+      Kontonummern stehen dort in den Spalten „Soll“ und „Haben“.</p>
+    <h3 id="der-kontenrahmen">Der Kontenrahmen</h3>
+    <table>
+      <thead>
+      <tr class="header">
+        <th>Nr.</th>
+        <th>Konto</th>
+        <th>Art</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr class="odd">
+        <td>000</td>
+        <td>Eröffnungsbilanzkonto</td>
+        <td>nur beim Jahreswechsel</td>
+      </tr>
+      <tr class="even">
+        <td>100</td>
+        <td>Forderungen</td>
+        <td>was Mitglieder schulden</td>
+      </tr>
+      <tr class="odd">
+        <td>110</td>
+        <td>Kasse</td>
+        <td>Bargeldbestand</td>
+      </tr>
+      <tr class="even">
+        <td>200</td>
+        <td>Vereinsvermögen</td>
+        <td>Eigenkapital</td>
+      </tr>
+      <tr class="odd">
+        <td>210</td>
+        <td>Restguthaben</td>
+        <td>was der Verein Mitgliedern schuldet</td>
+      </tr>
+      <tr class="even">
+        <td>220</td>
+        <td>Schulden gegenüber Dritten</td>
+        <td></td>
+      </tr>
+      <tr class="odd">
+        <td>250</td>
+        <td>GuV-Konto</td>
+        <td>Jahresergebnis, wird errechnet</td>
+      </tr>
+      <tr class="even">
+        <td>300</td>
+        <td>Beiträge</td>
+        <td>Ertrag</td>
+      </tr>
+      <tr class="odd">
+        <td>310</td>
+        <td>Strafen</td>
+        <td>Ertrag</td>
+      </tr>
+      <tr class="even">
+        <td>320</td>
+        <td>Umlagen</td>
+        <td>Ertrag</td>
+      </tr>
+      <tr class="odd">
+        <td>330</td>
+        <td>Sonstige Erträge</td>
+        <td>Ertrag</td>
+      </tr>
+      <tr class="even">
+        <td>400</td>
+        <td>Kegelbahn</td>
+        <td>Aufwand</td>
+      </tr>
+      <tr class="odd">
+        <td>410</td>
+        <td>Vereinsrunden</td>
+        <td>Aufwand</td>
+      </tr>
+      <tr class="even">
+        <td>420</td>
+        <td>Generalversammlung</td>
+        <td>Aufwand</td>
+      </tr>
+      <tr class="odd">
+        <td>430</td>
+        <td>Sonstige Aufwendungen</td>
+        <td>Aufwand</td>
+      </tr>
+      </tbody>
+    </table>
+    <h3 id="monatsbeiträge">Monatsbeiträge</h3>
+    <p>Buchungsdatum und die beiden Beitragssätze eintragen. Die Vorschau
+      zeigt, wer wie viel zahlt. Maßgeblich ist der Status <strong>zum
+        Buchungsdatum</strong> — Gastkegler und Ausgetretene bleiben außen
+      vor.</p>
+    <p><strong>Buchung je Mitglied:</strong> Forderungen (100) an Beiträge
+      (300)</p>
+    <p>Der Beitrag wird also zunächst nur als Forderung erfasst — in der
+      Kasse landet er erst beim Zahlungseingang.</p>
+    <h3 id="zahlungseingänge">Zahlungseingänge</h3>
+    <p>Die Liste zeigt alle Mitglieder mit offenen Forderungen. Betrag
+      eintragen oder über <strong>„offenen Betrag“</strong> übernehmen.</p>
+    <p>Zahlungen tilgen in dieser Reihenfolge: erst Beiträge, dann Strafen,
+      dann Umlagen. Wer mehr zahlt als offen ist, bekommt den Rest als
+      Restguthaben gutgeschrieben.</p>
+    <p><strong>Buchungen:</strong></p>
+    <table>
+      <thead>
+      <tr class="header">
+        <th>Anteil</th>
+        <th>Soll</th>
+        <th>Haben</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr class="odd">
+        <td>bis zur Höhe der offenen Forderung</td>
+        <td>Kasse (110)</td>
+        <td>Forderungen (100)</td>
+      </tr>
+      <tr class="even">
+        <td>darüber hinaus gezahlt</td>
+        <td>Kasse (110)</td>
+        <td>Restguthaben (210)</td>
+      </tr>
+      </tbody>
+    </table>
+    <h3 id="restguthaben-verrechnen">Restguthaben verrechnen</h3>
+    <p>Rechnet vorhandenes Guthaben gegen offene Forderungen auf, in
+      derselben Reihenfolge. Die Vorschau zeigt, wen es betrifft.</p>
+    <p><strong>Buchungen, je Forderungsart ein Paar:</strong></p>
+    <table>
+      <thead>
+      <tr class="header">
+        <th>Schritt</th>
+        <th>Soll</th>
+        <th>Haben</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr class="odd">
+        <td>Guthaben auflösen</td>
+        <td>Restguthaben (210)</td>
+        <td>Kasse (110)</td>
+      </tr>
+      <tr class="even">
+        <td>Forderung tilgen</td>
+        <td>Kasse (110)</td>
+        <td>Forderungen (100)</td>
+      </tr>
+      </tbody>
+    </table>
+    <p>Der Umweg über die Kasse sieht ungewöhnlich aus, ist aber gewollt: So
+      erscheint die Verrechnung im Journal wie eine Zahlung und lässt sich
+      genauso nachvollziehen. Der Kassenbestand bleibt dabei unverändert, weil
+      beide Buchungen sich aufheben.</p>
+    <h3 id="geburtstagsumlage">Geburtstagsumlage</h3>
+    <p>Ausrichter auswählen, dann die Teilnehmer anhaken. 10 € je Person;
+      über das Feld „Zusatzpersonen“ lassen sich Begleitungen erfassen. Die
+      Summe wird dem Ausrichter als Restguthaben gutgeschrieben.</p>
+    <p><strong>Buchungen:</strong></p>
+    <table>
+      <thead>
+      <tr class="header">
+        <th>Vorgang</th>
+        <th>Soll</th>
+        <th>Haben</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr class="odd">
+        <td>je Teilnehmer</td>
+        <td>Forderungen (100)</td>
+        <td>Umlagen (320)</td>
+      </tr>
+      <tr class="even">
+        <td>Gutschrift an den Ausrichter</td>
+        <td>Umlagen (320)</td>
+        <td>Restguthaben (210)</td>
+      </tr>
+      </tbody>
+    </table>
+    <hr />
+    <h2 id="journal">Journal</h2>
+    <p>Alle Buchungen des Kegeljahres, neueste zuerst.</p>
+    <p><strong>Filtern</strong> nach Text, Zeitraum, Konto und Mitglied —
+      beliebig kombinierbar. Die Summenzeile bezieht sich immer auf den
+      gesamten Filter, nicht nur auf die sichtbare Seite.</p>
+    <p><strong>Bearbeiten</strong> lädt eine Buchung in das Formular oben,
+      das dabei sichtbar den Modus wechselt. Nützlich etwa, um eine Buchung
+      nachträglich einem Mitglied zuzuordnen.</p>
+    <p><strong>Neue Buchung</strong> für alles, was kein Standardvorgang
+      ist. Hier wählst du Soll- und Habenkonto selbst. Häufige Fälle:</p>
+    <table>
+      <thead>
+      <tr class="header">
+        <th>Vorgang</th>
+        <th>Soll</th>
+        <th>Haben</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr class="odd">
+        <td>Bahnmiete bar bezahlt</td>
+        <td>Kegelbahn (400)</td>
+        <td>Kasse (110)</td>
+      </tr>
+      <tr class="even">
+        <td>Vereinsrunde bar bezahlt</td>
+        <td>Vereinsrunden (410)</td>
+        <td>Kasse (110)</td>
+      </tr>
+      <tr class="odd">
+        <td>Generalversammlung</td>
+        <td>Generalversammlung (420)</td>
+        <td>Kasse (110)</td>
+      </tr>
+      <tr class="even">
+        <td>sonstige Ausgabe</td>
+        <td>Sonstige Aufwendungen (430)</td>
+        <td>Kasse (110)</td>
+      </tr>
+      <tr class="odd">
+        <td>sonstige Einnahme</td>
+        <td>Kasse (110)</td>
+        <td>Sonstige Erträge (330)</td>
+      </tr>
+      </tbody>
+    </table>
+    <p>Für Beiträge, Zahlungen und Umlagen besser die Geschäftsvorfälle
+      nutzen, dort werden die Gegenkonten automatisch richtig gesetzt.</p>
+    <hr />
+    <h2 id="konten">Konten</h2>
+    <p>Die Kontenübersicht zeigt Vermögen, Verbindlichkeiten, Erträge und
+      Aufwendungen sowie das Jahresergebnis.</p>
+    <p>Über <strong>Datum ab / bis</strong> lässt sich ein Zeitraum
+      eingrenzen. Achtung: Dann zeigen die Zahlen die <strong>Bewegungen im
+        Zeitraum</strong>, nicht die Bestände — Werte können negativ sein, wenn
+      die Eröffnungsbuchungen außerhalb liegen. Die Anwendung weist darauf
+      hin, und die Spaltenüberschrift wechselt von „Saldo“ auf „Bewegung“.</p>
+    <p>Die <strong>Gegenprobe</strong> unten prüft, ob Vermögen den
+      Verbindlichkeiten zuzüglich Vereinsvermögen entspricht. Geht sie nicht
+      auf, fehlt eine Gegenbuchung.</p>
+    <hr />
+    <h2 id="abrechnung">Abrechnung</h2>
+    <p>Die Liste für den Kegelabend: wer schuldet was.</p>
+    <ul>
+      <li><strong>Stand</strong> legt den Stichtag fest.</li>
+      <li><strong>Ausgleich</strong> zeigt, was durch vorhandenes Restguthaben
+        gedeckt wäre. Gebucht wird dabei nichts — die tatsächliche Verrechnung
+        läuft über die Geschäftsvorfälle.</li>
+      <li><strong>Summe</strong> ist der zu zahlende Betrag.</li>
+      <li><strong>bezahlt</strong> bleibt im Ausdruck leer, zum Abhaken vor
+        Ort.</li>
+    </ul>
+    <p><strong>„PDF herunterladen“</strong> erzeugt die Liste im Querformat
+      als <code>abrechnung_JJJJMMTT.pdf</code>.</p>
+    <p>Erscheint ein Warnhinweis über nicht zugeordnete Forderungen, gehören
+      diese Beträge zu keinem Mitglied und fehlen deshalb in der Liste. Im
+      Journal lässt sich die Zuordnung nachtragen.</p>
+    <hr />
+    <h2 id="jahresabschluss">Jahresabschluss</h2>
+    <p>Am Ende des Kegeljahres:</p>
+    <ol type="1">
+      <li>Zuerst alle offenen Vorgänge buchen (letzte Beiträge,
+        Zahlungseingänge).</li>
+      <li><strong>Jahresabschluss</strong> öffnen und die vier Bestände mit
+        den eigenen Zahlen abgleichen.</li>
+      <li><strong>„Abschluss vorbereiten“</strong> — es erscheint eine
+        Vorschau aller Eröffnungsbuchungen für das Folgejahr.</li>
+      <li>Prüfen, ob das <strong>Eröffnungsbilanzkonto ausgeglichen</strong>
+        ist und ob Warnungen erscheinen.</li>
+      <li><strong>„Jahr abschließen“</strong>.</li>
+    </ol>
+    <p>Übertragen werden Kasse, Forderungen, Restguthaben und
+      Vereinsvermögen. Erträge und Aufwendungen beginnen im neuen Jahr wieder
+      bei null — sie sind im Vereinsvermögen bereits verrechnet.</p>
+    <p><strong>Eröffnungsbuchungen im neuen Jahr:</strong></p>
+    <table>
+      <colgroup>
+        <col style="width: 33%" />
+        <col style="width: 33%" />
+        <col style="width: 33%" />
+      </colgroup>
+      <thead>
+      <tr class="header">
+        <th>Bestand</th>
+        <th>Soll</th>
+        <th>Haben</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr class="odd">
+        <td>Vereinsvermögen</td>
+        <td>Eröffnungsbilanzkonto (000)</td>
+        <td>Vereinsvermögen (200)</td>
+      </tr>
+      <tr class="even">
+        <td>Kasse</td>
+        <td>Kasse (110)</td>
+        <td>Eröffnungsbilanzkonto (000)</td>
+      </tr>
+      <tr class="odd">
+        <td>Restguthaben je Mitglied</td>
+        <td>Eröffnungsbilanzkonto (000)</td>
+        <td>Restguthaben (210)</td>
+      </tr>
+      <tr class="even">
+        <td>Forderung je Mitglied</td>
+        <td>Forderungen (100)</td>
+        <td>Eröffnungsbilanzkonto (000)</td>
+      </tr>
+      </tbody>
+    </table>
+    <p>Das Eröffnungsbilanzkonto (000) ist dabei nur ein Durchgangsposten:
+      Am Ende muss es auf beiden Seiten denselben Betrag aufweisen. Genau das
+      prüft die Vorschau.</p>
+    <p>Das abgeschlossene Jahr bleibt vollständig erhalten und ist über den
+      Jahresumschalter weiter einsehbar. Der Abschluss wird sofort gespeichert
+      und lässt sich nicht rückgängig machen; auf dem Server liegt eine
+      Sicherungskopie des vorherigen Standes.</p>
+    <hr />
+    <h2 id="typische-abläufe">Typische Abläufe</h2>
+    <p><strong>Nach einem Kegelabend</strong> Kegelabende → Anlegen →
+      Teilnehmer und Anwesenheit prüfen → Runden erfassen → Strafen übernehmen
+      → <strong>Änderungen speichern</strong></p>
+    <p><strong>Monatlich</strong> Geschäftsvorfälle → Monatsbeiträge buchen
+      → Zahlungseingänge erfassen → <strong>Änderungen speichern</strong> →
+      Abrechnung → PDF für den nächsten Kegelabend</p>
+    <p><strong>Bei Ein- oder Austritt</strong> Mitglieder → aufnehmen bzw.
+      Status auf „ausgetreten“ setzen (mit korrektem Datum) →
+      <strong>Änderungen speichern</strong></p>
+    <hr />
+    <h2 id="wenn-etwas-klemmt">Wenn etwas klemmt</h2>
+    <p><strong>„Nicht verbunden“ in der Leiste</strong> Die Zugangsdaten
+      fehlen oder der Server ist nicht erreichbar. Unter Einstellungen neu
+      verbinden.</p>
+    <p><strong>Eine Zahl stimmt nicht</strong> Journal öffnen und nach dem
+      Mitglied filtern — dort steht jede einzelne Buchung mit Datum und
+      Konten.</p>
+    <p><strong>Der Kegelabend lässt sich nicht bearbeiten</strong> Er ist
+      abgerechnet. Unten „Abrechnung zurücknehmen“, korrigieren, erneut
+      übernehmen.</p>
+    <p><strong>Änderungen sind verschwunden</strong> Vermutlich wurde ohne
+      Speichern neu geladen oder das Kegeljahr gewechselt. Auf dem Server
+      liegen unter <code>backups/</code> die letzten Stände vor jedem
+      Speichern.</p>
+    <p><strong>Versehentlich etwas gelöscht</strong> Solange noch nicht
+      gespeichert wurde: „Verwerfen“ in der oberen Leiste. Danach hilft nur
+      eine Sicherungskopie vom Server.</p>
+  </article>
+</div>
