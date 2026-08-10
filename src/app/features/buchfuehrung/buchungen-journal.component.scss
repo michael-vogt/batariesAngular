@@ -46,7 +46,7 @@
 .filter {
   margin-bottom: var(--abstand-4);
   padding-bottom: var(--abstand-4);
-  border-bottom: 1px solid var(--farbe-rand);
+  border-bottom: 1px solid var(--farbe-linie);
 }
 
 .formular-zeile + .fehler,
@@ -87,7 +87,7 @@ tr.wird-bearbeitet {
   gap: var(--abstand-3);
   margin-top: var(--abstand-4);
   padding-top: var(--abstand-3);
-  border-top: 1px solid var(--farbe-rand);
+  border-top: 1px solid var(--farbe-linie);
   font-size: 0.875rem;
   color: var(--farbe-text-leise);
 }

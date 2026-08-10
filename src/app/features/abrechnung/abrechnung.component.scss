@@ -43,7 +43,7 @@ td.summe {
 /* Leere Spalte zum Abhaken: im Ausdruck breit, am Bildschirm nur angedeutet. */
 td.bezahlt {
   min-width: 5rem;
-  border-bottom: 1px solid var(--farbe-rand);
+  border-bottom: 1px solid var(--farbe-linie);
 }
 
 .karte > .hinweis {

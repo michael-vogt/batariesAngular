@@ -20,7 +20,7 @@
 .dokument h2 {
   margin: var(--abstand-8) 0 var(--abstand-3);
   padding-bottom: var(--abstand-2);
-  border-bottom: 1px solid var(--farbe-rand);
+  border-bottom: 1px solid var(--farbe-linie);
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--farbe-akzent);
@@ -58,17 +58,30 @@
 }
 
 .dokument th {
-  background: var(--farbe-akzent-hell);
+  background: var(--farbe-tabellenkopf);
   text-align: left;
   font-weight: 600;
-  border-bottom: 1px solid var(--farbe-rand);
+  /* Kopfzeile kräftiger abgesetzt als die Zeilentrenner darunter */
+  border-bottom: 2px solid var(--farbe-linie);
 }
 
 .dokument th,
 .dokument td {
   padding: var(--abstand-2) var(--abstand-3);
-  border-bottom: 1px solid var(--farbe-rand);
+  border-bottom: 1px solid var(--farbe-linie);
   vertical-align: top;
+}
+
+/* Umrandung, damit die Tabelle im dunklen Thema als Block erkennbar
+   bleibt — dort heben sich Flächen kaum voneinander ab. */
+.dokument table {
+  border: 1px solid var(--farbe-linie);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.dokument tr:last-child td {
+  border-bottom: none;
 }
 
 .dokument code {
@@ -77,6 +90,29 @@
   background: var(--farbe-flaeche);
   font-family: var(--schrift-zahl);
   font-size: 0.875em;
+}
+
+/* Links: gepunktet unterstrichen, damit sie sich vom Fließtext abheben,
+   ohne ihn zu zerschneiden.
+   Die Unterstreichung gilt bewusst für alle Zustände — Browser erlauben
+   bei :visited aus Datenschutzgründen nur Farbänderungen, kein
+   text-decoration-style. Der besuchte Zustand unterscheidet sich daher
+   allein durch die Textfarbe. */
+.dokument a {
+  color: var(--farbe-akzent);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.dokument a:visited {
+  color: var(--farbe-text);
+}
+
+.dokument a:hover,
+.dokument a:focus-visible {
+  text-decoration-style: solid;
 }
 
 /* Markdown-Zitate werden für Warnhinweise verwendet */
@@ -97,7 +133,7 @@
   height: 0;
   margin: var(--abstand-8) 0;
   border: none;
-  border-top: 1px solid var(--farbe-rand);
+  border-top: 1px solid var(--farbe-linie);
 }
 
 .drucken {
@@ -131,6 +167,21 @@
     display: none;
   }
 
+  /* Auf Papier trägt die Unterstreichung nichts bei — dort ist ohnehin
+     nichts anklickbar. Die Adresse wird stattdessen ausgeschrieben,
+     sofern sie nicht ohnehin im Linktext steht. */
+  .dokument a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .dokument a[href^='http']::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.85em;
+    color: #555;
+    word-break: break-all;
+  }
+
   .dokument h2,
   .dokument h3 {
     /* Überschriften nicht allein am Seitenende stehen lassen */
@@ -145,7 +196,7 @@
   }
 
   .dokument th {
-    background: #eef2ee !important;
+    background: #f3f1ea !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }

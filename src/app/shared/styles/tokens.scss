@@ -1,5 +1,10 @@
 /* Design-Tokens für die Vereinsverwaltung.
-   In src/styles.scss importieren:  @use './app/shared/styles/tokens';
+
+   In src/styles.scss einbinden:
+     @use './app/shared/styles/tokens';
+
+   @use statt @import: Letzteres ist in Sass abgekündigt und würde die
+   Datei bei mehrfacher Einbindung mehrfach ausgeben.
 
    Bewusst nüchtern gehalten: das hier ist ein Arbeitswerkzeug für
    Kassenwart und Schriftführer, keine Schauseite. Priorität haben
@@ -10,6 +15,12 @@
   --farbe-flaeche: #fbfaf7;
   --farbe-karte: #ffffff;
   --farbe-rand: #e2ded4;
+  /* Trennlinien in Tabellen. Eigener Wert, weil sie im dunklen Thema
+     deutlich heller sein müssen als Kartenränder: die WCAG-Formel bildet
+     Helligkeitsunterschiede nahe Schwarz schlecht ab — rechnerisch
+     gleiche Werte wirken dort viel schwächer. */
+  --farbe-linie: #ded9cd;
+  --farbe-tabellenkopf: #f3f1ea;
   --farbe-text: #23211d;
   --farbe-text-leise: #6c6759;
   --farbe-akzent: #2f5d42;
@@ -48,7 +59,9 @@
 [data-thema='bash'] {
   --farbe-flaeche: #0d1117;
   --farbe-karte: #12181f;
-  --farbe-rand: #2a333d;
+  --farbe-rand: #3a4653;
+  --farbe-linie: #44515f;
+  --farbe-tabellenkopf: #1e2a36;
   --farbe-text: #d4dae0;
   --farbe-text-leise: #8b98a5;
   --farbe-akzent: #6bd968;
@@ -125,7 +138,7 @@ table.daten {
 table.daten th,
 table.daten td {
   padding: var(--abstand-2) var(--abstand-3);
-  border-bottom: 1px solid var(--farbe-rand);
+  border-bottom: 1px solid var(--farbe-linie);
   text-align: left;
 }
 
