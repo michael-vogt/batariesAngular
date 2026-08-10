@@ -43,7 +43,8 @@ export function berechneSalden(buchungen: Buchung[]): Salden {
 
   // GuV-Saldo auf Vereinsvermögen (200) übertragen
   const guvSaldo = guvSoll - guvHaben;
-  if (guvSaldo > 0) salden['200'].soll += guvSaldo; // Verlust
+  if (guvSaldo > 0)
+    salden['200'].soll += guvSaldo; // Verlust
   else if (guvSaldo < 0) salden['200'].haben += Math.abs(guvSaldo); // Gewinn
 
   return salden;
@@ -53,7 +54,10 @@ export function berechneSalden(buchungen: Buchung[]): Salden {
 // Mitgliedsfinanzen (Forderungen/Restguthaben je Mitglied)
 // =====================================================================
 
-export function berechneMitgliedFinanzen(mitgliedId: string, buchungen: Buchung[]): MitgliedFinanzen {
+export function berechneMitgliedFinanzen(
+  mitgliedId: string,
+  buchungen: Buchung[],
+): MitgliedFinanzen {
   let offeneBeitraege = 0;
   let offeneStrafen = 0;
   let offeneUmlagen = 0;
@@ -125,8 +129,8 @@ export function journalMonatsbeitraege(params: {
   const { datum, mitglieder, beitragAktiv = 8, beitragPassiv = 1 } = params;
 
   return mitglieder
-    .filter(m => istBeitragspflichtig(m, datum))
-    .map(m =>
+    .filter((m) => istBeitragspflichtig(m, datum))
+    .map((m) =>
       erstelleBuchung({
         datum,
         sollKonto: '100',
@@ -141,10 +145,12 @@ export function journalMonatsbeitraege(params: {
 export function journalStrafen(params: {
   datum: string;
   posten: { mitglied: Mitglied; betrag: number }[];
+  /** Herkunft der Strafen; ermöglicht das spätere Zurücknehmen. */
+  kegelabendId?: string;
 }): Buchung[] {
   return params.posten
-    .filter(p => p.betrag > 0)
-    .map(p =>
+    .filter((p) => p.betrag > 0)
+    .map((p) =>
       erstelleBuchung({
         datum: params.datum,
         sollKonto: '100',
@@ -152,6 +158,7 @@ export function journalStrafen(params: {
         betrag: p.betrag,
         buchungstext: `Strafen Kegeln; ${p.mitglied.name}`,
         mitgliedId: p.mitglied.id,
+        ...(params.kegelabendId ? { kegelabendId: params.kegelabendId } : {}),
       }),
     );
 }
@@ -176,10 +183,24 @@ export function journalRestguthabenVerrechnung(params: {
     const verrechne = (betrag: number, text: string) => {
       if (betrag <= 0) return;
       out.push(
-        erstelleBuchung({ datum: params.datum, sollKonto: '210', habenKonto: '110', betrag, buchungstext: text, mitgliedId: m.id }),
+        erstelleBuchung({
+          datum: params.datum,
+          sollKonto: '210',
+          habenKonto: '110',
+          betrag,
+          buchungstext: text,
+          mitgliedId: m.id,
+        }),
       );
       out.push(
-        erstelleBuchung({ datum: params.datum, sollKonto: '110', habenKonto: '100', betrag, buchungstext: text, mitgliedId: m.id }),
+        erstelleBuchung({
+          datum: params.datum,
+          sollKonto: '110',
+          habenKonto: '100',
+          betrag,
+          buchungstext: text,
+          mitgliedId: m.id,
+        }),
       );
     };
 

@@ -106,6 +106,12 @@ export interface Buchung {
   buchungstext: string;
   /** Explizite Zuordnung statt Namens-Parsing aus buchungstext (Legacy-Problem) */
   mitgliedId?: string;
+  /**
+   * Gesetzt bei Buchungen, die aus der Strafenübernahme eines Kegelabends
+   * stammen. Dadurch lässt sich eine Übernahme gezielt zurücknehmen,
+   * ohne die Buchungen über ihren Text suchen zu müssen.
+   */
+  kegelabendId?: string;
 }
 
 // =====================================================================
@@ -171,6 +177,12 @@ export interface Kegelabend {
   ort?: string;
   teilnehmer: KegelabendTeilnehmer[];
   runden: Partial<Record<SpielKey, SpielRunde[]>>;
+  /**
+   * Zeitpunkt der Strafenübernahme (ISO). Gesetzt = die Strafen dieses
+   * Abends stehen bereits in der Buchführung; eine erneute Übernahme
+   * würde doppelt buchen und wird deshalb unterbunden.
+   */
+  strafenUebernommenAm?: string;
 }
 
 // =====================================================================

@@ -28,7 +28,7 @@ export class KegeljahrStore {
   readonly aktuellesKegeljahrId = this._aktuellesKegeljahrId.asReadonly();
 
   readonly aktuellesKegeljahr = computed(
-    () => this._kegeljahre().find(kj => kj.id === this._aktuellesKegeljahrId()) ?? null,
+    () => this._kegeljahre().find((kj) => kj.id === this._aktuellesKegeljahrId()) ?? null,
   );
 
   readonly buchungen = computed(() => this.aktuellesKegeljahr()?.buchungen ?? []);
@@ -44,7 +44,7 @@ export class KegeljahrStore {
   }
 
   addKegeljahr(kj: Kegeljahr): void {
-    this._kegeljahre.update(list => [...list, kj]);
+    this._kegeljahre.update((list) => [...list, kj]);
     this._aktuellesKegeljahrId.set(kj.id);
   }
 
@@ -53,7 +53,7 @@ export class KegeljahrStore {
   }
 
   findKegeljahrByDatum(datum: string): Kegeljahr | undefined {
-    return this._kegeljahre().find(kj => datum >= kj.startDatum && datum <= kj.endDatum);
+    return this._kegeljahre().find((kj) => datum >= kj.startDatum && datum <= kj.endDatum);
   }
 
   // ---------------------------------------------------------------
@@ -65,15 +65,15 @@ export class KegeljahrStore {
   }
 
   addMitglied(m: Mitglied): void {
-    this._mitglieder.update(list => [...list, m]);
+    this._mitglieder.update((list) => [...list, m]);
   }
 
   updateMitglied(m: Mitglied): void {
-    this._mitglieder.update(list => list.map(x => (x.id === m.id ? m : x)));
+    this._mitglieder.update((list) => list.map((x) => (x.id === m.id ? m : x)));
   }
 
   deleteMitglied(id: string): void {
-    this._mitglieder.update(list => list.filter(x => x.id !== id));
+    this._mitglieder.update((list) => list.filter((x) => x.id !== id));
   }
 
   // ---------------------------------------------------------------
@@ -81,18 +81,29 @@ export class KegeljahrStore {
   // ---------------------------------------------------------------
 
   addBuchungen(neue: Buchung[]): void {
-    this.updateAktuelles(kj => ({ ...kj, buchungen: [...kj.buchungen, ...neue] }));
+    this.updateAktuelles((kj) => ({ ...kj, buchungen: [...kj.buchungen, ...neue] }));
   }
 
   updateBuchung(b: Buchung): void {
-    this.updateAktuelles(kj => ({
+    this.updateAktuelles((kj) => ({
       ...kj,
-      buchungen: kj.buchungen.map(x => (x.id === b.id ? b : x)),
+      buchungen: kj.buchungen.map((x) => (x.id === b.id ? b : x)),
     }));
   }
 
   deleteBuchung(id: string): void {
-    this.updateAktuelles(kj => ({ ...kj, buchungen: kj.buchungen.filter(x => x.id !== id) }));
+    this.updateAktuelles((kj) => ({ ...kj, buchungen: kj.buchungen.filter((x) => x.id !== id) }));
+  }
+
+  /** Entfernt alle Buchungen, die aus der Abrechnung eines Kegelabends stammen. */
+  deleteBuchungenFuerKegelabend(kegelabendId: string): number {
+    let entfernt = 0;
+    this.updateAktuelles((kj) => {
+      const behalten = kj.buchungen.filter((b) => b.kegelabendId !== kegelabendId);
+      entfernt = kj.buchungen.length - behalten.length;
+      return { ...kj, buchungen: behalten };
+    });
+    return entfernt;
   }
 
   // ---------------------------------------------------------------
@@ -100,20 +111,20 @@ export class KegeljahrStore {
   // ---------------------------------------------------------------
 
   addKegelabend(ka: Kegelabend): void {
-    this.updateAktuelles(kj => ({ ...kj, kegelabende: [...kj.kegelabende, ka] }));
+    this.updateAktuelles((kj) => ({ ...kj, kegelabende: [...kj.kegelabende, ka] }));
   }
 
   updateKegelabend(ka: Kegelabend): void {
-    this.updateAktuelles(kj => ({
+    this.updateAktuelles((kj) => ({
       ...kj,
-      kegelabende: kj.kegelabende.map(x => (x.id === ka.id ? ka : x)),
+      kegelabende: kj.kegelabende.map((x) => (x.id === ka.id ? ka : x)),
     }));
   }
 
   deleteKegelabend(id: string): void {
-    this.updateAktuelles(kj => ({
+    this.updateAktuelles((kj) => ({
       ...kj,
-      kegelabende: kj.kegelabende.filter(x => x.id !== id),
+      kegelabende: kj.kegelabende.filter((x) => x.id !== id),
     }));
   }
 
@@ -122,6 +133,6 @@ export class KegeljahrStore {
   private updateAktuelles(fn: (kj: Kegeljahr) => Kegeljahr): void {
     const aktuelleId = this._aktuellesKegeljahrId();
     if (!aktuelleId) return;
-    this._kegeljahre.update(list => list.map(kj => (kj.id === aktuelleId ? fn(kj) : kj)));
+    this._kegeljahre.update((list) => list.map((kj) => (kj.id === aktuelleId ? fn(kj) : kj)));
   }
 }

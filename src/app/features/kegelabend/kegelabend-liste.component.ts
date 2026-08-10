@@ -73,6 +73,16 @@ export class KegelabendListeComponent {
   }
 
   protected loeschen(abend: Kegelabend): void {
+    if (abend.strafenUebernommenAm) {
+      // Sonst blieben die zugehörigen Strafenbuchungen ohne Bezugspunkt
+      // zurück und ließen sich nicht mehr gezielt zurücknehmen.
+      alert(
+        'Dieser Abend ist abgerechnet. Zuerst in der Detailansicht die Abrechnung ' +
+          'zurücknehmen, danach lässt er sich löschen.',
+      );
+      return;
+    }
+
     if (!confirm(`Kegelabend vom ${this.datumMitTag(abend.datum)} löschen?`)) return;
     this.kegelabendService.loeschen(abend.id);
     this.daten.aenderungVorgemerkt();

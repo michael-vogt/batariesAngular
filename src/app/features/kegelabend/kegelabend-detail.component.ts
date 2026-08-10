@@ -10,7 +10,7 @@ import {
   neuesMitglied,
 } from '../../core/kegelverein/mitglied.util';
 import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
-import { datumLang, euro } from '../../shared/format.util';
+import { datumKurz, datumLang, euro } from '../../shared/format.util';
 import {
   Kegelabend,
   KegelabendTeilnehmer,
@@ -77,12 +77,21 @@ export class KegelabendDetailComponent {
   protected readonly auswahlId = signal('');
   protected readonly speichert = signal(false);
   protected readonly uebernahmeMeldung = signal<string | null>(null);
+  protected readonly uebernahmeFehler = signal<string | null>(null);
 
   protected readonly abend = computed(() =>
     this.kegelabendService.kegelabende().find((ka) => ka.id === this.id()),
   );
 
   protected readonly runden = computed(() => this.abend()?.runden[this.aktivesSpiel()] ?? []);
+
+  /**
+   * Abgerechnete Abende sind schreibgeschützt: ihre Strafen stehen in der
+   * Buchführung, spätere Änderungen würden die Auswertung stillschweigend
+   * von den gebuchten Beträgen entfernen. Zum Ändern erst die Abrechnung
+   * zurücknehmen.
+   */
+  protected readonly gesperrt = computed(() => !!this.abend()?.strafenUebernommenAm);
 
   /** Mitglieder, die an diesem Abend noch nicht eingetragen sind. */
   protected readonly verfuegbare = computed(() => {
@@ -138,6 +147,9 @@ export class KegelabendDetailComponent {
   private aendern(fn: (ka: Kegelabend) => Kegelabend): void {
     const ka = this.abend();
     if (!ka) return;
+    // Zweite Absicherung neben den deaktivierten Feldern: so kann auch ein
+    // übersehener Bedienpfad keine Änderung an einem gebuchten Abend machen.
+    if (ka.strafenUebernommenAm) return;
     this.kegelabendService.speichern(fn(ka));
     this.daten.aenderungVorgemerkt();
   }
@@ -172,7 +184,7 @@ export class KegelabendDetailComponent {
 
   protected gastAnlegen(): void {
     const name = this.gastName().trim();
-    if (!name) return;
+    if (!name || this.gesperrt()) return;
 
     // Kein zweiter Stammdatensatz für denselben Namen — sonst zerfällt die
     // Historie später auf zwei Personen. Gleiche Prüfung wie in der
@@ -268,10 +280,31 @@ export class KegelabendDetailComponent {
 
     if (!confirm(`Strafen über ${this.euro(this.strafenSumme())} € als Buchungen anlegen?`)) return;
 
-    const anzahl = this.kegelabendService.strafenUebernehmen(ka, ka.datum);
+    this.uebernahmeFehler.set(null);
+    try {
+      const anzahl = this.kegelabendService.strafenUebernehmen(ka, ka.datum);
+      this.daten.aenderungVorgemerkt();
+      this.uebernahmeMeldung.set(
+        `${anzahl} Buchung(en) angelegt. Zum Sichern noch „Änderungen speichern“ drücken.`,
+      );
+    } catch (e) {
+      // Greift, wenn der Abend bereits abgerechnet ist — etwa wenn die
+      // Seite in einem zweiten Fenster offen stand.
+      this.uebernahmeFehler.set(e instanceof Error ? e.message : 'Übernahme fehlgeschlagen');
+    }
+  }
+
+  protected strafenZuruecknehmen(): void {
+    const ka = this.abend();
+    if (!ka) return;
+
+    if (!confirm('Die Buchungen dieser Abrechnung wieder löschen?')) return;
+
+    this.uebernahmeFehler.set(null);
+    const entfernt = this.kegelabendService.strafenZuruecknehmen(ka);
     this.daten.aenderungVorgemerkt();
     this.uebernahmeMeldung.set(
-      `${anzahl} Buchung(en) angelegt. Zum Sichern noch „Änderungen speichern“ drücken.`,
+      `${entfernt} Buchung(en) gelöscht. Zum Sichern noch „Änderungen speichern“ drücken.`,
     );
   }
 
@@ -280,10 +313,13 @@ export class KegelabendDetailComponent {
     try {
       await this.daten.speichern();
       this.uebernahmeMeldung.set(null);
+      this.uebernahmeFehler.set(null);
     } catch {
       // Fehlertext steht in daten.fehler()
     } finally {
       this.speichert.set(false);
     }
   }
+
+  protected readonly datumKurz = datumKurz;
 }

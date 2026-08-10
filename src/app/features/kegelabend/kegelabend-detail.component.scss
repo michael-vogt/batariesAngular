@@ -191,3 +191,22 @@ button.status[data-status='verloren'] {
 .visuell-versteckt {
   position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);
 }
+
+/* Deutlich sichtbar, weil daran hängt, ob der Knopf darunter bucht oder
+   zurücknimmt. */
+.abgerechnet {
+  margin: 0 0 var(--abstand-3);
+  padding: var(--abstand-3);
+  border-radius: var(--radius);
+  background: var(--farbe-akzent-hell);
+  color: var(--farbe-akzent);
+}
+
+/* Schreibschutz-Hinweis: erklärt, warum die Felder nicht reagieren. */
+.gesperrt-hinweis {
+  margin: 0 0 var(--abstand-4);
+  padding: var(--abstand-3);
+  border-radius: var(--radius);
+  background: var(--farbe-warnung-hell);
+  color: var(--farbe-warnung);
+}

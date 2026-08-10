@@ -31,6 +31,13 @@
       <p class="fehler">{{ text }}</p>
     }
 
+    @if (gesperrt()) {
+      <p class="gesperrt-hinweis">
+        Dieser Abend ist abgerechnet und daher schreibgeschützt. Zum Ändern unten die
+        Abrechnung zurücknehmen.
+      </p>
+    }
+
     <!-- Teilnehmer und Einzelstrafen -->
     <section class="karte">
       <h2>Teilnehmer</h2>
@@ -58,6 +65,7 @@
                 <input
                   type="checkbox"
                   [checked]="t.anwesend"
+                  [disabled]="gesperrt()"
                   (change)="anwesenheitGeaendert(t, $event)"
                   [attr.aria-label]="t.name + ' anwesend'"
                 />
@@ -65,6 +73,7 @@
               <td class="zahl">
                 <input
                   class="zahl-feld" type="number" min="0" step="0.5"
+                  [disabled]="gesperrt()"
                   [ngModel]="t.verspaetungStunden"
                   (ngModelChange)="statistikGeaendert(t, 'verspaetungStunden', $event)"
                 />
@@ -72,6 +81,7 @@
               <td class="zahl">
                 <input
                   class="zahl-feld" type="number" min="0"
+                  [disabled]="gesperrt()"
                   [ngModel]="t.pumpen"
                   (ngModelChange)="statistikGeaendert(t, 'pumpen', $event)"
                 />
@@ -79,6 +89,7 @@
               <td class="zahl">
                 <input
                   class="zahl-feld" type="number" min="0"
+                  [disabled]="gesperrt()"
                   [ngModel]="t.neuner"
                   (ngModelChange)="statistikGeaendert(t, 'neuner', $event)"
                 />
@@ -86,6 +97,7 @@
               <td class="zahl">
                 <input
                   class="zahl-feld" type="number" min="0"
+                  [disabled]="gesperrt()"
                   [ngModel]="t.eingeholt"
                   (ngModelChange)="statistikGeaendert(t, 'eingeholt', $event)"
                 />
@@ -93,63 +105,68 @@
               <td class="zahl">
                 <input
                   class="zahl-feld" type="number" min="0"
+                  [disabled]="gesperrt()"
                   [ngModel]="t.schnaps"
                   (ngModelChange)="statistikGeaendert(t, 'schnaps', $event)"
                 />
               </td>
               <td>
-                <button type="button" class="leise-aktion" (click)="teilnehmerEntfernen(t)">
-                  Entfernen
-                </button>
+                @if (!gesperrt()) {
+                  <button type="button" class="leise-aktion" (click)="teilnehmerEntfernen(t)">
+                    Entfernen
+                  </button>
+                }
               </td>
             </tr>
           }
         </tbody>
       </table>
 
-      <div class="hinzufuegen">
-        @if (verfuegbare().length > 0) {
+      @if (!gesperrt()) {
+        <div class="hinzufuegen">
+          @if (verfuegbare().length > 0) {
+            <div class="formular-zeile">
+              <label>
+                Mitglied hinzufügen
+                <select [ngModel]="auswahlId()" (ngModelChange)="auswahlId.set($event)">
+                  <option value="">– auswählen –</option>
+                  @for (m of verfuegbare(); track m.id) {
+                    <option [value]="m.id">
+                      {{ m.name }}{{ istGast(m.id) ? ' (Gastkegler)' : '' }}
+                    </option>
+                  }
+                </select>
+              </label>
+              <button type="button" [disabled]="!auswahlId()" (click)="teilnehmerHinzufuegen()">
+                Hinzufügen
+              </button>
+            </div>
+          }
+
           <div class="formular-zeile">
             <label>
-              Mitglied hinzufügen
-              <select [ngModel]="auswahlId()" (ngModelChange)="auswahlId.set($event)">
-                <option value="">– auswählen –</option>
-                @for (m of verfuegbare(); track m.id) {
-                  <option [value]="m.id">
-                    {{ m.name }}{{ istGast(m.id) ? ' (Gastkegler)' : '' }}
-                  </option>
-                }
-              </select>
+              Neuer Gastkegler
+              <input
+                type="text"
+                placeholder="Name"
+                [ngModel]="gastName()"
+                (ngModelChange)="gastName.set($event)"
+                (keyup.enter)="gastAnlegen()"
+              />
             </label>
-            <button type="button" [disabled]="!auswahlId()" (click)="teilnehmerHinzufuegen()">
-              Hinzufügen
+            <button type="button" [disabled]="!gastName().trim()" (click)="gastAnlegen()">
+              Anlegen und hinzufügen
             </button>
           </div>
-        }
-
-        <div class="formular-zeile">
-          <label>
-            Neuer Gastkegler
-            <input
-              type="text"
-              placeholder="Name"
-              [ngModel]="gastName()"
-              (ngModelChange)="gastName.set($event)"
-              (keyup.enter)="gastAnlegen()"
-            />
-          </label>
-          <button type="button" [disabled]="!gastName().trim()" (click)="gastAnlegen()">
-            Anlegen und hinzufügen
-          </button>
+          @if (gastFehler(); as text) {
+            <p class="fehler">{{ text }}</p>
+          }
+          <p class="hinweis">
+            Gastkegler werden als Mitglied mit dem Status „Gastkegler“ geführt. Sie zahlen
+            keinen Monatsbeitrag, ihre Strafen werden aber wie bei allen anderen verbucht.
+          </p>
         </div>
-        @if (gastFehler(); as text) {
-          <p class="fehler">{{ text }}</p>
-        }
-        <p class="hinweis">
-          Gastkegler werden als Mitglied mit dem Status „Gastkegler“ geführt. Sie zahlen
-          keinen Monatsbeitrag, ihre Strafen werden aber wie bei allen anderen verbucht.
-        </p>
-      </div>
+      }
     </section>
 
     <!-- Spielrunden -->
@@ -197,6 +214,7 @@
                       <button
                         type="button"
                         class="status"
+                        [disabled]="gesperrt()"
                         [attr.data-status]="statusVon(r, t.id)"
                         [title]="t.name + ': ' + statusTitel(statusVon(r, t.id))"
                         [attr.aria-label]="t.name + ': ' + statusTitel(statusVon(r, t.id))"
@@ -212,20 +230,22 @@
           </table>
         </div>
         <p class="hinweis legende">
-          Zelle anklicken zum Wechseln: · nicht dabei → ○ mitgespielt → S Sieg → N Niederlage
+          {{ gesperrt() ? 'Legende:' : 'Zelle anklicken zum Wechseln:' }} · nicht dabei → ○ mitgespielt → S Sieg → N Niederlage
         </p>
       }
 
-      <div class="runden-aktionen">
-        <button type="button" (click)="rundeHinzufuegen()">
-          Runde für {{ aktivesSpielName() }} hinzufügen
-        </button>
-        @if (runden().length > 0) {
-          <button type="button" class="leise-aktion" (click)="letzteRundeEntfernen()">
-            Letzte Runde entfernen
+      @if (!gesperrt()) {
+        <div class="runden-aktionen">
+          <button type="button" (click)="rundeHinzufuegen()">
+            Runde für {{ aktivesSpielName() }} hinzufügen
           </button>
-        }
-      </div>
+          @if (runden().length > 0) {
+            <button type="button" class="leise-aktion" (click)="letzteRundeEntfernen()">
+              Letzte Runde entfernen
+            </button>
+          }
+        </div>
+      }
     </section>
 
     <!-- Auswertung -->
@@ -266,15 +286,34 @@
       </table>
 
       <div class="uebernahme">
-        <button type="button" [disabled]="strafenSumme() === 0" (click)="strafenUebernehmen()">
-          Strafen in die Buchführung übernehmen
-        </button>
-        <p class="hinweis">
-          Erzeugt je Teilnehmer eine Buchung (Forderungen an Strafen), auch für
-          Gastkegler. Mehrfaches Übernehmen bucht erneut — nur einmal pro Abend ausführen.
-        </p>
+        @if (abend()!.strafenUebernommenAm; as zeitpunkt) {
+          <p class="abgerechnet">
+            <strong>Abgerechnet</strong> am {{ datumKurz(zeitpunkt) }} —
+            die Strafen dieses Abends stehen in der Buchführung.
+          </p>
+          <button type="button" (click)="strafenZuruecknehmen()">
+            Abrechnung zurücknehmen
+          </button>
+          <p class="hinweis">
+            Löscht die zugehörigen Buchungen wieder und gibt den Abend zur erneuten
+            Abrechnung frei — nötig, wenn oben noch etwas korrigiert wird. Von Hand
+            ergänzte Buchungen bleiben unberührt.
+          </p>
+        } @else {
+          <button type="button" [disabled]="strafenSumme() === 0" (click)="strafenUebernehmen()">
+            Strafen in die Buchführung übernehmen
+          </button>
+          <p class="hinweis">
+            Erzeugt je Teilnehmer eine Buchung (Forderungen an Strafen), auch für
+            Gastkegler. Ein zweites Mal ist erst nach einer Rücknahme möglich.
+          </p>
+        }
+
         @if (uebernahmeMeldung(); as text) {
           <p class="ok">{{ text }}</p>
+        }
+        @if (uebernahmeFehler(); as text) {
+          <p class="fehler">{{ text }}</p>
         }
       </div>
     </section>

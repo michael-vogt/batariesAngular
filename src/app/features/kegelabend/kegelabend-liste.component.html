@@ -52,6 +52,7 @@
           <th class="zahl">Anwesend</th>
           <th class="zahl">Runden</th>
           <th class="zahl">Strafen gesamt</th>
+          <th>Status</th>
           <th><span class="visuell-versteckt">Aktionen</span></th>
         </tr>
         </thead>
@@ -67,6 +68,13 @@
               <td class="zahl">{{ zeile.anwesend }} / {{ zeile.abend.teilnehmer.length }}</td>
               <td class="zahl">{{ zeile.runden }}</td>
               <td class="zahl">{{ euro(zeile.strafen) }}</td>
+              <td>
+                @if (zeile.abend.strafenUebernommenAm) {
+                  <span class="marke-abgerechnet">abgerechnet</span>
+                } @else {
+                  <span class="leise">offen</span>
+                }
+              </td>
               <td>
                 <button type="button" class="leise-aktion" (click)="loeschen(zeile.abend)">
                   Löschen

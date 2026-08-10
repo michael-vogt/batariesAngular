@@ -44,8 +44,17 @@ export class AccountingService {
     this.store.addBuchungen(buchungen);
   }
 
-  uebernehmeStrafen(datum: string, posten: { mitglied: Mitglied; betrag: number }[]): void {
-    this.store.addBuchungen(journalStrafen({ datum, posten }));
+  uebernehmeStrafen(
+    datum: string,
+    posten: { mitglied: Mitglied; betrag: number }[],
+    kegelabendId?: string,
+  ): void {
+    this.store.addBuchungen(journalStrafen({ datum, posten, kegelabendId }));
+  }
+
+  /** Macht die Strafenübernahme eines Kegelabends rückgängig. */
+  loescheStrafenFuerKegelabend(kegelabendId: string): number {
+    return this.store.deleteBuchungenFuerKegelabend(kegelabendId);
   }
 
   verrechneRestguthaben(datum: string): void {
