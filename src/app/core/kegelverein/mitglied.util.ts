@@ -38,18 +38,8 @@ export function istBeitragspflichtig(m: Mitglied, datum: string): boolean {
   return status === 'aktiv' || status === 'passiv';
 }
 
-/** Gehört zum Verein (aktiv oder passiv), Stichtag heute. */
-export function istVereinsmitglied(m: Mitglied): boolean {
-  const status = aktuellerStatus(m);
-  return status === 'aktiv' || status === 'passiv';
-}
-
 export function istGastkegler(m: Mitglied): boolean {
   return aktuellerStatus(m) === 'gastkegler';
-}
-
-export function istAusgetreten(m: Mitglied): boolean {
-  return aktuellerStatus(m) === 'ausgetreten';
 }
 
 /**

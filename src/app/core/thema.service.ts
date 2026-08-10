@@ -4,16 +4,11 @@ export type Thema = 'hell' | 'bash';
 
 const SPEICHER_SCHLUESSEL = 'kegelverein-thema';
 
-export const THEMEN: readonly { wert: Thema; name: string; beschreibung: string }[] = [
-  { wert: 'hell', name: 'Hell', beschreibung: 'Heller Hintergrund, Systemschrift' },
-  { wert: 'bash', name: 'Terminal', beschreibung: 'Dunkel, Konsolenschrift' },
-];
-
 /**
  * Verwaltet das gewählte Erscheinungsbild.
  *
  * Die Umsetzung liegt vollständig in CSS: der Dienst setzt lediglich
- * `data-thema` am <html>-Element, die Farbwerte kommen aus tokens.scss.
+ * `data-thema` am <html>-Element, die Farbwerte kommen aus tokens.css.
  * Dadurch braucht keine Komponente das Thema zu kennen.
  */
 @Injectable({ providedIn: 'root' })
@@ -34,12 +29,13 @@ export class ThemaService {
     });
   }
 
-  setzen(thema: Thema): void {
-    this._thema.set(thema);
-  }
-
+  /**
+   * Wechselt zwischen den beiden Themen. Eine setzen(thema)-Variante gäbe
+   * es erst, wenn ein drittes Thema dazukäme — bei zweien wäre sie nur
+   * ein Umweg.
+   */
   umschalten(): void {
-    this._thema.update((aktuell) => (aktuell === 'hell' ? 'bash' : 'hell'));
+    this._thema.update(aktuell => (aktuell === 'hell' ? 'bash' : 'hell'));
   }
 
   private geladenesThema(): Thema {

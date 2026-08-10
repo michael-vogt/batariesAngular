@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
 import { FileStorageService } from '../../core/kegelverein/persistenz/file-storage.service';
-import { THEMEN, ThemaService } from '../../core/thema.service';
+import { ThemaService } from '../../core/thema.service';
 
 interface NavPunkt {
   pfad: string;
@@ -21,8 +21,6 @@ export class HauptnavigationComponent {
   protected readonly daten = inject(VereinsdatenService);
   protected readonly storage = inject(FileStorageService);
   protected readonly thema = inject(ThemaService);
-
-  protected readonly themen = THEMEN;
 
   protected readonly menueOffen = signal(false);
   protected readonly jahrWechselt = signal(false);

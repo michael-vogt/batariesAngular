@@ -28,11 +28,6 @@ export function euro(betrag: number): string {
   });
 }
 
-/** Betrag mit Währungszeichen, z.B. "12,50 €". */
-export function euroMitZeichen(betrag: number): string {
-  return `${euro(betrag)} €`;
-}
-
 /** ISO-Datum als "07.08.2026". */
 export function datumKurz(iso: string): string {
   return new Date(iso).toLocaleDateString('de-DE');

@@ -15,8 +15,21 @@
 // =====================================================================
 
 export type KontoNummer =
-  | '000' | '100' | '110' | '200' | '210' | '220' | '250'
-  | '300' | '310' | '320' | '330' | '400' | '410' | '420' | '430';
+  | '000'
+  | '100'
+  | '110'
+  | '200'
+  | '210'
+  | '220'
+  | '250'
+  | '300'
+  | '310'
+  | '320'
+  | '330'
+  | '400'
+  | '410'
+  | '420'
+  | '430';
 
 export type KontoArt = 'Sonstige' | 'Aktiv' | 'Passiv' | 'Ertrag' | 'Aufwand' | 'GuV';
 
@@ -27,21 +40,21 @@ export interface Konto {
 }
 
 export const KONTENRAHMEN: readonly Konto[] = [
-  { nummer: '000', name: 'Eröffnungsbilanzkonto',   art: 'Sonstige' },
-  { nummer: '100', name: 'Forderungen',             art: 'Aktiv' },
-  { nummer: '110', name: 'Kasse',                   art: 'Aktiv' },
-  { nummer: '200', name: 'Vereinsvermögen',         art: 'Sonstige' },
-  { nummer: '210', name: 'Restguthaben',            art: 'Passiv' },
-  { nummer: '220', name: 'Schulden ggü. Dritten',   art: 'Passiv' },
-  { nummer: '250', name: 'GuV-Konto',               art: 'GuV' },
-  { nummer: '300', name: 'Beiträge',                art: 'Ertrag' },
-  { nummer: '310', name: 'Strafen',                 art: 'Ertrag' },
-  { nummer: '320', name: 'Umlagen',                 art: 'Ertrag' },
-  { nummer: '330', name: 'Sonstige Erträge',        art: 'Ertrag' },
-  { nummer: '400', name: 'Kegelbahn',               art: 'Aufwand' },
-  { nummer: '410', name: 'Vereinsrunden',           art: 'Aufwand' },
-  { nummer: '420', name: 'Generalversammlung',      art: 'Aufwand' },
-  { nummer: '430', name: 'Sonstige Aufwendungen',   art: 'Aufwand' },
+  { nummer: '000', name: 'Eröffnungsbilanzkonto', art: 'Sonstige' },
+  { nummer: '100', name: 'Forderungen', art: 'Aktiv' },
+  { nummer: '110', name: 'Kasse', art: 'Aktiv' },
+  { nummer: '200', name: 'Vereinsvermögen', art: 'Sonstige' },
+  { nummer: '210', name: 'Restguthaben', art: 'Passiv' },
+  { nummer: '220', name: 'Schulden ggü. Dritten', art: 'Passiv' },
+  { nummer: '250', name: 'GuV-Konto', art: 'GuV' },
+  { nummer: '300', name: 'Beiträge', art: 'Ertrag' },
+  { nummer: '310', name: 'Strafen', art: 'Ertrag' },
+  { nummer: '320', name: 'Umlagen', art: 'Ertrag' },
+  { nummer: '330', name: 'Sonstige Erträge', art: 'Ertrag' },
+  { nummer: '400', name: 'Kegelbahn', art: 'Aufwand' },
+  { nummer: '410', name: 'Vereinsrunden', art: 'Aufwand' },
+  { nummer: '420', name: 'Generalversammlung', art: 'Aufwand' },
+  { nummer: '430', name: 'Sonstige Aufwendungen', art: 'Aufwand' },
 ] as const;
 
 // =====================================================================
@@ -100,8 +113,16 @@ export interface Buchung {
 // =====================================================================
 
 export type SpielKey =
-  | 'abraeumen' | 'christbaum' | 'fuchsjagd' | 'hohe' | 'koenig'
-  | 'niedrige' | 'regenundsonne' | 'siebzehn' | 'totenkiste' | 'viergewinnt';
+  | 'abraeumen'
+  | 'christbaum'
+  | 'fuchsjagd'
+  | 'hohe'
+  | 'koenig'
+  | 'niedrige'
+  | 'regenundsonne'
+  | 'siebzehn'
+  | 'totenkiste'
+  | 'viergewinnt';
 
 /** Anzeigenamen der Spiele; die Reihenfolge bestimmt auch die Anzeige. */
 export const SPIELE: readonly { key: SpielKey; name: string }[] = [
@@ -167,12 +188,12 @@ export interface Strafsaetze {
 }
 
 export const STANDARD_STRAFSAETZE: Strafsaetze = {
-  verspaetungProStunde: 1.00,
-  pumpe: 0.10,
-  teilnahme: 0.10,
+  verspaetungProStunde: 1.0,
+  pumpe: 0.1,
+  teilnahme: 0.1,
   fuchsjagdTeilnahmeMitSieger: 0.25,
   niederlageStandard: 0.25,
-  niederlageFuchsjagdTotenkiste: 0.50,
+  niederlageFuchsjagdTotenkiste: 0.5,
 };
 
 // =====================================================================
@@ -190,15 +211,11 @@ export interface Kegeljahr {
 }
 
 // =====================================================================
-// 7. Persistenz-Root
+// 7. Persistenz
 // =====================================================================
-
-export interface VereinsDaten {
-  /** Vereinsweite Stammdaten, unabhängig vom Kegeljahr. */
-  mitglieder: Mitglied[];
-  kegeljahre: Kegeljahr[];
-  aktuellesKegeljahrId: string;
-}
+// Die Ablagestruktur (Manifest, mitglieder.json, Kegeljahr-Dateien) ist
+// in persistenz/file-storage.models.ts beschrieben — sie gehört zur
+// Speicherung, nicht zum Domänenmodell.
 
 // =====================================================================
 // 8. Abgeleitete Werte — NICHT persistieren, per Selector/computed() erzeugen
