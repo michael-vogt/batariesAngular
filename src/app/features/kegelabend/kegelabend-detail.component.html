@@ -184,7 +184,7 @@
             <tr>
               <th>Spieler</th>
               @for (r of runden(); track r.id; let i = $index) {
-                <th class="zahl">{{ i + 1 }}</th>
+                <th class="status-spalte">{{ i + 1 }}</th>
               }
             </tr>
             </thead>
@@ -193,12 +193,13 @@
                 <tr [class.abwesend]="!t.anwesend">
                   <td>{{ t.name }}</td>
                   @for (r of runden(); track r.id) {
-                    <td class="zahl">
+                    <td class="status-spalte">
                       <button
                         type="button"
                         class="status"
                         [attr.data-status]="statusVon(r, t.id)"
                         [title]="t.name + ': ' + statusTitel(statusVon(r, t.id))"
+                        [attr.aria-label]="t.name + ': ' + statusTitel(statusVon(r, t.id))"
                         (click)="statusWeiter(r, t.id)"
                       >
                         {{ statusKurz(statusVon(r, t.id)) }}

@@ -150,3 +150,19 @@
     margin: var(--abstand-2) 0;
   }
 }
+
+/* Umschalter des Erscheinungsbilds: bewusst klein und ohne Beschriftung
+   neben dem Verbindungsstatus — er wird selten gebraucht und soll die
+   Navigation nicht dominieren. */
+.thema-schalter {
+  padding: var(--abstand-1) var(--abstand-2);
+  font-family: var(--schrift-zahl);
+  font-size: 0.875rem;
+  line-height: 1.2;
+  color: var(--farbe-text-leise);
+}
+
+.thema-schalter:hover {
+  color: var(--farbe-akzent);
+  border-color: var(--farbe-akzent);
+}

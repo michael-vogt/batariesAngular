@@ -50,17 +50,53 @@ tr.abwesend td { opacity: 0.45; }
 .raster-umschlag { overflow-x: auto; }
 .raster th, .raster td { white-space: nowrap; }
 
-button.status {
-  width: 2rem; padding: var(--abstand-1) 0;
-  font-family: var(--schrift-zahl); font-size: 0.875rem;
-  border-color: transparent; background: transparent;
+/* Zellen des Rundenrasters mittig: hier steht ein Symbol unter einer
+   Spaltennummer, keine Zahl — rechtsbündig säße es versetzt. */
+.status-spalte { text-align: center; }
+th.status-spalte {
+  font-family: var(--schrift-zahl);
+  font-variant-numeric: tabular-nums;
 }
-button.status[data-status='nicht_teilgenommen'] { color: var(--farbe-text-leise); opacity: 0.5; }
+
+button.status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 1px solid var(--farbe-rand);
+  border-radius: var(--radius);
+  background: var(--farbe-karte);
+  font-family: var(--schrift-zahl);
+  font-size: 0.9375rem;
+  line-height: 1;
+  transition: transform 0.08s ease;
+}
+
+button.status:hover { border-color: var(--farbe-akzent); }
+button.status:active { transform: scale(0.94); }
+
+button.status[data-status='nicht_teilgenommen'] {
+  border-style: dashed;
+  color: var(--farbe-text-leise);
+  background: transparent;
+}
 button.status[data-status='teilgenommen'] { color: var(--farbe-text); }
 button.status[data-status='gewonnen'] {
-  background: var(--farbe-akzent-hell); color: var(--farbe-haben); font-weight: 700;
+  border-color: var(--farbe-haben);
+  background: var(--farbe-akzent-hell);
+  color: var(--farbe-haben);
+  font-weight: 700;
 }
-button.status[data-status='verloren'] { color: var(--farbe-soll); font-weight: 700; }
+button.status[data-status='verloren'] {
+  border-color: var(--farbe-soll);
+  background: var(--farbe-soll-hell);
+  color: var(--farbe-soll);
+  font-weight: 700;
+}
+
+.raster td.status-spalte { padding: var(--abstand-1) var(--abstand-2); }
 
 .legende { margin: var(--abstand-3) 0 0; font-size: 0.8125rem; }
 .runden-aktionen {

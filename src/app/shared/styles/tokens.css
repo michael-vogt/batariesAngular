@@ -15,6 +15,7 @@
   --farbe-akzent: #2f5d42;
   --farbe-akzent-hell: #eaf1ec;
   --farbe-soll: #a33a2c;
+  --farbe-soll-hell: #fdeceb;
   --farbe-haben: #2f5d42;
   --farbe-warnung: #8a6d1f;
   --farbe-warnung-hell: #fbf4e0;
@@ -31,6 +32,50 @@
   --abstand-8: 2rem;
 
   --radius: 6px;
+
+  /* Steuert die Darstellung nativer Bedienelemente (Datumsfelder,
+     Auswahllisten, Bildlaufleisten). */
+  color-scheme: light;
+}
+
+/* ---------------------------------------------------------------
+   Terminal-Thema
+   ---------------------------------------------------------------
+   Angelehnt an eine Konsole: dunkler Grund, Konsolenschrift, grüner
+   Akzent. Bewusst nicht reines #00ff00 auf #000 — das flimmert bei
+   längerem Lesen und macht die Zahlentabellen anstrengend. Stattdessen
+   leicht abgetönte Werte mit ausreichendem Kontrast. */
+[data-thema='bash'] {
+  --farbe-flaeche: #0d1117;
+  --farbe-karte: #12181f;
+  --farbe-rand: #2a333d;
+  --farbe-text: #d4dae0;
+  --farbe-text-leise: #8b98a5;
+  --farbe-akzent: #6bd968;
+  --farbe-akzent-hell: #16241a;
+  --farbe-soll: #f2705a;
+  --farbe-soll-hell: #2b1512;
+  --farbe-haben: #6bd968;
+  --farbe-warnung: #e3b341;
+  --farbe-warnung-hell: #2a2113;
+
+  /* Durchgehend Konsolenschrift — das prägt den Eindruck stärker als
+     die Farben allein. */
+  --schrift-text: 'Cascadia Mono', 'JetBrains Mono', 'SF Mono', Consolas,
+  'DejaVu Sans Mono', monospace;
+
+  color-scheme: dark;
+}
+
+/* Überschriften wie ein Prompt kennzeichnen. Rein dekorativ, deshalb
+   aus dem Vorlesefluss genommen. */
+[data-thema='bash'] .seiten-kopf h1::before {
+  content: '$ ';
+  color: var(--farbe-akzent);
+}
+
+[data-thema='bash'] .karte {
+  box-shadow: none;
 }
 
 body {
@@ -127,6 +172,13 @@ button.primaer {
   color: #fff;
 }
 
+/* Im dunklen Thema ist der Akzent hell — weiße Schrift darauf wäre kaum
+   lesbar, deshalb dunkle Schrift. */
+[data-thema='bash'] button.primaer {
+  color: #0d1117;
+  font-weight: 600;
+}
+
 button.leise-aktion {
   padding: var(--abstand-1) var(--abstand-2);
   color: var(--farbe-text-leise);
@@ -158,7 +210,7 @@ input, select {
 .fehler {
   padding: var(--abstand-3);
   border-radius: var(--radius);
-  background: #fdeceb;
+  background: var(--farbe-soll-hell);
   color: var(--farbe-soll);
 }
 .warnung {

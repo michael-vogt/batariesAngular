@@ -37,6 +37,14 @@
     </nav>
 
     <div class="status">
+      <button
+        type="button"
+        class="thema-schalter"
+        [title]="thema.thema() === 'hell' ? 'Zum Terminal-Thema wechseln' : 'Zum hellen Thema wechseln'"
+        [attr.aria-label]="thema.thema() === 'hell' ? 'Terminal-Thema einschalten' : 'Helles Thema einschalten'"
+        (click)="thema.umschalten()"
+      >{{ thema.thema() === 'hell' ? '>_' : '☀' }}</button>
+
       @if (storage.status() !== 'verbunden') {
         <a routerLink="/einstellungen" class="nicht-verbunden">Nicht verbunden</a>
       } @else {
