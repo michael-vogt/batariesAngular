@@ -9,6 +9,8 @@ import { GeschaeftsvorfaelleComponent } from './features/buchfuehrung/geschaefts
 import { JahresabschlussComponent } from './features/buchfuehrung/jahresabschluss.component';
 import { HauptnavigationComponent } from './features/hauptnavigation/hauptnavigation.component';
 import { AnleitungComponent } from './features/anleitung/anleitung.component';
+import { BackupWiederherstellungComponent } from './features/import/backup-wiederherstellung.component';
+import { VerbindungEinstellungenComponent } from './features/einstellungen/verbindung-einstellungen.component';
 
 export const routes: Routes = [
   {
@@ -55,13 +57,15 @@ export const routes: Routes = [
     component: MitgliederListeComponent
   },
   {
+    path: 'sicherungen',
+    component: BackupWiederherstellungComponent
+  },
+  {
     path: 'import',
     component: LegacyImportComponent
   },
   {
     path: 'einstellungen',
-    loadComponent: () =>
-      import('./features/einstellungen/verbindung-einstellungen.component')
-        .then(m => m.VerbindungEinstellungenComponent),
+    component: VerbindungEinstellungenComponent
   }
 ];

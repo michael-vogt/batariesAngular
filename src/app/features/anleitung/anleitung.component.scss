@@ -10,6 +10,71 @@
   margin: var(--abstand-1) 0 0;
 }
 
+/* Zwei Spalten: Dokument und Inhaltsverzeichnis. Letzteres steht rechts,
+   weil der Blick beim Lesen ohnehin links beginnt. */
+.spalten {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 15rem;
+  gap: var(--abstand-6);
+  align-items: start;
+}
+
+.inhalt {
+  /* Bleibt beim Scrollen stehen; der Abstand nach oben hält Abstand zur
+     Kopfleiste der Anwendung. */
+  position: sticky;
+  top: var(--abstand-4);
+  max-height: calc(100vh - var(--abstand-8));
+  overflow-y: auto;
+  padding: var(--abstand-4);
+  border: 1px solid var(--farbe-rand);
+  border-radius: var(--radius);
+  background: var(--farbe-karte);
+}
+
+.inhalt-titel {
+  margin: 0 0 var(--abstand-2);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--farbe-text-leise);
+}
+
+.inhalt ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.inhalt li {
+  margin: 0;
+}
+
+.inhalt a {
+  display: block;
+  padding: var(--abstand-1) var(--abstand-2);
+  border-left: 2px solid transparent;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  color: var(--farbe-text-leise);
+  font-size: 0.875rem;
+  line-height: 1.35;
+  text-decoration: none;
+}
+
+.inhalt a:hover {
+  background: var(--farbe-flaeche);
+  color: var(--farbe-text);
+}
+
+/* Abschnitt, der gerade gelesen wird */
+.inhalt a.aktiv {
+  border-left-color: var(--farbe-akzent);
+  background: var(--farbe-akzent-hell);
+  color: var(--farbe-akzent);
+  font-weight: 600;
+}
+
 .dokument {
   /* Rund 80 Zeichen je Zeile — darüber wird Fließtext mühsam zu lesen. */
   max-width: 52rem;
@@ -18,6 +83,9 @@
 }
 
 .dokument h2 {
+  /* Sonst verschwindet die angesprungene Überschrift hinter der
+     Kopfleiste der Anwendung. */
+  scroll-margin-top: var(--abstand-6);
   margin: var(--abstand-8) 0 var(--abstand-3);
   padding-bottom: var(--abstand-2);
   border-bottom: 1px solid var(--farbe-linie);
@@ -140,6 +208,32 @@
   flex-shrink: 0;
 }
 
+/* Auf schmalen Anzeigen passen zwei Spalten nicht — das Verzeichnis
+   wandert dann über den Text und scrollt normal mit. */
+@media (max-width: 60rem) {
+  .spalten {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .inhalt {
+    position: static;
+    max-height: none;
+    order: -1;
+  }
+
+  .inhalt ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--abstand-1);
+  }
+
+  .inhalt a {
+    border-left: none;
+    border-radius: var(--radius);
+    border: 1px solid var(--farbe-rand);
+  }
+}
+
 /* ---------------------------------------------------------------
    Druckausgabe
    ---------------------------------------------------------------
@@ -163,8 +257,13 @@
     background: none;
   }
 
-  .drucken {
+  .drucken,
+  .inhalt {
     display: none;
+  }
+
+  .spalten {
+    display: block;
   }
 
   /* Auf Papier trägt die Unterstreichung nichts bei — dort ist ohnehin

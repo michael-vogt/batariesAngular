@@ -354,6 +354,38 @@ des vorherigen Standes.
 
 ---
 
+## Sicherungen
+
+Vor jedem Speichern legt der Server eine Kopie des vorherigen Standes ab. Die
+Seite **Sicherungen** zeigt sie an und erlaubt, zu einem älteren Stand
+zurückzukehren.
+
+Mitglieder und Kegeljahre werden getrennt gesichert, deshalb sind die Stände nach
+Datei gruppiert — neueste zuerst. Aufbewahrt werden je Datei die letzten 15
+Stände, ältere fallen automatisch weg.
+
+### Einen Stand zurückholen
+
+1. **Ansehen** öffnet den gewählten Stand und zeigt, was darin steckt: bei
+   Mitgliedern deren Anzahl, bei einem Kegeljahr die Bezeichnung samt Anzahl der
+   Buchungen und Kegelabende.
+2. **Diesen Stand laden** ersetzt damit die Anzeige — auf dem Server ändert sich
+   dabei noch nichts.
+3. Den geladenen Stand in Ruhe prüfen, etwa im Journal oder in der
+   Mitgliederliste.
+4. **Änderungen speichern**, um ihn festzuschreiben — oder **Verwerfen** in der
+   oberen Leiste, um doch beim bisherigen Stand zu bleiben.
+
+Auch das Festschreiben ist rückholbar: Beim Speichern legt der Server wie gewohnt
+eine Sicherung des überschriebenen Standes an.
+
+> **Hinweis:** Wird ein älterer Mitgliederstand geladen, in dem Personen fehlen,
+> auf die das aktuelle Kegeljahr verweist, meldet die Anwendung das vor dem Laden.
+> Gespeichert werden kann erst, wenn auch ein passender Kegeljahr-Stand geladen
+> wurde.
+
+---
+
 ## Typische Abläufe
 
 **Nach einem Kegelabend**
@@ -385,9 +417,9 @@ Er ist abgerechnet. Unten „Abrechnung zurücknehmen“, korrigieren, erneut
 übernehmen.
 
 **Änderungen sind verschwunden**
-Vermutlich wurde ohne Speichern neu geladen oder das Kegeljahr gewechselt. Auf
-dem Server liegen unter `backups/` die letzten Stände vor jedem Speichern.
+Vermutlich wurde ohne Speichern neu geladen oder das Kegeljahr gewechselt. Über
+die Seite **Sicherungen** lässt sich ein früherer Stand zurückholen.
 
 **Versehentlich etwas gelöscht**
 Solange noch nicht gespeichert wurde: „Verwerfen“ in der oberen Leiste. Danach
-hilft nur eine Sicherungskopie vom Server.
+über die Seite **Sicherungen** den Stand von vor dem Speichern laden.

@@ -40,6 +40,17 @@ export interface KegeljahrDatei {
   kegeljahr: Kegeljahr;
 }
 
+/** Eine auf dem Server vorliegende Sicherung. */
+export interface BackupEintrag {
+  /** Dateiname innerhalb von backups/ */
+  dateiname: string;
+  /** Datei, in die zurückgeschrieben würde, z.B. "mitglieder.json" */
+  zielDatei: string;
+  art: 'mitglieder' | 'kegeljahr';
+  /** ISO-Zeitpunkt aus dem Dateinamen; null, wenn nicht deutbar. */
+  zeitpunkt: string | null;
+}
+
 export function leeresManifest(): Manifest {
   return {
     schemaVersion: SCHEMA_VERSION,
@@ -59,11 +70,17 @@ export function leeresManifest(): Manifest {
  */
 export function dateinameFuerKegeljahr(bezeichnung: string, fallbackId = 'kegeljahr'): string {
   const umlaute: Record<string, string> = {
-    ä: 'ae', ö: 'oe', ü: 'ue', Ä: 'ae', Ö: 'oe', Ü: 'ue', ß: 'ss',
+    ä: 'ae',
+    ö: 'oe',
+    ü: 'ue',
+    Ä: 'ae',
+    Ö: 'oe',
+    Ü: 'ue',
+    ß: 'ss',
   };
 
   const slug = bezeichnung
-    .replace(/[äöüÄÖÜß]/g, treffer => umlaute[treffer])
+    .replace(/[äöüÄÖÜß]/g, (treffer) => umlaute[treffer])
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');

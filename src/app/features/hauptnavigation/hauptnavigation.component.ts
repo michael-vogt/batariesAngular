@@ -39,6 +39,7 @@ export class HauptnavigationComponent {
   protected readonly weitere: NavPunkt[] = [
     { pfad: '/anleitung', titel: 'Anleitung' },
     { pfad: '/import', titel: 'Altdaten importieren' },
+    { pfad: '/sicherungen', titel: 'Sicherungen' },
     { pfad: '/einstellungen', titel: 'Einstellungen' },
   ];
 

@@ -1,6 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { PERSISTENZ_ADAPTER } from './persistenz-adapter.token';
 import {
+  BackupEintrag,
   KegeljahrDatei,
   MITGLIEDER_DATEI,
   Manifest,
@@ -15,6 +16,10 @@ import {
   pruefeMitgliederDatei,
 } from './file-storage.validation';
 import { Kegeljahr, Mitglied } from '../kegelverein.models';
+
+/** Geprüfter Inhalt einer Sicherung, noch nicht angewendet. */
+export type SicherungsInhalt =
+  { art: 'mitglieder'; mitglieder: Mitglied[] } | { art: 'kegeljahr'; kegeljahr: Kegeljahr };
 
 const MAX_BACKUPS_PRO_DATEI = 15;
 
@@ -138,6 +143,75 @@ export class FileStorageService {
     await this.backupErstellen(pfad, dateiname);
     await this.adapter.dateiSchreiben(pfad, JSON.stringify(datei, null, 2));
     await this.manifestAktualisieren(kegeljahr.id, kegeljahr.bezeichnung, dateiname);
+  }
+
+  // --- Sicherungen -----------------------------------------------------
+
+  /**
+   * Listet die vorhandenen Sicherungen, neueste zuerst.
+   *
+   * Der Zeitpunkt steckt im Dateinamen (`<basis>_<zeitstempel>.json`) und
+   * wird hier zurückübersetzt. Dateien, die dem Muster nicht entsprechen,
+   * werden übergangen — sie stammen dann nicht von dieser Anwendung.
+   */
+  async backupsAuflisten(): Promise<BackupEintrag[]> {
+    this.pruefeVerbunden();
+
+    const muster = /^(.+)_(\d{4}-\d{2}-\d{2}T[\d-]+Z)\.json$/;
+    const eintraege: BackupEintrag[] = [];
+
+    for (const dateiname of await this.adapter.dateiListen('backups')) {
+      const treffer = muster.exec(dateiname);
+      if (!treffer) continue;
+
+      const [, basis, stempel] = treffer;
+      // Zeitstempel zurückwandeln: aus "2026-08-10T09-12-33-123Z" wieder
+      // ein gültiges ISO-Datum machen.
+      const iso = stempel.replace(/T(\d{2})-(\d{2})-(\d{2})-(\d{3})Z/, 'T$1:$2:$3.$4Z');
+      const zeitpunkt = new Date(iso);
+
+      eintraege.push({
+        dateiname,
+        zielDatei: `${basis}.json`,
+        art: basis === MITGLIEDER_DATEI.replace(/\.json$/, '') ? 'mitglieder' : 'kegeljahr',
+        zeitpunkt: Number.isNaN(zeitpunkt.getTime()) ? null : zeitpunkt.toISOString(),
+      });
+    }
+
+    return eintraege.sort((a, b) => b.dateiname.localeCompare(a.dateiname));
+  }
+
+  /** Liest eine Sicherung, ohne sie einzuspielen — für die Vorschau. */
+  async backupLesen(dateiname: string): Promise<unknown> {
+    this.pruefeVerbunden();
+    const inhalt = await this.adapter.dateiLesen(`backups/${dateiname}`);
+    if (inhalt === null) throw new Error(`Sicherung "${dateiname}" nicht gefunden.`);
+    return JSON.parse(inhalt);
+  }
+
+  /**
+   * Liest eine Sicherung und prüft sie, schreibt aber nichts.
+   *
+   * Das Einspielen selbst geschieht bewusst nur im Arbeitsspeicher (siehe
+   * VereinsdatenService.sicherungUebernehmen): So lässt sich der Stand erst
+   * ansehen und bei Bedarf verwerfen, bevor er den Server erreicht.
+   */
+  async backupEinlesen(eintrag: BackupEintrag): Promise<SicherungsInhalt> {
+    const inhalt = await this.backupLesen(eintrag.dateiname);
+
+    if (eintrag.art === 'mitglieder') {
+      return { art: 'mitglieder', mitglieder: pruefeMitgliederDatei(inhalt).mitglieder };
+    }
+
+    // Ohne Mitglieds-IDs prüfen: die Sicherung soll auch dann lesbar sein,
+    // wenn die passenden Stammdaten erst danach eingespielt werden.
+    return { art: 'kegeljahr', kegeljahr: pruefeKegeljahrDatei(inhalt).kegeljahr };
+  }
+
+  /** Ändert eine Buchung nicht — nur zum Aufräumen alter Sicherungen. */
+  async backupLoeschen(dateiname: string): Promise<void> {
+    this.pruefeVerbunden();
+    await this.adapter.dateiLoeschen(`backups/${dateiname}`);
   }
 
   private async backupErstellen(pfad: string, dateiname: string): Promise<void> {

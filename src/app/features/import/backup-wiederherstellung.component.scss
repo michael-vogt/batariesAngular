@@ -1,0 +1,103 @@
+.seiten-kopf {
+  align-items: flex-start;
+}
+
+.seiten-kopf .hinweis {
+  margin: var(--abstand-1) 0 0;
+  max-width: 44rem;
+}
+
+.karte {
+  margin-bottom: var(--abstand-4);
+}
+
+.karte h2 {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-2);
+  margin: 0 0 var(--abstand-3);
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+.anzahl {
+  padding: 0 var(--abstand-2);
+  border-radius: 999px;
+  background: var(--farbe-akzent-hell);
+  color: var(--farbe-akzent);
+  font-family: var(--schrift-zahl);
+  font-size: 0.75rem;
+}
+
+.staende {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.staende > li {
+  border-bottom: 1px solid var(--farbe-linie);
+}
+
+.staende > li:last-child {
+  border-bottom: none;
+}
+
+.staende > li.gewaehlt {
+  background: var(--farbe-flaeche);
+}
+
+.zeile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--abstand-3);
+  padding: var(--abstand-2) var(--abstand-2);
+}
+
+.zeit {
+  font-family: var(--schrift-zahl);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9375rem;
+}
+
+/* Die Vorschau klappt unter dem gewählten Stand auf, damit der Bezug
+   zwischen Zeitpunkt und Inhalt sichtbar bleibt. */
+.vorschau {
+  padding: 0 var(--abstand-2) var(--abstand-4);
+}
+
+.vorschau p {
+  margin: 0 0 var(--abstand-3);
+  max-width: 46rem;
+}
+
+.vorschau .hinweis {
+  margin: var(--abstand-3) 0 0;
+}
+
+.hinweisliste {
+  margin: 0;
+  padding-left: var(--abstand-6);
+  max-width: 52rem;
+}
+
+.hinweisliste li {
+  margin-bottom: var(--abstand-2);
+}
+
+.meldung {
+  margin: 0 0 var(--abstand-4);
+}
+
+code {
+  font-family: var(--schrift-zahl);
+  font-size: 0.875em;
+}
+
+.kopf-aktionen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--abstand-3);
+}

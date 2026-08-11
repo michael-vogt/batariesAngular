@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { KegeljahrStore } from './kegeljahr.store';
-import { FileStorageService } from './persistenz/file-storage.service';
+import { FileStorageService, SicherungsInhalt } from './persistenz/file-storage.service';
 import { KegeljahrRef, SCHEMA_VERSION } from './persistenz/file-storage.models';
 import { AbschlussVorschau, bereiteAbschlussVor } from './jahresabschluss.logic';
 import { istSchemaV1, migriereV1 } from './persistenz/file-storage.migration';
@@ -230,6 +230,24 @@ export class VereinsdatenService {
       this._status.set('fehler');
       throw e;
     }
+  }
+
+  /**
+   * Übernimmt eine gelesene Sicherung in den Arbeitsstand — ohne sie zu
+   * speichern. Der Server bleibt unberührt, bis „Änderungen speichern“
+   * gedrückt wird; über „Verwerfen“ lässt sich der Schritt zurücknehmen.
+   */
+  sicherungUebernehmen(inhalt: SicherungsInhalt): void {
+    if (inhalt.art === 'mitglieder') {
+      this.store.setMitglieder(inhalt.mitglieder);
+    } else {
+      this.store.setKegeljahre([inhalt.kegeljahr], inhalt.kegeljahr.id);
+    }
+
+    // setKegeljahre/setMitglieder zählen den Datenstand hoch, wodurch die
+    // Seiten ihre offenen Bearbeitungen zurücksetzen. Als ungespeichert
+    // markieren müssen wir dagegen ausdrücklich.
+    this._ungespeichert.set(true);
   }
 
   private mitgliedIds(): Set<string> {

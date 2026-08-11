@@ -1,0 +1,130 @@
+<div class="seite">
+  <header class="seiten-kopf">
+    <div>
+      <h1>Sicherungen</h1>
+      <p class="hinweis">
+        Vor jedem Speichern legt der Server eine Sicherung des vorherigen Standes ab.
+      </p>
+    </div>
+    <div class="kopf-aktionen">
+      @if (daten.ungespeichert()) {
+        <span class="hinweis">Nicht gespeicherte Änderungen</span>
+      }
+      <button type="button" [disabled]="laedt()" (click)="aktualisieren()">
+        {{ laedt() ? 'Lädt…' : 'Neu einlesen' }}
+      </button>
+      <button
+        type="button"
+        class="primaer"
+        [disabled]="!daten.ungespeichert() || speichert()"
+        (click)="speichern()"
+      >
+        {{ speichert() ? 'Speichert…' : 'Änderungen speichern' }}
+      </button>
+    </div>
+  </header>
+
+  @if (storage.status() !== 'verbunden') {
+    <div class="karte">
+      <p class="fehler">Keine Serververbindung — bitte zuerst unter Einstellungen verbinden.</p>
+    </div>
+  } @else {
+    @if (fehler(); as text) {
+      <p class="fehler">{{ text }}</p>
+    }
+    @if (meldung(); as text) {
+      <p class="ok meldung">{{ text }}</p>
+    }
+
+    @if (eintraege().length === 0 && !laedt()) {
+      <div class="karte">
+        <p>
+          Noch keine Sicherungen vorhanden. Sie entstehen von selbst, sobald zum zweiten Mal
+          gespeichert wird.
+        </p>
+      </div>
+    }
+
+    @for (gruppe of gruppen(); track gruppe.zielDatei) {
+      <div class="karte">
+        <h2>
+          {{ gruppe.zielDatei === 'mitglieder.json' ? 'Mitglieder' : gruppe.zielDatei }}
+          <span class="anzahl">{{ gruppe.staende.length }}</span>
+        </h2>
+
+        <ul class="staende">
+          @for (e of gruppe.staende; track e.dateiname) {
+            <li [class.gewaehlt]="istGewaehlt(e)">
+              <div class="zeile">
+                <span class="zeit">{{ zeitpunkt(e) }}</span>
+                <button type="button" class="leise-aktion" (click)="ansehen(e)">
+                  {{ istGewaehlt(e) ? 'Schließen' : 'Ansehen' }}
+                </button>
+              </div>
+
+              @if (istGewaehlt(e)) {
+                @if (vorschau(); as v) {
+                  <div class="vorschau">
+                    @if (v.fehler) {
+                      <p class="fehler">{{ v.fehler }}</p>
+                    } @else {
+                      @if (v.eintrag.art === 'mitglieder') {
+                        <p>Enthält <strong>{{ v.mitglieder }}</strong> Mitglieder.</p>
+                      } @else {
+                        <p>
+                          Enthält <strong>{{ v.bezeichnung }}</strong> mit
+                          {{ v.buchungen }} Buchungen und {{ v.kegelabende }} Kegelabenden.
+                        </p>
+                      }
+
+                      <button
+                        type="button"
+                        class="primaer"
+                        [disabled]="stelltWiederHer()"
+                        (click)="uebernehmen(v)"
+                      >
+                        {{ stelltWiederHer() ? 'Lade…' : 'Diesen Stand laden' }}
+                      </button>
+
+                      <p class="hinweis">
+                        Ersetzt <code>{{ v.eintrag.zielDatei }}</code> nur im Arbeitsstand. Auf
+                        dem Server ändert sich erst etwas, wenn oben „Änderungen speichern“
+                        gedrückt wird.
+                      </p>
+                    }
+                  </div>
+                }
+              }
+            </li>
+          }
+        </ul>
+      </div>
+    }
+
+    <div class="karte">
+      <h2>Hinweise</h2>
+      <ul class="hinweisliste">
+        <li>
+          Mitglieder und Kegeljahre werden <strong>getrennt</strong> gesichert. Nach dem
+          Einspielen eines älteren Kegeljahres passen die Mitglieder eventuell nicht mehr dazu —
+          die Prüfung beim Speichern meldet das und bricht ab, bevor etwas Falsches entsteht.
+        </li>
+        <li>
+          Es werden je Datei die letzten 15 Stände aufbewahrt, ältere fallen automatisch weg.
+        </li>
+        <li>
+          Ein geladener Stand ersetzt zunächst nur die Anzeige. Prüfe ihn in Ruhe — etwa im
+          Journal oder in der Mitgliederliste — und speichere erst dann.
+        </li>
+        <li>
+          Solange nicht gespeichert wurde, macht <strong>Verwerfen</strong> in der oberen Leiste
+          den Schritt rückgängig und holt den Serverstand zurück.
+        </li>
+        <li>
+          Beim Speichern legt der Server wie gewohnt eine Sicherung des überschriebenen Standes
+          an — auch das bleibt also zurückholbar.
+        </li>
+      </ul>
+    </div>
+  }
+</div>
