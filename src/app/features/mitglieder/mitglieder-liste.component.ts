@@ -1,11 +1,4 @@
-import {
-  Component,
-  computed,
-  effect,
-  inject,
-  signal,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, computed, effect, inject, linkedSignal, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MitgliederService } from '../../core/kegelverein/mitglieder.service';
 import { AccountingService } from '../../core/kegelverein/accounting.service';
@@ -103,7 +96,17 @@ export class MitgliederListeComponent {
   protected readonly neuName = signal('');
   protected readonly neuStatus = signal<MitgliedStatus>('aktiv');
   protected readonly neuRolle = signal('');
-  protected readonly neuEintritt = signal(HEUTE());
+  /**
+   * Eintrittsdatum neuer Mitglieder, vorbelegt mit dem Beginn des
+   * aktuellen Kegeljahres.
+   *
+   * linkedSignal statt signal: Die Vereinsdaten kommen asynchron vom
+   * Server, beim Erzeugen der Komponente ist noch kein Kegeljahr geladen.
+   * Ein einmal berechneter Anfangswert bliebe deshalb für immer leer.
+   * Der Wert bleibt trotzdem änderbar und wird nur zurückgesetzt, wenn
+   * ein anderes Kegeljahr geladen oder gewechselt wird.
+   */
+  protected readonly neuEintritt = linkedSignal(() => this.standardEintritt());
   protected readonly anlegeFehler = signal<string | null>(null);
   protected readonly bearbeitenFehler = signal<string | null>(null);
   protected readonly verlaufOffen = signal<string | null>(null);
@@ -111,6 +114,14 @@ export class MitgliederListeComponent {
   protected readonly wechselStatus = signal<MitgliedStatus>('passiv');
   protected readonly wechselNotiz = signal('');
   protected readonly speichert = signal(false);
+
+  /**
+   * Vorschlag für das Eintrittsdatum: Beginn des aktuellen Kegeljahres,
+   * ersatzweise heute — etwa solange die Daten noch nicht geladen sind.
+   */
+  private standardEintritt(): string {
+    return this.daten.aktuellesJahr()?.startDatum ?? HEUTE();
+  }
 
   protected anlegen(): void {
     const name = this.neuName().trim();
@@ -129,14 +140,14 @@ export class MitgliederListeComponent {
       neuesMitglied(
         name,
         this.neuStatus(),
-        this.neuEintritt() || HEUTE(),
+        this.neuEintritt() || this.standardEintritt(),
         this.neuRolle().trim() || undefined,
       ),
     );
 
     this.neuName.set('');
     this.neuRolle.set('');
-    this.neuEintritt.set(HEUTE());
+    this.neuEintritt.set(this.standardEintritt());
     this.anlegeFehler.set(null);
     this.daten.aenderungVorgemerkt();
   }

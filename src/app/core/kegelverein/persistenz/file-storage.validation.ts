@@ -18,6 +18,22 @@ function istString(v: unknown): v is string {
   return typeof v === 'string';
 }
 
+/**
+ * Datumsangaben im Format JJJJ-MM-TT.
+ *
+ * Ein reiner typeof-Test würde auch "" oder "irgendwas" durchlassen. Da
+ * sämtliche Zeitvergleiche in der Anwendung auf der Zeichenkette selbst
+ * beruhen (Filter, Stichtage, Statusverlauf), wäre ein solcher Wert
+ * schlimmer als ein fehlender: er fällt nirgends auf, sortiert aber
+ * falsch. Zusätzlich wird geprüft, dass es den Tag wirklich gibt —
+ * "2026-02-31" hat das richtige Format, aber kein Gegenstück im Kalender.
+ */
+function istDatum(v: unknown): v is string {
+  if (typeof v !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(v)) return false;
+  const datum = new Date(`${v}T00:00:00Z`);
+  return !Number.isNaN(datum.getTime()) && datum.toISOString().slice(0, 10) === v;
+}
+
 function istZahl(v: unknown): v is number {
   return typeof v === 'number' && Number.isFinite(v);
 }
@@ -32,7 +48,10 @@ export function pruefeMitglied(v: unknown): asserts v is Mitglied {
     `Mitglied "${m.name}": statusVerlauf fehlt oder ist leer`,
   );
   for (const eintrag of m.statusVerlauf) {
-    pruefe(istString(eintrag.ab), `Mitglied "${m.name}": Statuseintrag ohne Datum`);
+    pruefe(
+      istDatum(eintrag.ab),
+      `Mitglied "${m.name}": Statuseintrag mit ungültigem Datum "${eintrag.ab}"`,
+    );
     pruefe(
       ERLAUBTE_STATUS.includes(eintrag.status),
       `Mitglied "${m.name}": ungültiger Status "${eintrag.status}"`,
@@ -60,7 +79,10 @@ export function pruefeMitgliederDatei(json: unknown): MitgliederDatei {
 export function pruefeBuchung(v: unknown): asserts v is Buchung {
   const b = v as Buchung;
   pruefe(!!b && istString(b.id), 'Buchung: id fehlt');
-  pruefe(istString(b.datum), `Buchung ${b.id}: datum fehlt/ungültig`);
+  pruefe(
+    istDatum(b.datum),
+    `Buchung ${b.id}: datum "${b.datum}" ist kein Datum im Format JJJJ-MM-TT`,
+  );
   pruefe(istString(b.sollKonto) && istString(b.habenKonto), `Buchung ${b.id}: Konten fehlen`);
   pruefe(b.sollKonto !== b.habenKonto, `Buchung ${b.id}: Soll- und Habenkonto identisch`);
   pruefe(istZahl(b.betrag) && b.betrag > 0, `Buchung ${b.id}: betrag muss > 0 sein`);
@@ -69,7 +91,11 @@ export function pruefeBuchung(v: unknown): asserts v is Buchung {
 
 export function pruefeKegelabend(v: unknown): asserts v is Kegelabend {
   const ka = v as Kegelabend;
-  pruefe(!!ka && istString(ka.id) && istString(ka.datum), 'Kegelabend: id/datum fehlen');
+  pruefe(!!ka && istString(ka.id), 'Kegelabend: id fehlt');
+  pruefe(
+    istDatum(ka.datum),
+    `Kegelabend ${ka.id}: datum "${ka.datum}" ist kein Datum im Format JJJJ-MM-TT`,
+  );
   pruefe(Array.isArray(ka.teilnehmer), `Kegelabend ${ka.id}: teilnehmer fehlt`);
   pruefe(typeof ka.runden === 'object' && ka.runden !== null, `Kegelabend ${ka.id}: runden fehlt`);
 }
@@ -86,9 +112,14 @@ export function pruefeKegeljahr(
   const kj = v as Kegeljahr;
   pruefe(!!kj && istString(kj.id) && istString(kj.bezeichnung), 'Kegeljahr: id/bezeichnung fehlen');
   pruefe(
-    istString(kj.startDatum) && istString(kj.endDatum),
-    `Kegeljahr ${kj.id}: Datumsfelder fehlen`,
+    istDatum(kj.startDatum),
+    `Kegeljahr ${kj.id}: startDatum "${kj.startDatum}" ist kein Datum im Format JJJJ-MM-TT`,
   );
+  pruefe(
+    istDatum(kj.endDatum),
+    `Kegeljahr ${kj.id}: endDatum "${kj.endDatum}" ist kein Datum im Format JJJJ-MM-TT`,
+  );
+  pruefe(kj.startDatum <= kj.endDatum, `Kegeljahr ${kj.id}: startDatum liegt nach endDatum`);
   pruefe(Array.isArray(kj.buchungen), `Kegeljahr ${kj.id}: buchungen fehlt`);
   pruefe(Array.isArray(kj.kegelabende), `Kegeljahr ${kj.id}: kegelabende fehlt`);
 
