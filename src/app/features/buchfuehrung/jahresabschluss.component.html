@@ -13,7 +13,40 @@
     </p>
   }
 
-  @if (!aktuellesJahr()) {
+  @if (nochKeinJahr()) {
+    <div class="karte erstes-jahr">
+      <h2>Erstes Kegeljahr anlegen</h2>
+      <p>
+        Auf dem Server liegt noch kein Kegeljahr. Alle weiteren Jahre entstehen später über den
+        Jahresabschluss, damit die Bestände lückenlos übertragen werden — das erste muss einmalig
+        von Hand angelegt werden.
+      </p>
+
+      <div class="formular-zeile">
+        <label>
+          Beginn
+          <input type="date" [ngModel]="neuStart()" (ngModelChange)="neuStart.set($event)" />
+        </label>
+        <label>
+          Ende
+          <input type="date" [ngModel]="neuEnde()" (ngModelChange)="neuEnde.set($event)" />
+        </label>
+        <button
+          type="button"
+          class="primaer"
+          [disabled]="legtAn() || !neuStart() || !neuEnde()"
+          (click)="erstesJahrAnlegen()"
+        >
+          {{ legtAn() ? 'Lege an…' : 'Kegeljahr anlegen' }}
+        </button>
+      </div>
+
+      <p class="hinweis">
+        Vorgeschlagen ist der übliche Zeitraum vom 1. Oktober bis zum 30. September. Das Ende
+        richtet sich automatisch nach dem Beginn und lässt sich anpassen.
+      </p>
+    </div>
+  } @else if (!aktuellesJahr()) {
     <div class="karte">
       <p>Kein Kegeljahr ausgewählt.</p>
     </div>

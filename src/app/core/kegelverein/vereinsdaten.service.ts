@@ -1,5 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { KegeljahrStore } from './kegeljahr.store';
+import { Kegeljahr } from './kegelverein.models';
 import { FileStorageService, SicherungsInhalt } from './persistenz/file-storage.service';
 import { KegeljahrRef, SCHEMA_VERSION } from './persistenz/file-storage.models';
 import { AbschlussVorschau, bereiteAbschlussVor } from './jahresabschluss.logic';
@@ -248,6 +249,51 @@ export class VereinsdatenService {
     // Seiten ihre offenen Bearbeitungen zurücksetzen. Als ungespeichert
     // markieren müssen wir dagegen ausdrücklich.
     this._ungespeichert.set(true);
+  }
+
+  /**
+   * Legt das erste Kegeljahr an — der Einstieg auf einem leeren Server.
+   *
+   * Alle weiteren Jahre entstehen über den Jahresabschluss, damit die
+   * Bestände lückenlos übertragen werden. Deshalb ist diese Funktion
+   * bewusst auf den Fall beschränkt, dass noch gar kein Jahr existiert.
+   *
+   * Anders als sonst wird hier sofort gespeichert: Ohne Kegeljahr gibt es
+   * keine Seite, auf der man „Änderungen speichern“ drücken könnte.
+   */
+  async erstesKegeljahrAnlegen(startDatum: string, endDatum: string): Promise<Kegeljahr> {
+    if (this._verfuegbareJahre().length > 0 || this.store.kegeljahre().length > 0) {
+      throw new Error(
+        'Es existiert bereits ein Kegeljahr. Weitere Jahre entstehen über den Jahresabschluss.',
+      );
+    }
+    if (startDatum >= endDatum) {
+      throw new Error('Das Startdatum muss vor dem Enddatum liegen.');
+    }
+
+    const kegeljahr: Kegeljahr = {
+      id: crypto.randomUUID(),
+      bezeichnung: `Kegeljahr ${startDatum.slice(0, 4)}/${endDatum.slice(0, 4)}`,
+      startDatum,
+      endDatum,
+      buchungen: [],
+      kegelabende: [],
+    };
+
+    this._fehler.set(null);
+    try {
+      // Stammdaten zuerst, damit mitglieder.json auf einem frischen Server
+      // überhaupt existiert — auch wenn sie noch leer ist.
+      await this.storage.mitgliederSpeichern(this.store.mitglieder());
+      await this.storage.kegeljahrSpeichern(kegeljahr, this.mitgliedIds());
+      await this.storage.aktuellesKegeljahrSetzen(kegeljahr.id);
+
+      await this.initialisieren();
+      return kegeljahr;
+    } catch (e) {
+      this._fehler.set(e instanceof Error ? e.message : 'Kegeljahr konnte nicht angelegt werden');
+      throw e;
+    }
   }
 
   private mitgliedIds(): Set<string> {

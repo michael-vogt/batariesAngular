@@ -321,6 +321,20 @@ die Zuordnung nachtragen.
 
 ## Jahresabschluss
 
+### Das erste Kegeljahr anlegen
+
+Auf einem frisch eingerichteten Server gibt es noch kein Kegeljahr — und ohne
+eines lässt sich nichts buchen. Die Seite **Jahresabschluss** bietet dann oben
+das Anlegen an: Beginn und Ende eintragen, vorgeschlagen ist der übliche Zeitraum
+vom 1. Oktober bis zum 30. September. Das Ende richtet sich nach dem Beginn und
+lässt sich anpassen.
+
+Alle weiteren Jahre entstehen später über den Abschluss, damit die Bestände
+lückenlos übertragen werden. Werden Altdaten importiert, entfällt dieser Schritt —
+die Kegeljahre kommen dann aus der Importdatei.
+
+### Ein Kegeljahr abschließen
+
 Am Ende des Kegeljahres:
 
 1. Zuerst alle offenen Vorgänge buchen (letzte Beiträge, Zahlungseingänge).

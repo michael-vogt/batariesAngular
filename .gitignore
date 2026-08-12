@@ -3,6 +3,9 @@
 # single files
 package-lock.json
 
+# certain file types
+*.zip
+
 # Compiled output
 /dist
 /tmp

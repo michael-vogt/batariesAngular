@@ -1,18 +1,33 @@
-import {
-  Component,
-  computed,
-  effect,
-  inject,
-  signal,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, computed, effect, inject, linkedSignal, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { AccountingService } from '../../core/kegelverein/accounting.service';
 import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
 import { AbschlussVorschau } from '../../core/kegelverein/jahresabschluss.logic';
 import { datumKurz, euro } from '../../shared/format.util';
 
+/**
+ * Vorschlag für den Beginn: der 1. Oktober des laufenden Kegeljahres.
+ * Vor Oktober liegt der Beginn im Vorjahr.
+ */
+function vorschlagJahresbeginn(): string {
+  const heute = new Date();
+  const jahr = heute.getMonth() >= 9 ? heute.getFullYear() : heute.getFullYear() - 1;
+  return `${jahr}-10-01`;
+}
+
+/** Ein Tag vor dem gleichen Datum im Folgejahr. */
+function einJahrSpaeter(startDatum: string): string {
+  if (!startDatum) return '';
+  const d = new Date(`${startDatum}T00:00:00Z`);
+  if (Number.isNaN(d.getTime())) return '';
+  d.setUTCFullYear(d.getUTCFullYear() + 1);
+  d.setUTCDate(d.getUTCDate() - 1);
+  return d.toISOString().slice(0, 10);
+}
+
 @Component({
   selector: 'app-jahresabschluss',
+  imports: [FormsModule],
   templateUrl: './jahresabschluss.component.html',
   styleUrl: './jahresabschluss.component.scss',
 })
@@ -39,6 +54,36 @@ export class JahresabschlussComponent {
   protected readonly abgeschlossen = signal(false);
 
   protected readonly aktuellesJahr = this.daten.aktuellesJahr;
+
+  // --- Erstinbetriebnahme ------------------------------------------------
+
+  /** Es gibt noch gar kein Kegeljahr — dann fehlt der Einstieg. */
+  protected readonly nochKeinJahr = computed(
+    () => this.daten.status() === 'bereit' && this.daten.verfuegbareJahre().length === 0,
+  );
+
+  protected readonly neuStart = signal(vorschlagJahresbeginn());
+  protected readonly neuEnde = linkedSignal(() => einJahrSpaeter(this.neuStart()));
+  protected readonly legtAn = signal(false);
+
+  protected async erstesJahrAnlegen(): Promise<void> {
+    const start = this.neuStart();
+    const ende = this.neuEnde();
+    if (!start || !ende) return;
+
+    const bezeichnung = `Kegeljahr ${start.slice(0, 4)}/${ende.slice(0, 4)}`;
+    if (!confirm(`${bezeichnung} anlegen (${this.datumKurz(start)} bis ${this.datumKurz(ende)})?`))
+      return;
+
+    this.legtAn.set(true);
+    try {
+      await this.daten.erstesKegeljahrAnlegen(start, ende);
+    } catch {
+      // Fehlertext steht in daten.fehler()
+    } finally {
+      this.legtAn.set(false);
+    }
+  }
 
   /** Bestände, die übertragen werden — zur Kontrolle vor dem Abschluss. */
   protected readonly bestaende = computed(() => {
