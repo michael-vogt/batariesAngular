@@ -4,6 +4,7 @@ import { AccountingService } from '../../core/kegelverein/accounting.service';
 import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
 import { AbschlussVorschau } from '../../core/kegelverein/jahresabschluss.logic';
 import { datumKurz, euro } from '../../shared/format.util';
+import { MitgliederService } from '../../core/kegelverein/mitglieder.service';
 
 /**
  * Vorschlag für den Beginn: der 1. Oktober des laufenden Kegeljahres.
@@ -38,6 +39,7 @@ export class JahresabschlussComponent {
   protected readonly datumKurz = datumKurz;
   private readonly accounting = inject(AccountingService);
   protected readonly daten = inject(VereinsdatenService);
+  protected readonly mitgliederService = inject(MitgliederService);
 
   constructor() {
     // Läuft bei jedem vollständigen Datenaustausch (Laden, Verwerfen,

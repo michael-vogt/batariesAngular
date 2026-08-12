@@ -33,7 +33,7 @@ export class GeschaeftsvorfaelleComponent {
   // damit die Templates darauf zugreifen können.
   protected readonly euro = euro;
   private readonly accounting = inject(AccountingService);
-  private readonly mitgliederService = inject(MitgliederService);
+  protected readonly mitgliederService = inject(MitgliederService);
   protected readonly daten = inject(VereinsdatenService);
 
   constructor() {
@@ -87,6 +87,10 @@ export class GeschaeftsvorfaelleComponent {
   protected beitraegeBuchen(): void {
     const anzahl = this.beitragVorschau().length;
     if (anzahl === 0) return;
+
+    if (!this.fortfahrenWennGewaehltesDatumHeute())
+      return;
+
     if (!confirm(`${anzahl} Monatsbeiträge über ${this.euro(this.beitragSumme())} € buchen?`))
       return;
 
@@ -293,5 +297,13 @@ export class GeschaeftsvorfaelleComponent {
     this.gaeste.set({});
     this.ausrichterId.set('');
     this.meldung.set(null);
+  }
+
+  private fortfahrenWennGewaehltesDatumHeute(): boolean {
+    // gewähltes Datum ist nicht heute, daher keine Überprüfung notwendig
+    if (this.beitragDatum() !== HEUTE())
+      return false;
+
+    return confirm('Achtung: Das gewählte Datum ist heute! Fortfahren?');
   }
 }

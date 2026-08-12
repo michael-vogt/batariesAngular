@@ -110,6 +110,7 @@
           <thead>
           <tr>
             <th>Buchungstext</th>
+            <th>zugeordnetes Mitglied</th>
             <th>Soll</th>
             <th>Haben</th>
             <th class="zahl">Betrag</th>
@@ -119,6 +120,7 @@
             @for (b of v.eroeffnungsbuchungen; track b.id) {
               <tr>
                 <td>{{ b.buchungstext }}</td>
+                <td>{{ mitgliederService.suchen(b.mitgliedId ?? '')?.name ?? '—' }}</td>
                 <td class="leise">{{ b.sollKonto }}</td>
                 <td class="leise">{{ b.habenKonto }}</td>
                 <td class="zahl">{{ euro(b.betrag) }}</td>
@@ -127,7 +129,7 @@
           </tbody>
           <tfoot>
           <tr>
-            <td colspan="3"><strong>Summe</strong></td>
+            <td colspan="4"><strong>Summe</strong></td>
             <td class="zahl"><strong>{{ euro(summe()) }}</strong></td>
           </tr>
           </tfoot>

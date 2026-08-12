@@ -86,7 +86,7 @@
           <tbody>
             @for (b of beitragVorschau(); track b.id) {
               <tr>
-                <td>{{ b.buchungstext }}</td>
+                <td>{{ mitgliederService.suchen(b.mitgliedId ?? '')?.name ?? 'unbekannt' }}</td>
                 <td class="zahl">{{ euro(b.betrag) }}</td>
               </tr>
             }

@@ -27,4 +27,8 @@ export class MitgliederService {
   setzeAlle(mitglieder: Mitglied[]): void {
     this.store.setMitglieder(mitglieder);
   }
+
+  suchen(id: string): Mitglied | undefined {
+    return this.mitglieder().find(mitglieder => mitglieder.id === id);
+  }
 }
