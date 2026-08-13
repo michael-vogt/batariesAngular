@@ -116,6 +116,18 @@ export class KegeljahrStore {
     this.updateAktuelles((kj) => ({ ...kj, buchungen: kj.buchungen.filter((x) => x.id !== id) }));
   }
 
+  /** Entfernt mehrere Buchungen auf einmal. */
+  deleteBuchungen(ids: readonly string[]): number {
+    const zuLoeschen = new Set(ids);
+    let entfernt = 0;
+    this.updateAktuelles((kj) => {
+      const behalten = kj.buchungen.filter((b) => !zuLoeschen.has(b.id));
+      entfernt = kj.buchungen.length - behalten.length;
+      return { ...kj, buchungen: behalten };
+    });
+    return entfernt;
+  }
+
   /** Entfernt alle Buchungen, die aus der Abrechnung eines Kegelabends stammen. */
   deleteBuchungenFuerKegelabend(kegelabendId: string): number {
     let entfernt = 0;

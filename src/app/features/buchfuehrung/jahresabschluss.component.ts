@@ -3,8 +3,8 @@ import { FormsModule } from '@angular/forms';
 import { AccountingService } from '../../core/kegelverein/accounting.service';
 import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
 import { AbschlussVorschau } from '../../core/kegelverein/jahresabschluss.logic';
+import { erzeugeJahresbericht } from '../../core/kegelverein/bilanz.logic';
 import { datumKurz, euro } from '../../shared/format.util';
-import { MitgliederService } from '../../core/kegelverein/mitglieder.service';
 
 /**
  * Vorschlag für den Beginn: der 1. Oktober des laufenden Kegeljahres.
@@ -39,7 +39,6 @@ export class JahresabschlussComponent {
   protected readonly datumKurz = datumKurz;
   private readonly accounting = inject(AccountingService);
   protected readonly daten = inject(VereinsdatenService);
-  protected readonly mitgliederService = inject(MitgliederService);
 
   constructor() {
     // Läuft bei jedem vollständigen Datenaustausch (Laden, Verwerfen,
@@ -84,6 +83,161 @@ export class JahresabschlussComponent {
       // Fehlertext steht in daten.fehler()
     } finally {
       this.legtAn.set(false);
+    }
+  }
+
+  /**
+   * Bilanz und GuV des laufenden Jahres — der Anhang für die
+   * Generalversammlung. Wird laufend aus den Buchungen berechnet und ist
+   * unabhängig davon, ob das Jahr schon abgeschlossen wurde.
+   */
+  protected readonly bericht = computed(() => {
+    const jahr = this.daten.aktuellesJahr();
+    return jahr ? erzeugeJahresbericht(jahr) : null;
+  });
+
+  protected readonly berichtSichtbar = signal(false);
+
+  protected berichtUmschalten(): void {
+    this.berichtSichtbar.update((offen) => !offen);
+  }
+
+  // --- Bilanz und GuV als PDF -------------------------------------------
+
+  protected readonly pdfLaeuft = signal(false);
+  protected readonly pdfFehler = signal<string | null>(null);
+
+  /** Für die Anzeige des Ergebnisses ohne Vorzeichen. */
+  protected abs(n: number): number {
+    return Math.abs(n);
+  }
+
+  /**
+   * Erzeugt den Anhang zur Generalversammlung als PDF: Eröffnungsbilanz,
+   * Schlussbilanz und GuV, nach dem Muster der bisherigen Anhänge.
+   *
+   * jsPDF wird erst beim Klick geladen — die Bibliothek ist die größte
+   * Abhängigkeit der Anwendung und wird nur hier und in der Abrechnung
+   * gebraucht.
+   */
+  protected async berichtAlsPdf(): Promise<void> {
+    const b = this.bericht();
+    if (!b) return;
+
+    this.pdfFehler.set(null);
+    this.pdfLaeuft.set(true);
+
+    try {
+      const { jsPDF } = await import('jspdf');
+      const { default: autoTable } = await import('jspdf-autotable');
+
+      const doc = new jsPDF();
+      const geld = (n: number) => `${this.euro(n)} €`;
+      const jahr = b.bezeichnung.replace('Kegeljahr ', '');
+
+      doc.setFontSize(13);
+      doc.text(`Bilanz des Kegeljahres ${jahr}`, 14, 16);
+
+      const bilanzTabelle = (titel: string, seite: typeof b.eroeffnungsbilanz, startY: number) => {
+        doc.setFontSize(10);
+        doc.text(titel, 14, startY);
+
+        autoTable(doc, {
+          startY: startY + 3,
+          head: [['Aktiva', '', 'Passiva', '']],
+          // Unterposten werden durch führende Leerzeichen eingerückt —
+          // autoTable kennt keine Einzugsangabe je Zelle.
+          body: [
+            ['Anlagevermögen', '', 'Vereinsvermögen', geld(seite.vereinsvermoegen)],
+            ['    ./.', geld(0), '', ''],
+            ['Umlaufvermögen', '', 'Verbindlichkeiten', ''],
+            [
+              '    Forderungen',
+              geld(seite.forderungen),
+              '    Restguthaben',
+              geld(seite.restguthaben),
+            ],
+            ['    Kasse', geld(seite.kasse), '    Schulden ggü. Dritten', geld(seite.schulden)],
+          ],
+          foot: [
+            ['Summe Aktiva', geld(seite.summeAktiva), 'Summe Passiva', geld(seite.summePassiva)],
+          ],
+          theme: 'grid',
+          styles: { fontSize: 9, cellPadding: 2, lineColor: [0, 0, 0], lineWidth: 0.1 },
+          headStyles: { fillColor: [64, 64, 64], textColor: [255, 255, 255], fontStyle: 'bold' },
+          footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' },
+          bodyStyles: { textColor: [0, 0, 0], fillColor: [255, 255, 255] },
+          columnStyles: {
+            1: { halign: 'right', cellWidth: 32 },
+            3: { halign: 'right', cellWidth: 32 },
+          },
+          // Zeile 0 und 2 tragen die Oberposten.
+          didParseCell: (data: {
+            row: { index: number };
+            column: { index: number };
+            cell: { styles: { fontStyle: string } };
+          }) => {
+            if ([0, 2].includes(data.row.index) && data.column.index % 2 === 0) {
+              data.cell.styles.fontStyle = 'bold';
+            }
+          },
+        });
+
+        return (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 8;
+      };
+
+      let y = bilanzTabelle(
+        `Eröffnungsbilanz zum ${this.datumKurz(b.startDatum)}`,
+        b.eroeffnungsbilanz,
+        24,
+      );
+      y = bilanzTabelle(`Schlussbilanz zum ${this.datumKurz(b.endDatum)}`, b.schlussbilanz, y);
+
+      doc.setFontSize(13);
+      doc.text(`Gewinn- und Verlustrechnung des Kegeljahres ${jahr}`, 14, y + 4);
+
+      const g = b.guv;
+      autoTable(doc, {
+        startY: y + 8,
+        body: [
+          ['Erträge:', 'Beiträge', geld(g.beitraege)],
+          ['', 'Strafen', geld(g.strafen)],
+          ['', 'Umlagen', geld(g.umlagen)],
+          ['', 'Sonstige Erträge', geld(g.sonstigeErtraege)],
+          ['', 'Erträge gesamt:', geld(g.ertraegeGesamt)],
+          ['Aufwendungen:', 'Kegelbahn', geld(g.kegelbahn)],
+          ['', 'Vereinsrunden', geld(g.vereinsrunden)],
+          ['', 'Generalversammlung', geld(g.generalversammlung)],
+          ['', 'Sonstige Aufwendungen', geld(g.sonstigeAufwendungen)],
+          ['', 'Aufwendungen gesamt:', geld(g.aufwendungenGesamt)],
+          [
+            g.ergebnis >= 0 ? 'Jahresüberschuss:' : 'Jahresfehlbetrag:',
+            '',
+            geld(Math.abs(g.ergebnis)),
+          ],
+        ],
+        theme: 'plain',
+        styles: { fontSize: 9, cellPadding: 1.5, textColor: [0, 0, 0] },
+        columnStyles: {
+          0: { fontStyle: 'bold', cellWidth: 38 },
+          2: { halign: 'right', cellWidth: 32 },
+        },
+        // Die beiden Summenzeilen und das Ergebnis hervorheben.
+        didParseCell: (data: {
+          row: { index: number };
+          cell: { styles: { fontStyle: string } };
+        }) => {
+          if ([4, 9, 10].includes(data.row.index)) data.cell.styles.fontStyle = 'bold';
+        },
+      });
+
+      doc.save(`bilanz_${b.endDatum.replace(/-/g, '')}.pdf`);
+    } catch (e) {
+      this.pdfFehler.set(
+        e instanceof Error ? `PDF konnte nicht erzeugt werden: ${e.message}` : 'Unbekannter Fehler',
+      );
+    } finally {
+      this.pdfLaeuft.set(false);
     }
   }
 

@@ -111,7 +111,7 @@ export function bereiteAbschlussVor(params: {
           sollKonto: '000',
           habenKonto: '210',
           betrag: finanzen.restguthaben,
-          buchungstext: `Eröffnungsbuchung Restguthaben`,
+          buchungstext: 'Eröffnungsbuchung Restguthaben',
           mitgliedId: m.id,
         }),
       );
@@ -124,7 +124,7 @@ export function bereiteAbschlussVor(params: {
           sollKonto: '100',
           habenKonto: '000',
           betrag: finanzen.offeneForderungenGesamt,
-          buchungstext: `Eröffnungsbuchung Forderungen`,
+          buchungstext: 'Eröffnungsbuchung Forderungen',
           mitgliedId: m.id,
         }),
       );

@@ -174,6 +174,11 @@ Von Hand ergänzte Buchungen bleiben dabei unberührt.
 
 Die vier wiederkehrenden Vorgänge, jeweils mit Vorschau vor dem Buchen.
 
+Bei allen vier Vorgängen ist das heutige Datum vorbelegt. Gebucht wird aber
+meist auf einen zurückliegenden Stichtag — den Monatsersten oder den Kegelabend.
+Steht noch das heutige Datum, weist die Anwendung am Feld darauf hin und fragt
+vor dem Buchen nach.
+
 Jeder Vorgang setzt die Buchungskonten automatisch. Wer die Buchungen im Journal
 nachvollziehen möchte, findet sie hier aufgeschlüsselt — die Kontonummern
 stehen dort in den Spalten „Soll“ und „Haben“.
@@ -264,9 +269,24 @@ Alle Buchungen des Kegeljahres, neueste zuerst.
 Summenzeile bezieht sich immer auf den gesamten Filter, nicht nur auf die
 sichtbare Seite.
 
+Das betroffene Mitglied steht in einer eigenen Spalte und wird über die in der
+Buchung hinterlegte Zuordnung ermittelt — nicht über den Buchungstext. Eine
+Umbenennung wirkt sich dadurch überall zugleich aus. Steht dort ein roter
+Eintrag, verweist die Buchung auf ein gelöschtes Mitglied.
+
 **Bearbeiten** lädt eine Buchung in das Formular oben, das dabei sichtbar den
 Modus wechselt. Nützlich etwa, um eine Buchung nachträglich einem Mitglied
 zuzuordnen.
+
+**Kopieren** übernimmt eine Buchung als Vorlage ins Formular, ohne sie zu
+ersetzen — praktisch für Reihen gleichartiger Buchungen wie mehrere Bahnmieten.
+Vor dem Buchen lässt sich noch alles anpassen.
+
+**Mehrere auf einmal löschen:** Über die Auswahlfelder links lassen sich Zeilen
+markieren; der Haken in der Kopfzeile wählt alle Zeilen der aktuellen Seite. Über
+der Tabelle erscheint dann eine Leiste mit Anzahl, Summe und der Möglichkeit,
+alle Ausgewählten zu löschen. Ein Wechsel des Filters hebt die Auswahl auf, damit
+nicht versehentlich unsichtbare Zeilen mitgelöscht werden.
 
 **Neue Buchung** für alles, was kein Standardvorgang ist. Hier wählst du Soll-
 und Habenkonto selbst. Häufige Fälle:
@@ -332,6 +352,26 @@ lässt sich anpassen.
 Alle weiteren Jahre entstehen später über den Abschluss, damit die Bestände
 lückenlos übertragen werden. Werden Altdaten importiert, entfällt dieser Schritt —
 die Kegeljahre kommen dann aus der Importdatei.
+
+### Bilanz und Gewinn- und Verlustrechnung
+
+Die Seite zeigt den Anhang für die Generalversammlung: Eröffnungsbilanz,
+Schlussbilanz und die Gewinn- und Verlustrechnung. Über **Anzeigen** klappt die
+Aufstellung auf, **Als PDF herunterladen** erzeugt sie als Datei
+`bilanz_JJJJMMTT.pdf`.
+
+Die Zahlen ergeben sich laufend aus den Buchungen — der Abschluss selbst ist
+dafür nicht nötig. Auch mitten im Jahr lässt sich so der Stand ablesen.
+
+| Aufstellung | Grundlage |
+|---|---|
+| Eröffnungsbilanz | die Eröffnungsbuchungen, also der aus dem Vorjahr übernommene Bestand |
+| Schlussbilanz | alle Buchungen des Kegeljahres |
+| Gewinn- und Verlustrechnung | Erträge und Aufwendungen des Kegeljahres |
+
+Als Gegenprobe muss die Veränderung des Vereinsvermögens zwischen beiden
+Bilanzen dem Jahresergebnis entsprechen. Weicht das ab, weist die Anwendung
+darauf hin — dann fehlt meist eine Gegenbuchung.
 
 ### Ein Kegeljahr abschließen
 

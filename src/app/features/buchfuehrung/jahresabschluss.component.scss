@@ -91,3 +91,71 @@
   font-size: 0.8125rem;
   color: var(--farbe-text-leise);
 }
+
+.bericht-kopf {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--abstand-3);
+}
+
+.bericht-kopf h2 {
+  margin: 0;
+}
+
+.bericht-aktionen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--abstand-2);
+}
+
+.bericht h3 {
+  margin: var(--abstand-6) 0 var(--abstand-2);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--farbe-text-leise);
+}
+
+/* Zwei Kontenseiten nebeneinander — die Trennlinie in der Mitte macht
+   deutlich, dass Aktiva und Passiva getrennte Aufstellungen sind. */
+table.bilanz td:nth-child(3),
+table.bilanz th:nth-child(3) {
+  border-left: 1px solid var(--farbe-linie);
+  padding-left: var(--abstand-4);
+}
+
+table.guv td.art {
+  width: 10rem;
+  font-weight: 600;
+}
+
+table.guv tr.summe td {
+  border-top: 1px solid var(--farbe-linie);
+}
+
+table.guv tr.ergebnis td {
+  border-top: 2px solid var(--farbe-linie);
+  color: var(--farbe-haben);
+}
+
+table.guv tr.ergebnis.verlust td {
+  color: var(--farbe-soll);
+}
+
+/* Bilanzgliederung: Oberposten (Anlagevermögen, Umlaufvermögen,
+   Verbindlichkeiten) tragen selbst keinen Betrag, die Einzelposten
+   darunter werden eingerückt. */
+table.bilanz tr.oberposten td {
+  font-weight: 600;
+  border-bottom: none;
+}
+
+table.bilanz td.unterposten {
+  padding-left: var(--abstand-6);
+}
+
+/* Auf der Passivseite kommt die Einrückung zur Trennlinie hinzu. */
+table.bilanz td:nth-child(3).unterposten {
+  padding-left: calc(var(--abstand-4) + var(--abstand-6));
+}

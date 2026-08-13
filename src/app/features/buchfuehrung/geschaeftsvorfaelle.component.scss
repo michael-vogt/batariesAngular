@@ -74,3 +74,10 @@ tr.inaktiv td {
 .aktion {
   margin-top: var(--abstand-4);
 }
+
+/* Weist früh darauf hin, dass die Vorbelegung noch steht — die Rückfrage
+   beim Buchen kommt sonst erst, wenn man schon fertig ist. */
+.datum-hinweis {
+  color: var(--farbe-warnung);
+  font-size: 0.75rem;
+}

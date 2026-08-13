@@ -276,6 +276,11 @@
       <h2 id="geschaeftsvorfaelle">Geschäftsvorfälle</h2>
       <p>Die vier wiederkehrenden Vorgänge, jeweils mit Vorschau vor dem Buchen.</p>
       <p>
+        Bei allen vier Vorgängen ist das heutige Datum vorbelegt. Gebucht wird aber meist auf einen
+        zurückliegenden Stichtag — den Monatsersten oder den Kegelabend. Steht noch das heutige
+        Datum, weist die Anwendung am Feld darauf hin und fragt vor dem Buchen nach.
+      </p>
+      <p>
         Jeder Vorgang setzt die Buchungskonten automatisch. Wer die Buchungen im Journal
         nachvollziehen möchte, findet sie hier aufgeschlüsselt — die Kontonummern stehen dort in den
         Spalten „Soll“ und „Haben“.
@@ -487,8 +492,26 @@
         Seite.
       </p>
       <p>
+        Das betroffene Mitglied steht in einer eigenen Spalte und wird über die in der Buchung
+        hinterlegte Zuordnung ermittelt — nicht über den Buchungstext. Eine Umbenennung wirkt sich
+        dadurch überall zugleich aus. Steht dort ein roter Eintrag, verweist die Buchung auf ein
+        gelöschtes Mitglied.
+      </p>
+      <p>
         <strong>Bearbeiten</strong> lädt eine Buchung in das Formular oben, das dabei sichtbar den
         Modus wechselt. Nützlich etwa, um eine Buchung nachträglich einem Mitglied zuzuordnen.
+      </p>
+      <p>
+        <strong>Kopieren</strong> übernimmt eine Buchung als Vorlage ins Formular, ohne sie zu
+        ersetzen — praktisch für Reihen gleichartiger Buchungen wie mehrere Bahnmieten. Vor dem
+        Buchen lässt sich noch alles anpassen.
+      </p>
+      <p>
+        <strong>Mehrere auf einmal löschen:</strong> Über die Auswahlfelder links lassen sich Zeilen
+        markieren; der Haken in der Kopfzeile wählt alle Zeilen der aktuellen Seite. Über der
+        Tabelle erscheint dann eine Leiste mit Anzahl, Summe und der Möglichkeit, alle Ausgewählten
+        zu löschen. Ein Wechsel des Filters hebt die Auswahl auf, damit nicht versehentlich
+        unsichtbare Zeilen mitgelöscht werden.
       </p>
       <p>
         <strong>Neue Buchung</strong> für alles, was kein Standardvorgang ist. Hier wählst du Soll-
@@ -590,6 +613,44 @@
         Alle weiteren Jahre entstehen später über den Abschluss, damit die Bestände lückenlos
         übertragen werden. Werden Altdaten importiert, entfällt dieser Schritt — die Kegeljahre
         kommen dann aus der Importdatei.
+      </p>
+      <h3>Bilanz und Gewinn- und Verlustrechnung</h3>
+      <p>
+        Die Seite zeigt den Anhang für die Generalversammlung: Eröffnungsbilanz, Schlussbilanz und
+        die Gewinn- und Verlustrechnung. Über <strong>Anzeigen</strong> klappt die Aufstellung auf,
+        <strong>Als PDF herunterladen</strong> erzeugt sie als Datei
+        <code>bilanz_JJJJMMTT.pdf</code>.
+      </p>
+      <p>
+        Die Zahlen ergeben sich laufend aus den Buchungen — der Abschluss selbst ist dafür nicht
+        nötig. Auch mitten im Jahr lässt sich so der Stand ablesen.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Aufstellung</th>
+            <th>Grundlage</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Eröffnungsbilanz</td>
+            <td>die Eröffnungsbuchungen, also der aus dem Vorjahr übernommene Bestand</td>
+          </tr>
+          <tr>
+            <td>Schlussbilanz</td>
+            <td>alle Buchungen des Kegeljahres</td>
+          </tr>
+          <tr>
+            <td>Gewinn- und Verlustrechnung</td>
+            <td>Erträge und Aufwendungen des Kegeljahres</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        Als Gegenprobe muss die Veränderung des Vereinsvermögens zwischen beiden Bilanzen dem
+        Jahresergebnis entsprechen. Weicht das ab, weist die Anwendung darauf hin — dann fehlt meist
+        eine Gegenbuchung.
       </p>
       <h3>Ein Kegeljahr abschließen</h3>
       <p>Am Ende des Kegeljahres:</p>

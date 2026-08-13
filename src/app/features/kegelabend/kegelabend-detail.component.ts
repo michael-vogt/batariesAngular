@@ -1,12 +1,4 @@
-import {
-  Component,
-  computed,
-  effect,
-  inject,
-  input,
-  signal,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { KegelabendService } from '../../core/kegelverein/kegelabend.service';
@@ -71,6 +63,7 @@ export class KegelabendDetailComponent {
   // damit die Templates darauf zugreifen können.
   protected readonly euro = euro;
   protected readonly datumLang = datumLang;
+  protected readonly datumKurz = datumKurz;
   /** Kommt aus der Route (withComponentInputBinding). */
   readonly id = input.required<string>();
 
@@ -346,6 +339,4 @@ export class KegelabendDetailComponent {
     this.uebernahmeMeldung.set(null);
     this.uebernahmeFehler.set(null);
   }
-
-  protected readonly datumKurz = datumKurz;
 }

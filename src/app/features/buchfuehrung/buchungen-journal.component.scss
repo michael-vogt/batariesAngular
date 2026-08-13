@@ -111,3 +111,75 @@ tr.wird-bearbeitet {
   align-items: center;
   gap: var(--abstand-2);
 }
+
+.wahl-spalte {
+  width: 2.5rem;
+  text-align: center;
+}
+
+tr.ausgewaehlt {
+  background: var(--farbe-akzent-hell);
+}
+
+/* Erscheint nur bei getroffener Auswahl, direkt über der Tabelle —
+   dort, wo der Blick nach dem Anhaken ohnehin ist. */
+.auswahl-leiste {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--abstand-3);
+  margin-bottom: var(--abstand-3);
+  padding: var(--abstand-2) var(--abstand-3);
+  border: 1px solid var(--farbe-akzent);
+  border-radius: var(--radius);
+  background: var(--farbe-akzent-hell);
+  font-size: 0.9375rem;
+}
+
+.wahl-spalte {
+  width: 2.5rem;
+  text-align: center;
+}
+
+tr.ist-ausgewaehlt {
+  background: var(--farbe-akzent-hell);
+}
+
+/* Kennung ohne passendes Mitglied — sichtbar machen statt still
+   "unbekannt" anzuzeigen. */
+td.verwaist {
+  color: var(--farbe-soll);
+  font-style: italic;
+}
+
+/* Erscheint nur bei aktiver Auswahl, direkt über der Tabelle. */
+.auswahlleiste {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--abstand-3);
+  margin-bottom: var(--abstand-3);
+  padding: var(--abstand-2) var(--abstand-3);
+  border: 1px solid var(--farbe-akzent);
+  border-radius: var(--radius);
+  background: var(--farbe-akzent-hell);
+  font-size: 0.9375rem;
+}
+
+.auswahl-aktionen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--abstand-2);
+}
+
+.auswahlleiste .loeschen {
+  padding: var(--abstand-1) var(--abstand-3);
+  border-color: var(--farbe-soll);
+  color: var(--farbe-soll);
+  font-size: 0.875rem;
+}
+
+.auswahlleiste .loeschen:hover {
+  background: var(--farbe-soll-hell);
+}

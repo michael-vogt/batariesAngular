@@ -58,6 +58,9 @@
         <label>
           Buchungsdatum
           <input type="date" [ngModel]="beitragDatum()" (ngModelChange)="beitragDatum.set($event)" />
+          @if (istHeute(beitragDatum())) {
+            <small class="datum-hinweis">heutiges Datum — Stichtag prüfen</small>
+          }
         </label>
         <label>
           Beitrag aktiv (€)
@@ -86,7 +89,7 @@
           <tbody>
             @for (b of beitragVorschau(); track b.id) {
               <tr>
-                <td>{{ mitgliederService.suchen(b.mitgliedId ?? '')?.name ?? 'unbekannt' }}</td>
+                <td>{{ b.buchungstext }}</td>
                 <td class="zahl">{{ euro(b.betrag) }}</td>
               </tr>
             }
@@ -114,6 +117,9 @@
         <label>
           Buchungsdatum
           <input type="date" [ngModel]="einnahmeDatum()" (ngModelChange)="einnahmeDatum.set($event)" />
+          @if (istHeute(einnahmeDatum())) {
+            <small class="datum-hinweis">heutiges Datum — Stichtag prüfen</small>
+          }
         </label>
       </div>
 
@@ -182,6 +188,9 @@
         <label>
           Buchungsdatum
           <input type="date" [ngModel]="verrechnungDatum()" (ngModelChange)="verrechnungDatum.set($event)" />
+          @if (istHeute(verrechnungDatum())) {
+            <small class="datum-hinweis">heutiges Datum — Stichtag prüfen</small>
+          }
         </label>
       </div>
 
@@ -222,6 +231,9 @@
         <label>
           Buchungsdatum
           <input type="date" [ngModel]="geburtstagDatum()" (ngModelChange)="geburtstagDatum.set($event)" />
+          @if (istHeute(geburtstagDatum())) {
+            <small class="datum-hinweis">heutiges Datum — Stichtag prüfen</small>
+          }
         </label>
         <label>
           Ausrichter

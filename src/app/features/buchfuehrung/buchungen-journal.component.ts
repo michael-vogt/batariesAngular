@@ -1,11 +1,4 @@
-import {
-  Component,
-  computed,
-  effect,
-  inject,
-  signal,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AccountingService } from '../../core/kegelverein/accounting.service';
 import { MitgliederService } from '../../core/kegelverein/mitglieder.service';
@@ -74,6 +67,9 @@ export class BuchungenJournalComponent {
     };
     ziele[feld].set(wert);
     this.seite.set(1);
+    // Eine Auswahl aus dem vorherigen Filter wäre nach dem Wechsel nicht
+    // mehr sichtbar — ein Löschen träfe dann unbemerkt andere Zeilen.
+    this.ausgewaehlt.set(new Set());
   }
 
   protected filterZuruecksetzen(): void {
@@ -83,6 +79,7 @@ export class BuchungenJournalComponent {
     this.datumVon.set('');
     this.datumBis.set('');
     this.seite.set(1);
+    this.ausgewaehlt.set(new Set());
   }
 
   protected readonly gefiltert = computed(() => {
@@ -144,7 +141,72 @@ export class BuchungenJournalComponent {
     this.seite.set(1);
   }
 
+  // --- Mehrfachauswahl -------------------------------------------------
+
+  protected readonly ausgewaehlt = signal<ReadonlySet<string>>(new Set());
+
+  protected readonly anzahlAusgewaehlt = computed(() => this.ausgewaehlt().size);
+
+  protected readonly summeAusgewaehlt = computed(() => {
+    const ids = this.ausgewaehlt();
+    return this.gefiltert()
+      .filter((b) => ids.has(b.id))
+      .reduce((s, b) => s + b.betrag, 0);
+  });
+
+  /** Alle sichtbaren Zeilen ausgewählt? Grundlage für den Kopf-Haken. */
+  protected readonly alleSichtbarGewaehlt = computed(() => {
+    const sichtbar = this.sichtbar();
+    const ids = this.ausgewaehlt();
+    return sichtbar.length > 0 && sichtbar.every((b) => ids.has(b.id));
+  });
+
+  protected istAusgewaehlt(id: string): boolean {
+    return this.ausgewaehlt().has(id);
+  }
+
+  protected auswahlUmschalten(id: string): void {
+    this.ausgewaehlt.update((alt) => {
+      const neu = new Set(alt);
+      neu.has(id) ? neu.delete(id) : neu.add(id);
+      return neu;
+    });
+  }
+
+  /** Bezieht sich nur auf die sichtbare Seite, nicht auf den ganzen Filter. */
+  protected alleSichtbarUmschalten(): void {
+    const sichtbar = this.sichtbar().map((b) => b.id);
+    this.ausgewaehlt.update((alt) => {
+      const neu = new Set(alt);
+      if (this.alleSichtbarGewaehlt()) sichtbar.forEach((id) => neu.delete(id));
+      else sichtbar.forEach((id) => neu.add(id));
+      return neu;
+    });
+  }
+
+  protected auswahlAufheben(): void {
+    this.ausgewaehlt.set(new Set());
+  }
+
+  protected ausgewaehlteLoeschen(): void {
+    const ids = [...this.ausgewaehlt()];
+    if (ids.length === 0) return;
+
+    const text =
+      `${ids.length} Buchungen über zusammen ${this.euro(this.summeAusgewaehlt())} € löschen?\n\n` +
+      `Das lässt sich vor dem Speichern über „Verwerfen“ zurücknehmen.`;
+    if (!confirm(text)) return;
+
+    if (ids.includes(this.bearbeiteId() ?? '')) this.bearbeitenAbbrechen();
+
+    this.accounting.loescheBuchungen(ids);
+    this.auswahlAufheben();
+    this.daten.aenderungVorgemerkt();
+  }
+
   // --- Formular (neu anlegen und bearbeiten) ---------------------------
+
+  // --- Formular --------------------------------------------------------
 
   /** null = neue Buchung, sonst die id der bearbeiteten Buchung. */
   protected readonly bearbeiteId = signal<string | null>(null);
@@ -168,6 +230,22 @@ export class BuchungenJournalComponent {
     this.formMitgliedId.set(b.mitgliedId ?? '');
     this.formularFehler.set(null);
     // Das Formular steht oben — ohne Sprung bliebe die Änderung unsichtbar.
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /**
+   * Übernimmt eine Buchung als Vorlage ins Formular, ohne sie zu ersetzen.
+   * Nützlich für Reihen gleichartiger Buchungen, etwa mehrere Bahnmieten.
+   */
+  protected kopieren(b: Buchung): void {
+    this.bearbeiteId.set(null);
+    this.formDatum.set(b.datum);
+    this.formSoll.set(b.sollKonto);
+    this.formHaben.set(b.habenKonto);
+    this.formBetrag.set(b.betrag);
+    this.formText.set(b.buchungstext);
+    this.formMitgliedId.set(b.mitgliedId ?? '');
+    this.formularFehler.set(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -226,6 +304,11 @@ export class BuchungenJournalComponent {
     if (this.bearbeiteId() === b.id) this.bearbeitenAbbrechen();
 
     this.accounting.loescheBuchung(b.id);
+    this.ausgewaehlt.update((alt) => {
+      const neu = new Set(alt);
+      neu.delete(b.id);
+      return neu;
+    });
     this.daten.aenderungVorgemerkt();
   }
 
@@ -238,6 +321,11 @@ export class BuchungenJournalComponent {
   protected mitgliedName(id: string | undefined): string {
     if (!id) return '';
     return this.mitglieder().find((m) => m.id === id)?.name ?? 'unbekannt';
+  }
+
+  /** true, wenn die Buchung eine Kennung trägt, zu der es kein Mitglied gibt. */
+  protected verwaisteZuordnung(b: Buchung): boolean {
+    return !!b.mitgliedId && !this.mitglieder().some((m) => m.id === b.mitgliedId);
   }
 
   protected async speichern(): Promise<void> {
@@ -257,5 +345,7 @@ export class BuchungenJournalComponent {
     this.bearbeiteId.set(null);
     this.formularLeeren();
     this.seite.set(1);
+    this.ausgewaehlt.set(new Set());
+    this.ausgewaehlt.set(new Set());
   }
 }

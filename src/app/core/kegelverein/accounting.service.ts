@@ -114,4 +114,8 @@ export class AccountingService {
   loescheBuchung(id: string): void {
     this.store.deleteBuchung(id);
   }
+
+  loescheBuchungen(ids: readonly string[]): number {
+    return this.store.deleteBuchungen(ids);
+  }
 }

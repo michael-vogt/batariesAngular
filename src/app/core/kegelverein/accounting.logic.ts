@@ -136,7 +136,7 @@ export function journalMonatsbeitraege(params: {
         sollKonto: '100',
         habenKonto: '300',
         betrag: statusZum(m, datum) === 'aktiv' ? beitragAktiv : beitragPassiv,
-        buchungstext: `Monatsbeitrag`,
+        buchungstext: 'Monatsbeitrag',
         mitgliedId: m.id,
       }),
     );
@@ -156,7 +156,7 @@ export function journalStrafen(params: {
         sollKonto: '100',
         habenKonto: '310',
         betrag: p.betrag,
-        buchungstext: `Strafen Kegeln`,
+        buchungstext: 'Strafen Kegeln',
         mitgliedId: p.mitglied.id,
         ...(params.kegelabendId ? { kegelabendId: params.kegelabendId } : {}),
       }),
@@ -204,9 +204,9 @@ export function journalRestguthabenVerrechnung(params: {
       );
     };
 
-    verrechne(betragBeitrag, `Verrechnung Restguthaben für Beitrag`);
-    verrechne(betragStrafen, `Verrechnung Restguthaben für Strafen`);
-    verrechne(betragUmlagen, `Verrechnung Restguthaben für Umlagen`);
+    verrechne(betragBeitrag, 'Verrechnung Restguthaben für Beitrag');
+    verrechne(betragStrafen, 'Verrechnung Restguthaben für Strafen');
+    verrechne(betragUmlagen, 'Verrechnung Restguthaben für Umlagen');
   }
 
   return out;
@@ -233,7 +233,7 @@ export function journalEinnahmen(params: {
           sollKonto: '110',
           habenKonto: '100',
           betrag: fuerForderungen,
-          buchungstext: `Einnahmen`,
+          buchungstext: 'Einnahmen',
           mitgliedId: mitglied.id,
         }),
       );
@@ -245,7 +245,7 @@ export function journalEinnahmen(params: {
           sollKonto: '110',
           habenKonto: '210',
           betrag: fuerRestguthaben,
-          buchungstext: `Überzahlung`,
+          buchungstext: 'Überzahlung',
           mitgliedId: mitglied.id,
         }),
       );
@@ -272,7 +272,7 @@ export function journalGeburtstagsumlage(params: {
         sollKonto: '100',
         habenKonto: '320',
         betrag,
-        buchungstext: `Geburtstagsumlage`,
+        buchungstext: 'Geburtstagsumlage',
         mitgliedId: g.mitglied.id,
       }),
     );
@@ -284,7 +284,7 @@ export function journalGeburtstagsumlage(params: {
       sollKonto: '320',
       habenKonto: '210',
       betrag: summe,
-      buchungstext: `Geburtstagsgeschenk`,
+      buchungstext: 'Geburtstagsgeschenk',
       mitgliedId: params.ausrichter.id,
     }),
   );

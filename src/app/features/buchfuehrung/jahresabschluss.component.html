@@ -93,6 +93,153 @@
       }
     </div>
 
+    @if (bericht(); as b) {
+      <div class="karte bericht">
+        <div class="bericht-kopf">
+          <h2>Bilanz und Gewinn- und Verlustrechnung</h2>
+          <div class="bericht-aktionen">
+            <button type="button" (click)="berichtUmschalten()">
+              {{ berichtSichtbar() ? 'Ausblenden' : 'Anzeigen' }}
+            </button>
+            <button type="button" [disabled]="pdfLaeuft()" (click)="berichtAlsPdf()">
+              {{ pdfLaeuft() ? 'Erzeuge…' : 'Als PDF herunterladen' }}
+            </button>
+          </div>
+        </div>
+
+        <p class="hinweis">
+          Der Anhang für die Generalversammlung. Die Zahlen ergeben sich laufend aus den
+          Buchungen — der Abschluss selbst ist dafür nicht nötig.
+        </p>
+
+        @if (pdfFehler(); as text) {
+          <p class="fehler">{{ text }}</p>
+        }
+
+        @if (berichtSichtbar()) {
+          @for (bilanz of [
+            { titel: 'Eröffnungsbilanz zum ' + datumKurz(b.startDatum), seite: b.eroeffnungsbilanz },
+            { titel: 'Schlussbilanz zum ' + datumKurz(b.endDatum), seite: b.schlussbilanz }
+          ]; track bilanz.titel) {
+            <h3>{{ bilanz.titel }}</h3>
+            <table class="daten bilanz">
+              <thead>
+              <tr>
+                <th>Aktiva</th>
+                <th class="zahl"></th>
+                <th>Passiva</th>
+                <th class="zahl"></th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr class="oberposten">
+                <td>Anlagevermögen</td>
+                <td class="zahl"></td>
+                <td>Vereinsvermögen</td>
+                <td class="zahl">{{ euro(bilanz.seite.vereinsvermoegen) }}</td>
+              </tr>
+              <tr>
+                <td class="unterposten leise">./.</td>
+                <td class="zahl leise">{{ euro(0) }}</td>
+                <td></td>
+                <td class="zahl"></td>
+              </tr>
+              <tr class="oberposten">
+                <td>Umlaufvermögen</td>
+                <td class="zahl"></td>
+                <td>Verbindlichkeiten</td>
+                <td class="zahl"></td>
+              </tr>
+              <tr>
+                <td class="unterposten">Forderungen</td>
+                <td class="zahl">{{ euro(bilanz.seite.forderungen) }}</td>
+                <td class="unterposten">Restguthaben</td>
+                <td class="zahl">{{ euro(bilanz.seite.restguthaben) }}</td>
+              </tr>
+              <tr>
+                <td class="unterposten">Kasse</td>
+                <td class="zahl">{{ euro(bilanz.seite.kasse) }}</td>
+                <td class="unterposten">Schulden ggü. Dritten</td>
+                <td class="zahl">{{ euro(bilanz.seite.schulden) }}</td>
+              </tr>
+              </tbody>
+              <tfoot>
+              <tr>
+                <td><strong>Summe Aktiva</strong></td>
+                <td class="zahl"><strong>{{ euro(bilanz.seite.summeAktiva) }}</strong></td>
+                <td><strong>Summe Passiva</strong></td>
+                <td class="zahl"><strong>{{ euro(bilanz.seite.summePassiva) }}</strong></td>
+              </tr>
+              </tfoot>
+            </table>
+          }
+
+          <h3>Gewinn- und Verlustrechnung</h3>
+          <table class="daten guv">
+            <tbody>
+            <tr>
+              <td class="art">Erträge:</td>
+              <td>Beiträge</td>
+              <td class="zahl">{{ euro(b.guv.beitraege) }}</td>
+            </tr>
+            <tr><td></td><td>Strafen</td><td class="zahl">{{ euro(b.guv.strafen) }}</td></tr>
+            <tr><td></td><td>Umlagen</td><td class="zahl">{{ euro(b.guv.umlagen) }}</td></tr>
+            <tr>
+              <td></td>
+              <td>Sonstige Erträge</td>
+              <td class="zahl">{{ euro(b.guv.sonstigeErtraege) }}</td>
+            </tr>
+            <tr class="summe">
+              <td></td>
+              <td><strong>Erträge gesamt:</strong></td>
+              <td class="zahl"><strong>{{ euro(b.guv.ertraegeGesamt) }}</strong></td>
+            </tr>
+            <tr>
+              <td class="art">Aufwendungen:</td>
+              <td>Kegelbahn</td>
+              <td class="zahl">{{ euro(b.guv.kegelbahn) }}</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>Vereinsrunden</td>
+              <td class="zahl">{{ euro(b.guv.vereinsrunden) }}</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>Generalversammlung</td>
+              <td class="zahl">{{ euro(b.guv.generalversammlung) }}</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>Sonstige Aufwendungen</td>
+              <td class="zahl">{{ euro(b.guv.sonstigeAufwendungen) }}</td>
+            </tr>
+            <tr class="summe">
+              <td></td>
+              <td><strong>Aufwendungen gesamt:</strong></td>
+              <td class="zahl"><strong>{{ euro(b.guv.aufwendungenGesamt) }}</strong></td>
+            </tr>
+            <tr class="ergebnis" [class.verlust]="b.guv.ergebnis < 0">
+              <td class="art">
+                {{ b.guv.ergebnis >= 0 ? 'Jahresüberschuss:' : 'Jahresfehlbetrag:' }}
+              </td>
+              <td></td>
+              <td class="zahl"><strong>{{ euro(abs(b.guv.ergebnis)) }}</strong></td>
+            </tr>
+            </tbody>
+          </table>
+
+          @if (!b.probe.stimmt) {
+            <p class="warnung">
+              Die Veränderung des Vereinsvermögens ({{ euro(b.probe.vermoegensaenderung) }} €)
+              weicht vom Jahresergebnis ({{ euro(b.probe.ergebnis) }} €) ab. Vermutlich fehlt
+              eine Gegenbuchung oder die Eröffnungsbuchungen sind unvollständig.
+            </p>
+          }
+        }
+      </div>
+    }
+
     @if (vorschau(); as v) {
       <div class="karte">
         <h2>Vorschau: {{ v.neuesKegeljahr.bezeichnung }}</h2>
@@ -110,7 +257,6 @@
           <thead>
           <tr>
             <th>Buchungstext</th>
-            <th>zugeordnetes Mitglied</th>
             <th>Soll</th>
             <th>Haben</th>
             <th class="zahl">Betrag</th>
@@ -120,7 +266,6 @@
             @for (b of v.eroeffnungsbuchungen; track b.id) {
               <tr>
                 <td>{{ b.buchungstext }}</td>
-                <td>{{ mitgliederService.suchen(b.mitgliedId ?? '')?.name ?? '—' }}</td>
                 <td class="leise">{{ b.sollKonto }}</td>
                 <td class="leise">{{ b.habenKonto }}</td>
                 <td class="zahl">{{ euro(b.betrag) }}</td>
@@ -129,7 +274,7 @@
           </tbody>
           <tfoot>
           <tr>
-            <td colspan="4"><strong>Summe</strong></td>
+            <td colspan="3"><strong>Summe</strong></td>
             <td class="zahl"><strong>{{ euro(summe()) }}</strong></td>
           </tr>
           </tfoot>

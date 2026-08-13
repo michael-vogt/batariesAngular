@@ -137,6 +137,33 @@
       }
     </div>
 
+    @if (anzahlAusgewaehlt() > 0) {
+      <div class="auswahl-leiste">
+        <span>{{ anzahlAusgewaehlt() }} ausgewählt</span>
+        <button type="button" (click)="ausgewaehlteLoeschen()">Ausgewählte löschen</button>
+        <button type="button" class="leise-aktion" (click)="auswahlAufheben()">
+          Auswahl aufheben
+        </button>
+      </div>
+    }
+
+    @if (anzahlAusgewaehlt() > 0) {
+      <div class="auswahlleiste">
+        <span>
+          <strong>{{ anzahlAusgewaehlt() }}</strong> ausgewählt
+          <span class="leise">— zusammen {{ euro(summeAusgewaehlt()) }} €</span>
+        </span>
+        <span class="auswahl-aktionen">
+          <button type="button" class="leise-aktion" (click)="auswahlAufheben()">
+            Auswahl aufheben
+          </button>
+          <button type="button" class="loeschen" (click)="ausgewaehlteLoeschen()">
+            Ausgewählte löschen
+          </button>
+        </span>
+      </div>
+    }
+
     @if (gefiltert().length === 0) {
       <p class="hinweis">
         {{ istGefiltert() ? 'Keine Buchung passt zum Filter.' : 'Noch keine Buchungen erfasst.' }}
@@ -145,6 +172,14 @@
       <table class="daten">
         <thead>
         <tr>
+          <th class="wahl-spalte">
+            <input
+              type="checkbox"
+              [checked]="alleSichtbarGewaehlt()"
+              (change)="alleSichtbarUmschalten()"
+              aria-label="Alle Buchungen dieser Seite auswählen"
+            />
+          </th>
           <th>Datum</th>
           <th>Buchungstext</th>
           <th>Mitglied</th>
@@ -156,7 +191,18 @@
         </thead>
         <tbody>
           @for (b of sichtbar(); track b.id) {
-            <tr [class.wird-bearbeitet]="bearbeiteId() === b.id">
+            <tr
+              [class.wird-bearbeitet]="bearbeiteId() === b.id"
+              [class.ausgewaehlt]="istAusgewaehlt(b.id)"
+            >
+              <td class="wahl-spalte">
+                <input
+                  type="checkbox"
+                  [checked]="istAusgewaehlt(b.id)"
+                  (change)="auswahlUmschalten(b.id)"
+                  [attr.aria-label]="'Buchung ' + b.buchungstext + ' auswählen'"
+                />
+              </td>
               <td class="zahl leise">{{ datumKurz(b.datum) }}</td>
               <td>{{ b.buchungstext }}</td>
               <td class="leise">{{ mitgliedName(b.mitgliedId) || '—' }}</td>
@@ -167,6 +213,7 @@
                 <button type="button" class="leise-aktion" (click)="bearbeitenStarten(b)">
                   Bearbeiten
                 </button>
+                <button type="button" class="leise-aktion" (click)="kopieren(b)">Kopieren</button>
                 <button type="button" class="leise-aktion" (click)="loeschen(b)">Löschen</button>
               </td>
             </tr>
@@ -174,7 +221,7 @@
         </tbody>
         <tfoot>
         <tr>
-          <td colspan="5">
+          <td colspan="6">
             <strong>
               {{ gefiltert().length }} Buchungen{{ istGefiltert() ? ' (gefiltert)' : '' }}
             </strong>

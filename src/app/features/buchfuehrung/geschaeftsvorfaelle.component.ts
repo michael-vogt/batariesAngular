@@ -1,11 +1,4 @@
-import {
-  Component,
-  computed,
-  effect,
-  inject,
-  signal,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AccountingService } from '../../core/kegelverein/accounting.service';
 import { MitgliederService } from '../../core/kegelverein/mitglieder.service';
@@ -16,7 +9,7 @@ import {
 } from '../../core/kegelverein/accounting.logic';
 import { aktuellerStatus, istGastkegler } from '../../core/kegelverein/mitglied.util';
 import { Mitglied } from '../../core/kegelverein/kegelverein.models';
-import { euro } from '../../shared/format.util';
+import { datumKurz, euro } from '../../shared/format.util';
 
 type Vorgang = 'beitraege' | 'einnahmen' | 'restguthaben' | 'geburtstag';
 
@@ -33,7 +26,7 @@ export class GeschaeftsvorfaelleComponent {
   // damit die Templates darauf zugreifen können.
   protected readonly euro = euro;
   private readonly accounting = inject(AccountingService);
-  protected readonly mitgliederService = inject(MitgliederService);
+  private readonly mitgliederService = inject(MitgliederService);
   protected readonly daten = inject(VereinsdatenService);
 
   constructor() {
@@ -50,6 +43,26 @@ export class GeschaeftsvorfaelleComponent {
   protected readonly speichert = signal(false);
 
   protected readonly mitglieder = this.mitgliederService.mitglieder;
+
+  /**
+   * Steht bei einem Vorgang das heutige Datum, ist das meist die
+   * unveränderte Vorbelegung: Beiträge und Zahlungen werden fast immer
+   * für einen zurückliegenden Stichtag gebucht. Deshalb wird vorher
+   * nachgefragt — verhindert wird nichts.
+   */
+  protected istHeute(datum: string): boolean {
+    return datum === HEUTE();
+  }
+
+  private bestaetigeDatum(datum: string, vorgang: string): boolean {
+    if (datum !== HEUTE()) return true;
+
+    return confirm(
+      `${vorgang} auf den heutigen Tag (${datumKurz(datum)}) buchen?\n\n` +
+        `Das ist die Vorbelegung — häufig soll stattdessen ein zurückliegender ` +
+        `Stichtag gelten, etwa der Monatserste oder der Kegelabend.`,
+    );
+  }
 
   /** Ohne Gastkegler und Ausgetretene — für Auswahllisten. */
   protected readonly vereinsmitglieder = computed(() =>
@@ -87,10 +100,7 @@ export class GeschaeftsvorfaelleComponent {
   protected beitraegeBuchen(): void {
     const anzahl = this.beitragVorschau().length;
     if (anzahl === 0) return;
-
-    if (!this.fortfahrenWennGewaehltesDatumHeute())
-      return;
-
+    if (!this.bestaetigeDatum(this.beitragDatum(), 'Monatsbeiträge')) return;
     if (!confirm(`${anzahl} Monatsbeiträge über ${this.euro(this.beitragSumme())} € buchen?`))
       return;
 
@@ -153,6 +163,7 @@ export class GeschaeftsvorfaelleComponent {
       .filter((z): z is { mitglied: Mitglied; betrag: number } => !!z.mitglied);
 
     if (eintraege.length === 0) return;
+    if (!this.bestaetigeDatum(this.einnahmeDatum(), 'Zahlungseingänge')) return;
     if (!confirm(`Zahlungseingänge über ${this.euro(this.zahlungSumme())} € buchen?`)) return;
 
     this.accounting.bucheEinnahmen(this.einnahmeDatum(), eintraege);
@@ -191,6 +202,8 @@ export class GeschaeftsvorfaelleComponent {
   protected verrechnungBuchen(): void {
     const zeilen = this.verrechnungZeilen();
     if (zeilen.length === 0) return;
+
+    if (!this.bestaetigeDatum(this.verrechnungDatum(), 'Die Verrechnung')) return;
 
     const summe = zeilen.reduce((s, z) => s + z.betrag, 0);
     if (!confirm(`Restguthaben über ${this.euro(summe)} € mit offenen Forderungen verrechnen?`))
@@ -255,6 +268,7 @@ export class GeschaeftsvorfaelleComponent {
       .filter((z): z is { mitglied: Mitglied; anzahlZusatzpersonen: number } => !!z.mitglied);
 
     if (!ausrichter || eintraege.length === 0) return;
+    if (!this.bestaetigeDatum(this.geburtstagDatum(), 'Die Geburtstagsumlage')) return;
     if (
       !confirm(
         `Geburtstagsumlage über ${this.euro(this.umlageSumme())} € für ${ausrichter.name} buchen?`,
@@ -297,13 +311,5 @@ export class GeschaeftsvorfaelleComponent {
     this.gaeste.set({});
     this.ausrichterId.set('');
     this.meldung.set(null);
-  }
-
-  private fortfahrenWennGewaehltesDatumHeute(): boolean {
-    // gewähltes Datum ist nicht heute, daher keine Überprüfung notwendig
-    if (this.beitragDatum() !== HEUTE())
-      return false;
-
-    return confirm('Achtung: Das gewählte Datum ist heute! Fortfahren?');
   }
 }
