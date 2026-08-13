@@ -15,7 +15,9 @@ import { VerbindungEinstellungenComponent } from './features/einstellungen/verbi
 export const routes: Routes = [
   {
     path: 'anleitung',
-    component: AnleitungComponent
+    loadComponent: () =>
+      import('./features/anleitung/anleitung.component')
+        .then(m => m.AnleitungComponent),
   },
   {
     path: 'abrechnung',
@@ -50,7 +52,9 @@ export const routes: Routes = [
   },
   {
     path: 'kegelabende/:id',
-    component: KegelabendDetailComponent
+    loadComponent: () =>
+      import('./features/kegelabend/kegelabend-detail.component')
+      .then(m => m.KegelabendDetailComponent)
   },
   {
     path: 'mitglieder',

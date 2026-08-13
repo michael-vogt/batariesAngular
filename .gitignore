@@ -4,7 +4,7 @@
 package-lock.json
 
 # certain file types
-*.zip
+/*.zip
 
 # Compiled output
 /dist
