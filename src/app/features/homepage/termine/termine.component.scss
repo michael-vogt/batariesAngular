@@ -1,0 +1,90 @@
+.seiten-kopf {
+  align-items: flex-start;
+}
+
+.seiten-kopf .hinweis {
+  margin: var(--abstand-1) 0 0;
+  max-width: 42rem;
+}
+
+.karte {
+  margin-bottom: var(--abstand-4);
+}
+
+.karte h2 {
+  margin: 0 0 var(--abstand-3);
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+.formular-zeile {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--abstand-3);
+}
+
+.formular-zeile label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--abstand-1);
+  font-size: 0.8125rem;
+  color: var(--farbe-text-leise);
+}
+
+.formular-zeile label.breit {
+  flex: 1 1 18rem;
+}
+
+.termin-kopf {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--abstand-3);
+}
+
+.termin-kopf h2 {
+  margin: 0;
+}
+
+.termin-kopf .hinweis {
+  margin: var(--abstand-1) 0 0;
+}
+
+/* Vergangene Termine bleiben lesbar, treten aber zurück. */
+.termin.vergangen {
+  opacity: 0.72;
+}
+
+.marke-vergangen {
+  margin-left: var(--abstand-2);
+  padding: 0 var(--abstand-2);
+  border-radius: 999px;
+  background: var(--farbe-flaeche);
+  color: var(--farbe-text-leise);
+  font-size: 0.75rem;
+}
+
+.zahlen {
+  margin: var(--abstand-3) 0;
+  color: var(--farbe-text-leise);
+}
+
+.abmelden {
+  margin-top: var(--abstand-3);
+  padding-top: var(--abstand-3);
+  border-top: 1px solid var(--farbe-linie);
+}
+
+.abmelden .fehler {
+  margin: var(--abstand-3) 0 0;
+}
+
+.visuell-versteckt {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}

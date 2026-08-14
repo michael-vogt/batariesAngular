@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { FileStorageService } from '../../../core/kegelverein/persistenz/file-storage.service';
 import { VereinsdatenService } from '../../../core/kegelverein/vereinsdaten.service';
 import { KegeljahrStore } from '../../../core/kegelverein/kegeljahr.store';
+import { TerminService } from '../../../core/kegelverein/termin.service';
 import { BackupEintrag } from '../../../core/kegelverein/persistenz/file-storage.models';
 import { Kegelabend, Kegeljahr, Mitglied } from '../../../core/kegelverein/kegelverein.models';
 
@@ -9,6 +10,7 @@ import { Kegelabend, Kegeljahr, Mitglied } from '../../../core/kegelverein/kegel
 interface Vorschau {
   eintrag: BackupEintrag;
   mitglieder?: number;
+  termine?: number;
   bezeichnung?: string;
   buchungen?: number;
   kegelabende?: number;
@@ -24,6 +26,7 @@ export class BackupWiederherstellungComponent {
   protected readonly storage = inject(FileStorageService);
   protected readonly daten = inject(VereinsdatenService);
   private readonly store = inject(KegeljahrStore);
+  private readonly terminService = inject(TerminService);
 
   protected readonly eintraege = signal<BackupEintrag[]>([]);
   protected readonly laedt = signal(false);
@@ -108,11 +111,14 @@ export class BackupWiederherstellungComponent {
       const inhalt = (await this.storage.backupLesen(e.dateiname)) as {
         schemaVersion?: number;
         mitglieder?: Mitglied[];
+        termine?: unknown[];
         kegeljahr?: Kegeljahr & { kegelabende: Kegelabend[] };
       };
 
       if (e.art === 'mitglieder') {
         this.vorschau.set({ eintrag: e, mitglieder: inhalt.mitglieder?.length ?? 0 });
+      } else if (e.art === 'termine') {
+        this.vorschau.set({ eintrag: e, termine: inhalt.termine?.length ?? 0 });
       } else {
         this.vorschau.set({
           eintrag: e,
@@ -153,7 +159,9 @@ export class BackupWiederherstellungComponent {
     const was =
       v.eintrag.art === 'mitglieder'
         ? `${v.mitglieder} Mitglieder`
-        : `das Kegeljahr „${v.bezeichnung}“`;
+        : v.eintrag.art === 'termine'
+          ? `${v.termine} Termine`
+          : `das Kegeljahr „${v.bezeichnung}“`;
 
     let warnung = '';
     if (v.eintrag.art === 'mitglieder') {
@@ -179,13 +187,20 @@ export class BackupWiederherstellungComponent {
     this.fehler.set(null);
     try {
       const inhalt = await this.storage.backupEinlesen(v.eintrag);
-      this.daten.sicherungUebernehmen(inhalt);
 
-      this.vorschau.set(null);
-      this.meldung.set(
-        `Stand vom ${this.zeitpunkt(v.eintrag)} geladen. ` +
-          `Zum Festschreiben oben „Änderungen speichern“ drücken.`,
-      );
+      if (inhalt.art === 'termine') {
+        // Termine kennen keinen Arbeitsstand — hier wird sofort gespeichert.
+        await this.terminService.sicherungUebernehmen(inhalt.termine);
+        this.vorschau.set(null);
+        this.meldung.set(`Terminstand vom ${this.zeitpunkt(v.eintrag)} wurde eingespielt.`);
+      } else {
+        this.daten.sicherungUebernehmen(inhalt);
+        this.vorschau.set(null);
+        this.meldung.set(
+          `Stand vom ${this.zeitpunkt(v.eintrag)} geladen. ` +
+            `Zum Festschreiben oben „Änderungen speichern“ drücken.`,
+        );
+      }
     } catch (e) {
       this.fehler.set(e instanceof Error ? e.message : 'Sicherung konnte nicht geladen werden');
     } finally {

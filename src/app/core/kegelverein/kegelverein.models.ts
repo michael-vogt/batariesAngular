@@ -209,6 +209,47 @@ export const STANDARD_STRAFSAETZE: Strafsaetze = {
 };
 
 // =====================================================================
+// 5b. Kegeltermine und Abmeldungen
+// =====================================================================
+
+/**
+ * Zeitpunkt mit Datum und Uhrzeit im Format JJJJ-MM-TTTHH:MM.
+ *
+ * Bewusst ohne Zeitzone: Der Verein kegelt an einem Ort, und eine
+ * Zeitzonenangabe würde beim Anzeigen nur Umrechnungen erfordern, die
+ * niemand braucht. Als Zeichenkette bleibt der Wert sortierbar und
+ * vergleichbar.
+ */
+export type Zeitpunkt = string;
+
+/** Abmeldung eines Mitglieds von einem Termin. */
+export interface Abmeldung {
+  id: string;
+  /** Verweis auf Mitglied.id — der Name wird daraus aufgelöst. */
+  mitgliedId: string;
+  grund: string;
+  /** Wann die Abmeldung eingetragen wurde. */
+  gemeldetAm: Zeitpunkt;
+}
+
+/**
+ * Ein geplanter Kegeltermin.
+ *
+ * Bewusst getrennt von Kegelabend und Kegeljahr: Der Termin dient der
+ * Planung und wird in einer eigenen Datei geführt, die unabhängig von der
+ * Buchführung gespeichert wird. Ein Bezug zum Kegelabend, der hinterher
+ * aus dem tatsächlich Gespielten entsteht, ist nicht vorgesehen — er
+ * müsste gepflegt werden, ohne dass jemand etwas davon hätte.
+ */
+export interface Kegeltermin {
+  id: string;
+  beginn: Zeitpunkt;
+  ort?: string;
+  notiz?: string;
+  abmeldungen: Abmeldung[];
+}
+
+// =====================================================================
 // 6. Kegeljahr — Aggregatwurzel
 // =====================================================================
 

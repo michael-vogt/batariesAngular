@@ -1,5 +1,5 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { Buchung, Kegelabend, Kegeljahr, Mitglied } from './kegelverein.models';
+import { Buchung, Kegelabend, Kegeljahr, Kegeltermin, Mitglied } from './kegelverein.models';
 
 /**
  * Zentraler State-Container: hält alle Kegeljahre und das aktuell
@@ -153,7 +153,6 @@ export class KegeljahrStore {
       kegelabende: kj.kegelabende.map((x) => (x.id === ka.id ? ka : x)),
     }));
   }
-
   deleteKegelabend(id: string): void {
     this.updateAktuelles((kj) => ({
       ...kj,

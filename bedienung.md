@@ -99,6 +99,43 @@ Endgültiges Entfernen ist nur für Fehleingaben gedacht.
 
 ---
 
+## Termine
+
+Die Planung der kommenden Kegelabende: Wann wird gekegelt, und wer ist
+verhindert?
+
+Dieser Bereich arbeitet anders als der Rest der Anwendung: **Änderungen werden
+sofort gespeichert.** Es gibt kein „Änderungen speichern“ und kein „Verwerfen“ —
+wer sich abmeldet, erwartet, dass es unmittelbar gilt. Die Termine liegen dafür
+in einer eigenen Datei, unabhängig von Buchführung und Kegeljahr.
+
+### Termin anlegen
+
+Beginn mit Datum **und Uhrzeit** eintragen, dazu optional Ort und eine Notiz.
+Vorgeschlagen ist der nächste Freitag um 19:30 Uhr. Liegt der Termin in der
+Vergangenheit, fragt die Anwendung nach.
+
+Anstehende Termine stehen oben, die vergangenen darunter — letztere zurückgenommen
+dargestellt und ohne die Möglichkeit, sich nachträglich abzumelden.
+
+### Abmelden
+
+**Abmeldung eintragen** öffnet ein Feld: Mitglied auswählen, Grund angeben,
+fertig. Der Zeitpunkt der Meldung wird automatisch festgehalten.
+
+Zur Auswahl stehen aktive Mitglieder, die noch nicht abgemeldet sind. Gastkegler
+erscheinen nicht — sie sind nicht verpflichtet zu kommen und müssen sich folglich
+auch nicht abmelden.
+
+Meldet sich jemand ein zweites Mal ab, ersetzt das den bisherigen Eintrag; so
+lässt sich ein Grund nachträglich richtigstellen. **Zurücknehmen** entfernt die
+Abmeldung wieder, wenn jemand doch kommt.
+
+Je Termin zeigt die Anwendung, wie viele erwartet werden und wie viele sich
+abgemeldet haben. Als erwartet gelten alle aktiven Mitglieder ohne Abmeldung.
+
+---
+
 ## Kegelabende
 
 ### Abend anlegen

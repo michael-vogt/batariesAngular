@@ -48,7 +48,13 @@
     @for (gruppe of gruppen(); track gruppe.zielDatei) {
       <div class="karte">
         <h2>
-          {{ gruppe.zielDatei === 'mitglieder.json' ? 'Mitglieder' : gruppe.zielDatei }}
+          {{
+            gruppe.zielDatei === 'mitglieder.json'
+              ? 'Mitglieder'
+              : gruppe.zielDatei === 'termine.json'
+                ? 'Termine'
+                : gruppe.zielDatei
+          }}
           <span class="anzahl">{{ gruppe.staende.length }}</span>
         </h2>
 
@@ -70,6 +76,11 @@
                     } @else {
                       @if (v.eintrag.art === 'mitglieder') {
                         <p>Enthält <strong>{{ v.mitglieder }}</strong> Mitglieder.</p>
+                      } @else if (v.eintrag.art === 'termine') {
+                        <p>
+                          Enthält <strong>{{ v.termine }}</strong> Termine. Dieser Stand wird
+                          sofort gespeichert — Termine kennen keinen Arbeitsstand.
+                        </p>
                       } @else {
                         <p>
                           Enthält <strong>{{ v.bezeichnung }}</strong> mit

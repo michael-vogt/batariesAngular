@@ -1,21 +1,22 @@
 <div class="layout">
   <header class="header">
-    Header
+    &#x1F3B3; Die Bataries &#x1F3B3;
   </header>
 
   <nav class="menu">
     <ul>
-      <li><a href="#">Satzung</a></li>
+      <li><a [routerLink]="['home']" routerLinkActive="aktiv">Hauptseite</a></li>
+      <li><a [routerLink]="['dokument', 'satzung']" routerLinkActive="aktiv">Satzung</a></li>
       @if (userService.istNutzerAngemeldet()) {
-      <li><a href="#">Kegeltermine</a></li>
+      <li><a [routerLink]="['kegeltermine']" routerLinkActive="aktiv">Kegeltermine</a></li>
       @if (userService.currentRole() === 'admin') {
-        <li><a target="_blank" href="/angular/verwaltung">Verwaltung</a></li>
+        <li><a [routerLink]="['verwaltung']" routerLinkActive="aktiv">Verwaltung</a></li>
       }
       }
     </ul>
   </nav>
 
   <main class="content">
-    <app-login/>
+    <router-outlet/>
   </main>
 </div>

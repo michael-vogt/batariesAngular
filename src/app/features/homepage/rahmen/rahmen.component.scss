@@ -1,3 +1,7 @@
+.aktiv {
+  font-weight: bold;
+}
+
 .layout {
   min-height: 100vh;
 
@@ -9,14 +13,25 @@
 .header {
   grid-column: 1 / -1;
 
+  font-size: 5em;
+
   padding: 1rem 1.5rem;
-  background: #222;
+  background: #854242;
   color: white;
+
+  border: 0.125rem solid black;
+  border-radius: 1rem;
+  box-shadow: 0.125rem 0.125rem 0.375rem black;
+  margin-bottom: 1rem;
 }
 
 .menu {
   padding: 1rem;
-  background: #f5f5f5;
+  background: #854242;
+  border: 0.125rem solid black;
+  border-radius: 1rem;
+  box-shadow: 0.125rem 0.125rem 0.375rem black;
+  color: white;
 }
 
 .menu ul {

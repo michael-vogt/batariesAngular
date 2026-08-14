@@ -1,5 +1,11 @@
-import { Buchung, Kegelabend, Kegeljahr, Mitglied } from '../kegelverein.models';
-import { KegeljahrDatei, Manifest, MitgliederDatei, SCHEMA_VERSION } from './file-storage.models';
+import { Buchung, Kegelabend, Kegeljahr, Kegeltermin, Mitglied } from '../kegelverein.models';
+import {
+  KegeljahrDatei,
+  Manifest,
+  MitgliederDatei,
+  SCHEMA_VERSION,
+  TermineDatei,
+} from './file-storage.models';
 
 /**
  * Bewusst ohne zod/io-ts o.ä.: für dieses überschaubare Schema reichen
@@ -105,6 +111,72 @@ export function pruefeKegelabend(v: unknown): asserts v is Kegelabend {
  * referentielle Prüfung übersprungen — sinnvoll etwa während einer
  * Migration, wenn die Stammdaten noch nicht geschrieben sind.
  */
+/**
+ * Zeitpunkt im Format JJJJ-MM-TTTHH:MM. Wie bei istDatum wird geprüft,
+ * dass es den Tag tatsächlich gibt — und zusätzlich, dass die Uhrzeit im
+ * gültigen Bereich liegt.
+ */
+function istZeitpunkt(v: unknown): v is string {
+  if (typeof v !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(v)) return false;
+  const [datum, zeit] = v.split('T');
+  if (!istDatum(datum)) return false;
+  const [stunde, minute] = zeit.split(':').map(Number);
+  return stunde < 24 && minute < 60;
+}
+
+export function pruefeTermin(v: unknown): asserts v is Kegeltermin {
+  const t = v as Kegeltermin;
+  pruefe(!!t && istString(t.id), 'Kegeltermin: id fehlt');
+  pruefe(
+    istZeitpunkt(t.beginn),
+    `Kegeltermin ${t.id}: beginn "${t.beginn}" ist kein Zeitpunkt im Format JJJJ-MM-TTTHH:MM`,
+  );
+  pruefe(Array.isArray(t.abmeldungen), `Kegeltermin ${t.beginn}: abmeldungen fehlt`);
+
+  const ids = new Set<string>();
+  for (const a of t.abmeldungen) {
+    pruefe(
+      istString(a.id) && istString(a.mitgliedId),
+      `Kegeltermin ${t.beginn}: Abmeldung ohne id`,
+    );
+    pruefe(istString(a.grund), `Kegeltermin ${t.beginn}: Abmeldung ohne Grund`);
+    pruefe(
+      istZeitpunkt(a.gemeldetAm),
+      `Kegeltermin ${t.beginn}: Abmeldung mit ungültigem Zeitpunkt "${a.gemeldetAm}"`,
+    );
+    // Doppelte Abmeldungen desselben Mitglieds wären widersprüchlich.
+    pruefe(!ids.has(a.mitgliedId), `Kegeltermin ${t.beginn}: Mitglied ist mehrfach abgemeldet`);
+    ids.add(a.mitgliedId);
+  }
+}
+
+/**
+ * `bekannteMitgliedIds` prüft die Abmeldungen gegen die Stammdaten. Ohne
+ * die Menge wird das übersprungen — die Termindatei lässt sich dadurch
+ * auch lesen, bevor die Mitglieder geladen sind.
+ */
+export function pruefeTermineDatei(json: unknown, bekannteMitgliedIds?: Set<string>): TermineDatei {
+  const datei = json as TermineDatei;
+  pruefe(
+    datei?.schemaVersion === SCHEMA_VERSION,
+    `termine.json: unbekannte/fehlende schemaVersion (erwartet ${SCHEMA_VERSION})`,
+  );
+  pruefe(Array.isArray(datei.termine), 'termine.json: termine fehlt');
+  datei.termine.forEach(pruefeTermin);
+
+  if (bekannteMitgliedIds) {
+    for (const t of datei.termine) {
+      for (const a of t.abmeldungen) {
+        pruefe(
+          bekannteMitgliedIds.has(a.mitgliedId),
+          `Kegeltermin ${t.beginn}: Abmeldung verweist auf kein bekanntes Mitglied`,
+        );
+      }
+    }
+  }
+  return datei;
+}
+
 export function pruefeKegeljahr(
   v: unknown,
   bekannteMitgliedIds?: Set<string>,

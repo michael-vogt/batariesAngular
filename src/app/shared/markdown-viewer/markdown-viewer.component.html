@@ -1,0 +1,7 @@
+@if (resource.isLoading()) {
+  <p>Dokument wird geladen...</p>
+} @else if (resource.error()) {
+  <p>Dokument konnte nicht geladen werden.</p>
+} @else {
+  <article [innerHTML]="html()"></article>
+}

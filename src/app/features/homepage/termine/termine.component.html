@@ -1,0 +1,180 @@
+<div class="seite">
+  <header class="seiten-kopf">
+    <div>
+      <h1>Kegeltermine</h1>
+      <p class="hinweis">
+        Änderungen werden sofort gespeichert — hier gibt es kein „Änderungen speichern“.
+      </p>
+    </div>
+    @if (termine.speichert()) {
+      <span class="hinweis">Speichert…</span>
+    }
+  </header>
+
+  @if (storage.status() !== 'verbunden') {
+    <div class="karte">
+      <p class="fehler">Keine Serververbindung — bitte zuerst unter Einstellungen verbinden.</p>
+    </div>
+  } @else {
+    @if (termine.fehler(); as text) {
+      <p class="fehler">{{ text }}</p>
+    }
+
+    @if (istAdminAngemeldet()) {
+    <div class="karte">
+      <h2>Neuer Termin</h2>
+      <div class="formular-zeile">
+        <label>
+          Beginn
+          <input
+            type="datetime-local"
+            [ngModel]="neuBeginn()"
+            (ngModelChange)="neuBeginn.set($event)"
+          />
+        </label>
+        <label>
+          Ort (optional)
+          <input type="text" [ngModel]="neuOrt()" (ngModelChange)="neuOrt.set($event)" />
+        </label>
+        <label class="breit">
+          Notiz (optional)
+          <input
+            type="text"
+            placeholder="z.B. Jahresabschluss, Gäste willkommen"
+            [ngModel]="neuNotiz()"
+            (ngModelChange)="neuNotiz.set($event)"
+          />
+        </label>
+        <button
+          type="button"
+          [disabled]="!neuBeginn() || termine.speichert()"
+          (click)="anlegen()"
+        >
+          Termin anlegen
+        </button>
+      </div>
+    </div>
+    }
+
+    @if (termine.status() === 'laedt') {
+      <p class="hinweis">Termine werden geladen…</p>
+    }
+
+    @if (uebersichten().length === 0 && termine.status() === 'bereit') {
+      <div class="karte">
+        <p>Noch keine Termine erfasst.</p>
+      </div>
+    }
+
+    @for (u of uebersichten(); track u.termin.id) {
+      <div class="karte termin" [class.vergangen]="u.vergangen">
+        <div class="termin-kopf">
+          <div>
+            <h2>{{ zeitpunktLang(u.termin.beginn) }}</h2>
+            <p class="hinweis">
+              @if (u.termin.ort) {
+                {{ u.termin.ort }}
+              }
+              @if (u.termin.ort && u.termin.notiz) {
+                ·
+              }
+              @if (u.termin.notiz) {
+                {{ u.termin.notiz }}
+              }
+              @if (u.vergangen) {
+                <span class="marke-vergangen">vergangen</span>
+              }
+            </p>
+          </div>
+          @if (istAdminAngemeldet()) {
+          <button type="button" class="leise-aktion" (click)="loeschen(u.termin)">Löschen</button>
+          }
+        </div>
+
+        <p class="zahlen">
+          <strong>{{ u.erwartet.length }}</strong> erwartet ·
+          <strong>{{ u.abgemeldet.length }}</strong> abgemeldet
+        </p>
+
+        @if (u.abgemeldet.length > 0) {
+          <table class="daten">
+            <thead>
+            <tr>
+              <th>Abgemeldet</th>
+              <th>Grund</th>
+              <th>gemeldet am</th>
+              <th><span class="visuell-versteckt">Aktionen</span></th>
+            </tr>
+            </thead>
+            <tbody>
+              @for (a of u.abgemeldet; track a.abmeldung.id) {
+                <tr>
+                  <td>{{ a.name }}</td>
+                  <td>{{ a.abmeldung.grund }}</td>
+                  <td>{{ zeitpunktKurz(a.abmeldung.gemeldetAm) }}</td>
+                  <td>
+                    @if (istAdminAngemeldet()) {
+                    <button
+                      type="button"
+                      class="leise-aktion"
+                      (click)="zuruecknehmen(u.termin.id, a.abmeldung.mitgliedId, a.name)"
+                    >
+                      Zurücknehmen
+                    </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+
+        @if (abmeldeFuer() === u.termin.id) {
+          <div class="abmelden">
+            <div class="formular-zeile">
+              <label>
+                Mitglied
+                <select
+                  [ngModel]="abmeldeMitgliedId()"
+                  (ngModelChange)="abmeldeMitgliedId.set($event)"
+                >
+                  <option value="">– auswählen –</option>
+                  @for (m of abmeldbare(u.termin); track m.id) {
+                    <option [value]="m.id">{{ m.name }}</option>
+                  }
+                </select>
+              </label>
+              <label class="breit">
+                Grund
+                <input
+                  type="text"
+                  placeholder="z.B. Urlaub, Krankheit, beruflich verhindert"
+                  [ngModel]="abmeldeGrund()"
+                  (ngModelChange)="abmeldeGrund.set($event)"
+                  (keyup.enter)="abmelden(u.termin.id)"
+                />
+              </label>
+              <button
+                type="button"
+                class="primaer"
+                [disabled]="termine.speichert()"
+                (click)="abmelden(u.termin.id)"
+              >
+                Abmelden
+              </button>
+              <button type="button" class="leise-aktion" (click)="abmeldungOeffnen(u.termin.id)">
+                Abbrechen
+              </button>
+            </div>
+
+            @if (formularFehler(); as text) {
+              <p class="fehler">{{ text }}</p>
+            }
+          </div>
+        } @else if (!u.vergangen) {
+          <button type="button" (click)="abmeldungOeffnen(u.termin.id)">Abmeldung eintragen</button>
+        }
+      </div>
+    }
+  }
+</div>

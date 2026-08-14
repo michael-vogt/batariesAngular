@@ -1,4 +1,4 @@
-import { Kegeljahr, Mitglied } from '../kegelverein.models';
+import { Kegeljahr, Kegeltermin, Mitglied } from '../kegelverein.models';
 
 /**
  * Schema-Version des Dateiformats.
@@ -12,6 +12,12 @@ export const SCHEMA_VERSION = 2 as const;
 
 /** Dateiname der vereinsweiten Stammdaten, relativ zum Datenverzeichnis. */
 export const MITGLIEDER_DATEI = 'mitglieder.json';
+
+/**
+ * Dateiname der Terminplanung. Eigene Datei, weil Termine unabhängig von
+ * Kegeljahr und Buchführung geführt und sofort gespeichert werden.
+ */
+export const TERMINE_DATEI = 'termine.json';
 
 export interface KegeljahrRef {
   id: string;
@@ -34,6 +40,12 @@ export interface MitgliederDatei {
   mitglieder: Mitglied[];
 }
 
+/** termine.json — Terminplanung mit Abmeldungen */
+export interface TermineDatei {
+  schemaVersion: number;
+  termine: Kegeltermin[];
+}
+
 /** kegeljahre/<jahr>.json — ein Kegeljahr pro Datei, ohne Mitglieder */
 export interface KegeljahrDatei {
   schemaVersion: number;
@@ -46,7 +58,7 @@ export interface BackupEintrag {
   dateiname: string;
   /** Datei, in die zurückgeschrieben würde, z.B. "mitglieder.json" */
   zielDatei: string;
-  art: 'mitglieder' | 'kegeljahr';
+  art: 'mitglieder' | 'kegeljahr' | 'termine';
   /** ISO-Zeitpunkt aus dem Dateinamen; null, wenn nicht deutbar. */
   zeitpunkt: string | null;
 }

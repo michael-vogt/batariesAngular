@@ -3,6 +3,8 @@ import { PERSISTENZ_ADAPTER } from './persistenz-adapter.token';
 import {
   BackupEintrag,
   KegeljahrDatei,
+  TERMINE_DATEI,
+  TermineDatei,
   MITGLIEDER_DATEI,
   Manifest,
   MitgliederDatei,
@@ -14,12 +16,15 @@ import {
   pruefeKegeljahrDatei,
   pruefeManifest,
   pruefeMitgliederDatei,
+  pruefeTermineDatei,
 } from './file-storage.validation';
-import { Kegeljahr, Mitglied } from '../kegelverein.models';
+import { Kegeljahr, Kegeltermin, Mitglied } from '../kegelverein.models';
 
 /** Geprüfter Inhalt einer Sicherung, noch nicht angewendet. */
 export type SicherungsInhalt =
-  { art: 'mitglieder'; mitglieder: Mitglied[] } | { art: 'kegeljahr'; kegeljahr: Kegeljahr };
+  | { art: 'mitglieder'; mitglieder: Mitglied[] }
+  | { art: 'termine'; termine: Kegeltermin[] }
+  | { art: 'kegeljahr'; kegeljahr: Kegeljahr };
 
 const MAX_BACKUPS_PRO_DATEI = 15;
 
@@ -145,6 +150,32 @@ export class FileStorageService {
     await this.manifestAktualisieren(kegeljahr.id, kegeljahr.bezeichnung, dateiname);
   }
 
+  // --- Terminplanung ---------------------------------------------------
+
+  /** `null`, wenn noch keine Termindatei existiert. */
+  async termineLaden(bekannteMitgliedIds?: Set<string>): Promise<Kegeltermin[] | null> {
+    this.pruefeVerbunden();
+    const inhalt = await this.adapter.dateiLesen(TERMINE_DATEI);
+    if (inhalt === null) return null;
+    return pruefeTermineDatei(JSON.parse(inhalt), bekannteMitgliedIds).termine;
+  }
+
+  /**
+   * Schreibt die Terminplanung. Anders als Buchführung und Mitglieder wird
+   * sie sofort bei jeder Änderung gespeichert — die Planung ist ein
+   * geteiltes Arbeitsmittel, bei dem Zwischenstände im Browser niemandem
+   * nützen.
+   */
+  async termineSpeichern(termine: Kegeltermin[], bekannteMitgliedIds?: Set<string>): Promise<void> {
+    this.pruefeVerbunden();
+
+    const datei: TermineDatei = { schemaVersion: SCHEMA_VERSION, termine };
+    pruefeTermineDatei(datei, bekannteMitgliedIds);
+
+    await this.backupErstellen(TERMINE_DATEI, TERMINE_DATEI);
+    await this.adapter.dateiSchreiben(TERMINE_DATEI, JSON.stringify(datei, null, 2));
+  }
+
   // --- Sicherungen -----------------------------------------------------
 
   /**
@@ -173,7 +204,12 @@ export class FileStorageService {
       eintraege.push({
         dateiname,
         zielDatei: `${basis}.json`,
-        art: basis === MITGLIEDER_DATEI.replace(/\.json$/, '') ? 'mitglieder' : 'kegeljahr',
+        art:
+          basis === MITGLIEDER_DATEI.replace(/\.json$/, '')
+            ? 'mitglieder'
+            : basis === TERMINE_DATEI.replace(/\.json$/, '')
+              ? 'termine'
+              : 'kegeljahr',
         zeitpunkt: Number.isNaN(zeitpunkt.getTime()) ? null : zeitpunkt.toISOString(),
       });
     }
@@ -201,6 +237,9 @@ export class FileStorageService {
 
     if (eintrag.art === 'mitglieder') {
       return { art: 'mitglieder', mitglieder: pruefeMitgliederDatei(inhalt).mitglieder };
+    }
+    if (eintrag.art === 'termine') {
+      return { art: 'termine', termine: pruefeTermineDatei(inhalt).termine };
     }
 
     // Ohne Mitglieds-IDs prüfen: die Sicherung soll auch dann lesbar sein,

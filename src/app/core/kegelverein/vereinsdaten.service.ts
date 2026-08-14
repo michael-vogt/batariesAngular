@@ -237,8 +237,19 @@ export class VereinsdatenService {
    * Übernimmt eine gelesene Sicherung in den Arbeitsstand — ohne sie zu
    * speichern. Der Server bleibt unberührt, bis „Änderungen speichern“
    * gedrückt wird; über „Verwerfen“ lässt sich der Schritt zurücknehmen.
+   *
+   * Termine sind hier nicht vorgesehen: Sie werden ohnehin sofort
+   * gespeichert und kennen keinen Arbeitsstand. Ihre Wiederherstellung
+   * läuft über TerminService (siehe termineUebernehmen dort).
    */
   sicherungUebernehmen(inhalt: SicherungsInhalt): void {
+    if (inhalt.art === 'termine') {
+      throw new Error(
+        'Terminstände lassen sich nicht in den Arbeitsstand übernehmen — ' +
+          'sie werden direkt gespeichert.',
+      );
+    }
+
     if (inhalt.art === 'mitglieder') {
       this.store.setMitglieder(inhalt.mitglieder);
     } else {

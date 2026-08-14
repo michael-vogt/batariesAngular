@@ -1,0 +1,30 @@
+<div class="karte">
+  <h2>Abmeldungen für das nächste Kegeln</h2>
+  @if (!naechsterTermin()) {
+    <p>Derzeit keine Termine vorhanden</p>
+  } @else {
+    <p>Datum: {{ datumKurz(naechsterTermin()?.beginn ?? '')}}</p>
+    @if (abmeldungen().length === 0) {
+      <p>noch keine Abmeldungen</p>
+    } @else {
+      <table class="daten short">
+        <thead>
+        <tr>
+          <th>Name</th>
+          <th>Abmeldedatum</th>
+          <th>Grund</th>
+        </tr>
+        </thead>
+        <tbody>
+      @for (abmeldung of abmeldungen(); track abmeldung.id) {
+        <tr>
+          <td>{{ mitgliederService.suchen(abmeldung.mitgliedId)?.name }}</td>
+          <td>{{ datumZeitKurz(abmeldung.gemeldetAm) }}</td>
+          <td>{{ abmeldung.grund }}</td>
+        </tr>
+      }
+        </tbody>
+      </table>
+    }
+  }
+</div>
