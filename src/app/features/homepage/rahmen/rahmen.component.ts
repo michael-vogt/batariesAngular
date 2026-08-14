@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { LoginComponent } from '../login/login.component';
+import { UserService } from '../../../core/user.service';
 
 @Component({
   selector: 'app-rahmen',
@@ -7,4 +8,8 @@ import { LoginComponent } from '../login/login.component';
   templateUrl: './rahmen.component.html',
   styleUrl: './rahmen.component.scss',
 })
-export class RahmenComponent {}
+export class RahmenComponent {
+
+  protected userService = inject(UserService);
+
+}

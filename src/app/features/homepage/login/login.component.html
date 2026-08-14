@@ -1,0 +1,23 @@
+<div class="karte">
+  <h2>Login</h2>
+  @if(!userService.istNutzerAngemeldet()) {
+  <div class="formular-zeile">
+    <label>
+      Passwort
+      <input
+        type="password"
+        [ngModel]="password()"
+        (ngModelChange)="password.set($event)"
+        (keydown.enter)="login()"
+      />
+    </label>
+    <button type="button" [disabled]="!password()" (click)="login()">anmelden</button>
+  </div>
+    @if (userService.fehler()) {
+      <p class="fehler">{{userService.fehler()}}</p>
+    }
+  } @else {
+    <p>Angemeldet als {{userService.currentRole()}}</p>
+    <button type="button" (click)="logout()">Logout</button>
+  }
+</div>
