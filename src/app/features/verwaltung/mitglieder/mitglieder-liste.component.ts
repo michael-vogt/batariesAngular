@@ -1,11 +1,11 @@
 import { Component, computed, effect, inject, linkedSignal, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MitgliederService } from '../../core/kegelverein/mitglieder.service';
-import { AccountingService } from '../../core/kegelverein/accounting.service';
-import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
-import { Mitglied, MitgliedStatus } from '../../core/kegelverein/kegelverein.models';
-import { findeNamensdublette } from '../../core/kegelverein/namen.util';
-import { datumKurz, euro } from '../../shared/format.util';
+import { MitgliederService } from '../../../core/kegelverein/mitglieder.service';
+import { AccountingService } from '../../../core/kegelverein/accounting.service';
+import { VereinsdatenService } from '../../../core/kegelverein/vereinsdaten.service';
+import { Mitglied, MitgliedStatus } from '../../../core/kegelverein/kegelverein.models';
+import { findeNamensdublette } from '../../../core/kegelverein/namen.util';
+import { datumKurz, euro } from '../../../shared/format.util';
 import {
   STATUS_BEZEICHNUNG,
   aktuellerStatus,
@@ -13,7 +13,7 @@ import {
   neuesMitglied,
   ohneStatuseintrag,
   sortierterVerlauf,
-} from '../../core/kegelverein/mitglied.util';
+} from '../../../core/kegelverein/mitglied.util';
 
 const HEUTE = () => new Date().toISOString().slice(0, 10);
 

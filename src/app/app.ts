@@ -2,11 +2,10 @@ import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@ang
 import { RouterOutlet } from '@angular/router';
 import { FileStorageService } from './core/kegelverein/persistenz/file-storage.service';
 import { VereinsdatenService } from './core/kegelverein/vereinsdaten.service';
-import { HauptnavigationComponent } from './features/hauptnavigation/hauptnavigation.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, HauptnavigationComponent],
+  imports: [RouterOutlet],
   templateUrl: './app.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app.scss',

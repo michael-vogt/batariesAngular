@@ -1,9 +1,9 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { FileStorageService } from '../../core/kegelverein/persistenz/file-storage.service';
-import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
-import { KegeljahrStore } from '../../core/kegelverein/kegeljahr.store';
-import { BackupEintrag } from '../../core/kegelverein/persistenz/file-storage.models';
-import { Kegelabend, Kegeljahr, Mitglied } from '../../core/kegelverein/kegelverein.models';
+import { FileStorageService } from '../../../core/kegelverein/persistenz/file-storage.service';
+import { VereinsdatenService } from '../../../core/kegelverein/vereinsdaten.service';
+import { KegeljahrStore } from '../../../core/kegelverein/kegeljahr.store';
+import { BackupEintrag } from '../../../core/kegelverein/persistenz/file-storage.models';
+import { Kegelabend, Kegeljahr, Mitglied } from '../../../core/kegelverein/kegelverein.models';
 
 /** Was in einer Sicherung steckt — für die Vorschau vor dem Einspielen. */
 interface Vorschau {

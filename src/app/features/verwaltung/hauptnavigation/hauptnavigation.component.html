@@ -1,6 +1,6 @@
 <header class="kopfleiste">
   <div class="innen">
-    <a routerLink="/mitglieder" class="marke" (click)="menueSchliessen()">
+    <a routerLink="mitglieder" [relativeTo]="route" class="marke" (click)="menueSchliessen()">
       Kegelverein
     </a>
 
@@ -18,6 +18,7 @@
       @for (punkt of punkte; track punkt.pfad) {
         <a
           [routerLink]="punkt.pfad"
+          [relativeTo]="route"
           routerLinkActive="aktiv"
           [routerLinkActiveOptions]="{ exact: !!punkt.exakt }"
           (click)="menueSchliessen()"
@@ -30,6 +31,7 @@
         <a
           class="leise-punkt"
           [routerLink]="punkt.pfad"
+          [relativeTo]="route"
           routerLinkActive="aktiv"
           (click)="menueSchliessen()"
         >{{ punkt.titel }}</a>
@@ -46,7 +48,7 @@
       >{{ thema.thema() === 'hell' ? '>_' : '☀' }}</button>
 
       @if (storage.status() !== 'verbunden') {
-        <a routerLink="/einstellungen" class="nicht-verbunden">Nicht verbunden</a>
+        <a routerLink="einstellungen" [relativeTo]="route" class="nicht-verbunden">Nicht verbunden</a>
       } @else {
         @if (daten.verfuegbareJahre().length > 1) {
           <label class="jahr-wahl">

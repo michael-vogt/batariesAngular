@@ -20,7 +20,7 @@ const require = createRequire(import.meta.url);
 
 const wurzel = resolve(import.meta.dirname, '..');
 const quelle = join(wurzel, 'BEDIENUNG.md');
-const ziel = join(wurzel, 'src/app/features/anleitung/anleitung.component.html');
+const ziel = join(wurzel, 'src/app/features/verwaltung/anleitung/anleitung.component.html');
 
 function markdownWandeln(text) {
   let marked;

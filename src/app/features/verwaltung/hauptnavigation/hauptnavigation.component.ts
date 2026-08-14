@@ -1,10 +1,11 @@
 import { Component, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
-import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
-import { FileStorageService } from '../../core/kegelverein/persistenz/file-storage.service';
-import { ThemaService } from '../../core/thema.service';
+import { ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
+import { VereinsdatenService } from '../../../core/kegelverein/vereinsdaten.service';
+import { FileStorageService } from '../../../core/kegelverein/persistenz/file-storage.service';
+import { ThemaService } from '../../../core/thema.service';
 
 interface NavPunkt {
+  /** Relativ zum Verwaltungsbereich, ohne führenden Schrägstrich. */
   pfad: string;
   titel: string;
   /** true, wenn der Punkt nur bei exakter Übereinstimmung aktiv sein soll. */
@@ -22,25 +23,35 @@ export class HauptnavigationComponent {
   protected readonly storage = inject(FileStorageService);
   protected readonly thema = inject(ThemaService);
 
+  /**
+   * Bezugspunkt für die Verweise: die Route des Verwaltungsbereichs, in
+   * dessen Vorlage diese Leiste steht.
+   *
+   * Dadurch kommen die Pfade ohne das Präfix aus — es steht nur noch in
+   * app.routes.ts. Eine Umbenennung des Bereichs ist damit eine einzige
+   * Zeile, statt elf Einträge hier nachzuziehen.
+   */
+  protected readonly route = inject(ActivatedRoute);
+
   protected readonly menueOffen = signal(false);
   protected readonly jahrWechselt = signal(false);
   protected readonly verwirft = signal(false);
 
   protected readonly punkte: NavPunkt[] = [
-    { pfad: '/mitglieder', titel: 'Mitglieder' },
-    { pfad: '/kegelabende', titel: 'Kegelabende' },
-    { pfad: '/buchfuehrung/journal', titel: 'Journal' },
-    { pfad: '/buchfuehrung/vorfaelle', titel: 'Geschäftsvorfälle' },
-    { pfad: '/buchfuehrung/konten', titel: 'Konten' },
-    { pfad: '/abrechnung', titel: 'Abrechnung' },
-    { pfad: '/buchfuehrung/abschluss', titel: 'Jahresabschluss' },
+    { pfad: 'mitglieder', titel: 'Mitglieder' },
+    { pfad: 'kegelabende', titel: 'Kegelabende' },
+    { pfad: 'buchfuehrung/journal', titel: 'Journal' },
+    { pfad: 'buchfuehrung/vorfaelle', titel: 'Geschäftsvorfälle' },
+    { pfad: 'buchfuehrung/konten', titel: 'Konten' },
+    { pfad: 'abrechnung', titel: 'Abrechnung' },
+    { pfad: 'buchfuehrung/abschluss', titel: 'Jahresabschluss' },
   ];
 
   protected readonly weitere: NavPunkt[] = [
-    { pfad: '/anleitung', titel: 'Anleitung' },
-    { pfad: '/import', titel: 'Altdaten importieren' },
-    { pfad: '/sicherungen', titel: 'Sicherungen' },
-    { pfad: '/einstellungen', titel: 'Einstellungen' },
+    { pfad: 'anleitung', titel: 'Anleitung' },
+    { pfad: 'import', titel: 'Altdaten importieren' },
+    { pfad: 'sicherungen', titel: 'Sicherungen' },
+    { pfad: 'einstellungen', titel: 'Einstellungen' },
   ];
 
   protected menueUmschalten(): void {

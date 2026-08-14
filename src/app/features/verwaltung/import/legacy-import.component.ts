@@ -1,11 +1,11 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { FileStorageService } from '../../core/kegelverein/persistenz/file-storage.service';
-import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
+import { FileStorageService } from '../../../core/kegelverein/persistenz/file-storage.service';
+import { VereinsdatenService } from '../../../core/kegelverein/vereinsdaten.service';
 import {
   ImportErgebnis,
   importiereLegacyExport,
   pruefeSummaryAbweichungen,
-} from '../../core/kegelverein/persistenz/legacy-import';
+} from '../../../core/kegelverein/persistenz/legacy-import';
 
 type Phase = 'leer' | 'geprueft' | 'speichert' | 'fertig' | 'fehler';
 

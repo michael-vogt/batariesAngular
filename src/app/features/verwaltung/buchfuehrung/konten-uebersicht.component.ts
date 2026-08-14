@@ -1,10 +1,10 @@
 import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AccountingService } from '../../core/kegelverein/accounting.service';
-import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
-import { berechneSalden } from '../../core/kegelverein/accounting.logic';
-import { KONTENRAHMEN, KontoArt, KontoNummer } from '../../core/kegelverein/kegelverein.models';
-import { datumKurz, euro } from '../../shared/format.util';
+import { AccountingService } from '../../../core/kegelverein/accounting.service';
+import { VereinsdatenService } from '../../../core/kegelverein/vereinsdaten.service';
+import { berechneSalden } from '../../../core/kegelverein/accounting.logic';
+import { KONTENRAHMEN, KontoArt, KontoNummer } from '../../../core/kegelverein/kegelverein.models';
+import { datumKurz, euro } from '../../../shared/format.util';
 
 interface KontoZeile {
   nummer: KontoNummer;

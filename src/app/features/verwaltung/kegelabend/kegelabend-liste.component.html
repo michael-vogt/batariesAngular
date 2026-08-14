@@ -60,7 +60,7 @@
           @for (zeile of zeilen(); track zeile.abend.id) {
             <tr>
               <td>
-                <a [routerLink]="['/kegelabende', zeile.abend.id]">
+                <a [routerLink]="[zeile.abend.id]" [relativeTo]="route">
                   {{ datumMitTag(zeile.abend.datum) }}
                 </a>
               </td>

@@ -1,16 +1,16 @@
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { KegelabendService } from '../../core/kegelverein/kegelabend.service';
-import { MitgliederService } from '../../core/kegelverein/mitglieder.service';
-import { findeNamensdublette } from '../../core/kegelverein/namen.util';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { KegelabendService } from '../../../core/kegelverein/kegelabend.service';
+import { MitgliederService } from '../../../core/kegelverein/mitglieder.service';
+import { findeNamensdublette } from '../../../core/kegelverein/namen.util';
 import {
   aktuellerStatus,
   istGastkegler,
   neuesMitglied,
-} from '../../core/kegelverein/mitglied.util';
-import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
-import { datumKurz, datumLang, euro } from '../../shared/format.util';
+} from '../../../core/kegelverein/mitglied.util';
+import { VereinsdatenService } from '../../../core/kegelverein/vereinsdaten.service';
+import { datumKurz, datumLang, euro } from '../../../shared/format.util';
 import {
   Kegelabend,
   KegelabendTeilnehmer,
@@ -19,7 +19,7 @@ import {
   SpielKey,
   SpielRunde,
   SpielStatus,
-} from '../../core/kegelverein/kegelverein.models';
+} from '../../../core/kegelverein/kegelverein.models';
 
 /** Frischer Teilnehmereintrag aus einem Mitglied; Statistiken starten bei null. */
 function neuerTeilnehmer(m: Mitglied): KegelabendTeilnehmer {
@@ -66,6 +66,9 @@ export class KegelabendDetailComponent {
   protected readonly datumKurz = datumKurz;
   /** Kommt aus der Route (withComponentInputBinding). */
   readonly id = input.required<string>();
+
+  /** Bezugspunkt für die Verweise zurück zur Übersicht (eine Ebene höher). */
+  protected readonly route = inject(ActivatedRoute);
 
   private readonly kegelabendService = inject(KegelabendService);
   private readonly mitgliederService = inject(MitgliederService);

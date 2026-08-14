@@ -1,15 +1,15 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AccountingService } from '../../core/kegelverein/accounting.service';
-import { MitgliederService } from '../../core/kegelverein/mitglieder.service';
-import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
+import { AccountingService } from '../../../core/kegelverein/accounting.service';
+import { MitgliederService } from '../../../core/kegelverein/mitglieder.service';
+import { VereinsdatenService } from '../../../core/kegelverein/vereinsdaten.service';
 import {
   journalMonatsbeitraege,
   journalRestguthabenVerrechnung,
-} from '../../core/kegelverein/accounting.logic';
-import { aktuellerStatus, istGastkegler } from '../../core/kegelverein/mitglied.util';
-import { Mitglied } from '../../core/kegelverein/kegelverein.models';
-import { datumKurz, euro } from '../../shared/format.util';
+} from '../../../core/kegelverein/accounting.logic';
+import { aktuellerStatus, istGastkegler } from '../../../core/kegelverein/mitglied.util';
+import { Mitglied } from '../../../core/kegelverein/kegelverein.models';
+import { datumKurz, euro } from '../../../shared/format.util';
 
 type Vorgang = 'beitraege' | 'einnahmen' | 'restguthaben' | 'geburtstag';
 

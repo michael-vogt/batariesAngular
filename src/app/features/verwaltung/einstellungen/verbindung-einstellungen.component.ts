@@ -1,8 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { PhpApiAdapter } from '../../core/kegelverein/persistenz/php-api-adapter';
-import { FileStorageService } from '../../core/kegelverein/persistenz/file-storage.service';
-import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
+import { PhpApiAdapter } from '../../../core/kegelverein/persistenz/php-api-adapter';
+import { FileStorageService } from '../../../core/kegelverein/persistenz/file-storage.service';
+import { VereinsdatenService } from '../../../core/kegelverein/vereinsdaten.service';
 
 /**
  * Einmalige Eingabe der Serverzugangsdaten. Nach erfolgreichem Test

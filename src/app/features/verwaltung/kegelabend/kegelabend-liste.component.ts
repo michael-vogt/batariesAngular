@@ -1,12 +1,12 @@
-import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { KegelabendService } from '../../core/kegelverein/kegelabend.service';
-import { MitgliederService } from '../../core/kegelverein/mitglieder.service';
-import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
-import { Kegelabend } from '../../core/kegelverein/kegelverein.models';
-import { aktuellerStatus } from '../../core/kegelverein/mitglied.util';
-import { datumMitTag, euro } from '../../shared/format.util';
+import { KegelabendService } from '../../../core/kegelverein/kegelabend.service';
+import { MitgliederService } from '../../../core/kegelverein/mitglieder.service';
+import { VereinsdatenService } from '../../../core/kegelverein/vereinsdaten.service';
+import { Kegelabend } from '../../../core/kegelverein/kegelverein.models';
+import { aktuellerStatus } from '../../../core/kegelverein/mitglied.util';
+import { datumMitTag, euro } from '../../../shared/format.util';
 
 @Component({
   selector: 'app-kegelabend-liste',
@@ -19,6 +19,9 @@ export class KegelabendListeComponent {
   // damit die Templates darauf zugreifen können.
   protected readonly euro = euro;
   protected readonly datumMitTag = datumMitTag;
+  /** Bezugspunkt für die Verweise auf die Detailansicht. */
+  protected readonly route = inject(ActivatedRoute);
+
   private readonly kegelabendService = inject(KegelabendService);
   private readonly mitgliederService = inject(MitgliederService);
   protected readonly daten = inject(VereinsdatenService);

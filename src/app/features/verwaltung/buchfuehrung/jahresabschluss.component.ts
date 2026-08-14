@@ -1,10 +1,10 @@
 import { Component, computed, effect, inject, linkedSignal, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AccountingService } from '../../core/kegelverein/accounting.service';
-import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
-import { AbschlussVorschau } from '../../core/kegelverein/jahresabschluss.logic';
-import { erzeugeJahresbericht } from '../../core/kegelverein/bilanz.logic';
-import { datumKurz, euro } from '../../shared/format.util';
+import { AccountingService } from '../../../core/kegelverein/accounting.service';
+import { VereinsdatenService } from '../../../core/kegelverein/vereinsdaten.service';
+import { AbschlussVorschau } from '../../../core/kegelverein/jahresabschluss.logic';
+import { erzeugeJahresbericht } from '../../../core/kegelverein/bilanz.logic';
+import { datumKurz, euro } from '../../../shared/format.util';
 
 /**
  * Vorschlag für den Beginn: der 1. Oktober des laufenden Kegeljahres.

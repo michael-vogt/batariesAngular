@@ -1,10 +1,10 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AccountingService } from '../../core/kegelverein/accounting.service';
-import { MitgliederService } from '../../core/kegelverein/mitglieder.service';
-import { VereinsdatenService } from '../../core/kegelverein/vereinsdaten.service';
-import { Buchung, KONTENRAHMEN, KontoNummer } from '../../core/kegelverein/kegelverein.models';
-import { datumKurz, euro } from '../../shared/format.util';
+import { AccountingService } from '../../../core/kegelverein/accounting.service';
+import { MitgliederService } from '../../../core/kegelverein/mitglieder.service';
+import { VereinsdatenService } from '../../../core/kegelverein/vereinsdaten.service';
+import { Buchung, KONTENRAHMEN, KontoNummer } from '../../../core/kegelverein/kegelverein.models';
+import { datumKurz, euro } from '../../../shared/format.util';
 
 const SEITENGROESSEN = [25, 50, 100, 250] as const;
 

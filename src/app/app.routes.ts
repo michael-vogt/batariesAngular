@@ -1,75 +1,91 @@
 import { Routes } from '@angular/router';
-import { LegacyImportComponent } from './features/import/legacy-import.component';
-import { MitgliederListeComponent } from './features/mitglieder/mitglieder-liste.component';
-import { KegelabendListeComponent } from './features/kegelabend/kegelabend-liste.component';
-import { KegelabendDetailComponent } from './features/kegelabend/kegelabend-detail.component';
-import { BuchungenJournalComponent } from './features/buchfuehrung/buchungen-journal.component';
-import { KontenUebersichtComponent } from './features/buchfuehrung/konten-uebersicht.component';
-import { GeschaeftsvorfaelleComponent } from './features/buchfuehrung/geschaeftsvorfaelle.component';
-import { JahresabschlussComponent } from './features/buchfuehrung/jahresabschluss.component';
-import { HauptnavigationComponent } from './features/hauptnavigation/hauptnavigation.component';
-import { AnleitungComponent } from './features/anleitung/anleitung.component';
-import { BackupWiederherstellungComponent } from './features/import/backup-wiederherstellung.component';
-import { VerbindungEinstellungenComponent } from './features/einstellungen/verbindung-einstellungen.component';
+import { LegacyImportComponent } from './features/verwaltung/import/legacy-import.component';
+import { MitgliederListeComponent } from './features/verwaltung/mitglieder/mitglieder-liste.component';
+import { KegelabendListeComponent } from './features/verwaltung/kegelabend/kegelabend-liste.component';
+import { KegelabendDetailComponent } from './features/verwaltung/kegelabend/kegelabend-detail.component';
+import { BuchungenJournalComponent } from './features/verwaltung/buchfuehrung/buchungen-journal.component';
+import { KontenUebersichtComponent } from './features/verwaltung/buchfuehrung/konten-uebersicht.component';
+import { GeschaeftsvorfaelleComponent } from './features/verwaltung/buchfuehrung/geschaeftsvorfaelle.component';
+import { JahresabschlussComponent } from './features/verwaltung/buchfuehrung/jahresabschluss.component';
+import { HauptnavigationComponent } from './features/verwaltung/hauptnavigation/hauptnavigation.component';
+import { AnleitungComponent } from './features/verwaltung/anleitung/anleitung.component';
+import { BackupWiederherstellungComponent } from './features/verwaltung/import/backup-wiederherstellung.component';
+import { VerbindungEinstellungenComponent } from './features/verwaltung/einstellungen/verbindung-einstellungen.component';
+import { RahmenComponent } from './features/homepage/rahmen/rahmen.component';
+import { VerwaltungComponent } from './features/verwaltung/verwaltung.component';
 
 export const routes: Routes = [
   {
-    path: 'anleitung',
-    loadComponent: () =>
-      import('./features/anleitung/anleitung.component')
-        .then(m => m.AnleitungComponent),
-  },
-  {
-    path: 'abrechnung',
-    loadComponent: () =>
-      import('./features/abrechnung/abrechnung.component')
-        .then(m => m.AbrechnungComponent)
-  },
-  {
     path: '',
-    redirectTo: 'mitglieder',
-    pathMatch: 'full'
+    component: RahmenComponent,
+    pathMatch: 'full',
   },
   {
-    path: 'buchfuehrung/journal',
-    component: BuchungenJournalComponent
+    path: 'verwaltung',
+    component: VerwaltungComponent,
+    children: [
+      {
+        path: '',
+        redirectTo: 'mitglieder',
+        pathMatch: 'full',
+      },
+      {
+        path: 'anleitung',
+        loadComponent: () =>
+          import('./features/verwaltung/anleitung/anleitung.component').then(
+            (m) => m.AnleitungComponent,
+          ),
+      },
+      {
+        path: 'abrechnung',
+        loadComponent: () =>
+          import('./features/verwaltung/abrechnung/abrechnung.component').then(
+            (m) => m.AbrechnungComponent,
+          ),
+      },
+      {
+        path: 'buchfuehrung/journal',
+        component: BuchungenJournalComponent,
+      },
+      {
+        path: 'buchfuehrung/konten',
+        component: KontenUebersichtComponent,
+      },
+      {
+        path: 'buchfuehrung/vorfaelle',
+        component: GeschaeftsvorfaelleComponent,
+      },
+      {
+        path: 'buchfuehrung/abschluss',
+        component: JahresabschlussComponent,
+      },
+      {
+        path: 'kegelabende',
+        component: KegelabendListeComponent,
+      },
+      {
+        path: 'kegelabende/:id',
+        loadComponent: () =>
+          import('./features/verwaltung/kegelabend/kegelabend-detail.component').then(
+            (m) => m.KegelabendDetailComponent,
+          ),
+      },
+      {
+        path: 'mitglieder',
+        component: MitgliederListeComponent,
+      },
+      {
+        path: 'sicherungen',
+        component: BackupWiederherstellungComponent,
+      },
+      {
+        path: 'import',
+        component: LegacyImportComponent,
+      },
+      {
+        path: 'einstellungen',
+        component: VerbindungEinstellungenComponent,
+      },
+    ],
   },
-  {
-    path: 'buchfuehrung/konten',
-    component: KontenUebersichtComponent
-  },
-  {
-    path: 'buchfuehrung/vorfaelle',
-    component: GeschaeftsvorfaelleComponent
-  },
-  {
-    path: 'buchfuehrung/abschluss',
-    component: JahresabschlussComponent
-  },
-  {
-    path: 'kegelabende',
-    component: KegelabendListeComponent
-  },
-  {
-    path: 'kegelabende/:id',
-    loadComponent: () =>
-      import('./features/kegelabend/kegelabend-detail.component')
-      .then(m => m.KegelabendDetailComponent)
-  },
-  {
-    path: 'mitglieder',
-    component: MitgliederListeComponent
-  },
-  {
-    path: 'sicherungen',
-    component: BackupWiederherstellungComponent
-  },
-  {
-    path: 'import',
-    component: LegacyImportComponent
-  },
-  {
-    path: 'einstellungen',
-    component: VerbindungEinstellungenComponent
-  }
 ];

@@ -1,12 +1,12 @@
 <div class="seite">
   @if (!abend()) {
     <p class="fehler">
-      Kegelabend nicht gefunden. <a routerLink="/kegelabende">Zur Übersicht</a>
+      Kegelabend nicht gefunden. <a routerLink=".." [relativeTo]="route">Zur Übersicht</a>
     </p>
   } @else {
     <header class="seiten-kopf">
       <div>
-        <a routerLink="/kegelabende" class="zurueck">← Alle Kegelabende</a>
+        <a routerLink=".." [relativeTo]="route" class="zurueck">← Alle Kegelabende</a>
         <h1>{{ datumLang(abend()!.datum) }}</h1>
         @if (abend()!.ort) {
           <p class="hinweis">{{ abend()!.ort }}</p>
