@@ -71,7 +71,13 @@ export class PhpApiAdapter implements PersistenzAdapter {
     const erreichbar = await this.pruefeVerbindung(kandidat);
     if (!erreichbar) return false;
 
-    this._verbindung.set(kandidat);
+    // Nur setzen, wenn sich tatsächlich etwas ändert: Das Signal löst
+    // sonst Effekte aus, die daran hängen — etwa das Nachladen der
+    // Rollennamen —, ohne dass es dafür einen Anlass gäbe.
+    const bisher = this._verbindung();
+    if (bisher?.baseUrl !== kandidat.baseUrl || bisher?.apiKey !== kandidat.apiKey) {
+      this._verbindung.set(kandidat);
+    }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(kandidat));
     return true;
   }

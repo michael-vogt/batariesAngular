@@ -1,5 +1,7 @@
 import { inject, Service, signal } from '@angular/core';
 import { Berechtigung, Berechtigungen, RollenService } from './rollen.service';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { from } from 'rxjs';
 
 interface Nutzer {
   username: string;

@@ -5,8 +5,9 @@
     <label>
       Rolle
       <select [(ngModel)]="username">
-        <option value="Mitglied">Mitglied</option>
-        <option value="Kassenwart">Kassenwart</option>
+        @for (rolle of rollenService.rollennamen(); track rolle) {
+          <option value="{{rolle}}">{{ rolle }}</option>
+        }
       </select>
     </label>
     <label>
@@ -20,6 +21,9 @@
     </label>
     <button type="button" [disabled]="!password()" (click)="login()">anmelden</button>
   </div>
+    @if (rollenService.namenLaden()) {
+      <small class="leise">Rollen werden geladen...</small>
+    }
     @if (loginService.fehler()) {
       <p class="fehler">{{loginService.fehler()}}</p>
     }

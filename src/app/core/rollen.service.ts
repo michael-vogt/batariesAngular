@@ -1,4 +1,4 @@
-import { Service, inject } from '@angular/core';
+import { Injectable, effect, inject, signal, Service } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { PhpApiAdapter } from './kegelverein/persistenz/php-api-adapter';
@@ -13,11 +13,11 @@ export type Berechtigung = 'verwaltung' | 'terminPlanung' | 'termineAbmelden';
  * nicht zwischen "nicht erteilt" und "nicht eingetragen" unterscheiden.
  */
 export interface Berechtigungen {
-  /** Zugang zu Mitgliedern, Buchführung, Abrechnung und Jahresabschluss. */
+  /** Mitglieder, Buchführung, Abrechnung, Jahresabschluss, Sicherungen. */
   verwaltung: boolean;
-  /** Zugang zur Terminplanung */
+  /** Termine anlegen und löschen. */
   terminplanung: boolean;
-  /** Zugang zur Terminplanung zwecks Abmeldung. */
+  /** Sich und andere von Terminen abmelden. */
   termineAbmelden: boolean;
 }
 
@@ -32,6 +32,12 @@ export const KEINE_BERECHTIGUNGEN: Berechtigungen = {
 export type PruefErgebnis =
   | { gueltig: true; name: string; berechtigungen: Berechtigungen }
   | { gueltig: false; grund: 'abgelehnt' | 'nicht_erreichbar' | 'unvollstaendig'; meldung: string };
+
+/** Eine Rolle samt ihren Rechten — nur für Berechtigte einsehbar. */
+export interface RolleMitRechten {
+  name: string;
+  berechtigungen: Berechtigungen;
+}
 
 interface AuthAntwort {
   gueltig: boolean;
@@ -57,6 +63,102 @@ interface AuthAntwort {
 export class RollenService {
   private readonly http = inject(HttpClient);
   private readonly adapter = inject(PhpApiAdapter);
+
+  private readonly _rollennamen = signal<string[]>([]);
+  private readonly _namenLaden = signal(false);
+
+  /**
+   * Die vorhandenen Rollennamen, für eine Auswahlliste beim Anmelden.
+   *
+   * Wird geladen, sobald eine Serververbindung besteht, und geleert, wenn
+   * sie getrennt wird. Komponenten lesen das Signal einfach — ohne selbst
+   * den richtigen Zeitpunkt abpassen zu müssen.
+   */
+  readonly rollennamen = this._rollennamen.asReadonly();
+
+  /** true, solange die Namen abgerufen werden. */
+  readonly namenLaden = this._namenLaden.asReadonly();
+
+  constructor() {
+    effect(() => {
+      // hatVerbindung() liest intern ein Signal und wird dadurch
+      // beobachtet: Der Effekt läuft erneut, sobald sich der
+      // Verbindungszustand ändert.
+      if (this.adapter.hatVerbindung()) {
+        void this.namenLadenVomServer();
+      } else {
+        this._rollennamen.set([]);
+      }
+    });
+  }
+
+  /**
+   * Lädt die Rollennamen erneut.
+   *
+   * Normalerweise nicht nötig — der Effekt im Konstruktor erledigt das
+   * beim Verbinden. Sinnvoll nur, wenn sich die Rollendatei auf dem
+   * Server geändert hat, während die Anwendung offen war.
+   */
+  async namenAktualisieren(): Promise<void> {
+    await this.namenLadenVomServer();
+  }
+
+  /**
+   * Holt die Namen vom Server.
+   *
+   * Fehler werden geschluckt und führen zu einer leeren Liste: Eine
+   * Auswahlliste ist ein Komfort, für den nichts scheitern muss. Wer sich
+   * anmelden will, kann den Namen weiterhin eintippen.
+   */
+  private async namenLadenVomServer(): Promise<void> {
+    if (!this.adapter.hatVerbindung()) {
+      this._rollennamen.set([]);
+      return;
+    }
+
+    this._namenLaden.set(true);
+    try {
+      const antwort = await firstValueFrom(
+        this.http.get<{ rollen?: string[] }>(
+          `${this.adapter.endpunktUrl('auth.php')}?aktion=rollen`,
+          { headers: this.adapter.apiKeyKopfzeile() },
+        ),
+      );
+      this._rollennamen.set(antwort?.rollen ?? []);
+    } catch {
+      this._rollennamen.set([]);
+    } finally {
+      this._namenLaden.set(false);
+    }
+  }
+
+  /**
+   * Liest alle Rollen samt Berechtigungen.
+   *
+   * Verlangt gültige Zugangsdaten einer Rolle, die selbst
+   * Verwaltungsrechte hat — wer die Rechte anderer einsehen will, muss
+   * sie auch vergeben dürfen. Hashes liefert der Server grundsätzlich
+   * nicht mit.
+   */
+  async rollenMitRechten(name: string, credential: string): Promise<RolleMitRechten[] | null> {
+    if (!this.adapter.hatVerbindung()) return null;
+
+    try {
+      const antwort = await firstValueFrom(
+        this.http.post<{ rollen?: RolleMitRechten[] }>(
+          `${this.adapter.endpunktUrl('auth.php')}?aktion=rollen`,
+          { name: name.trim(), credential },
+          { headers: this.adapter.apiKeyKopfzeile() },
+        ),
+      );
+      return antwort?.rollen ?? [];
+    } catch {
+      // 401 (Zugangsdaten falsch) und 403 (nicht berechtigt) laufen hier
+      // zusammen: Beides bedeutet für den Aufrufer, dass es die Auskunft
+      // nicht gibt.
+      return null;
+    }
+  }
 
   /**
    * Prüft Name und Zugangsdaten.
@@ -106,11 +208,7 @@ export class RollenService {
         };
       }
 
-      return {
-        gueltig: false,
-        grund: 'abgelehnt',
-        meldung: 'Rolle oder Zugangsdaten stimmen nicht.',
-      };
+      return { gueltig: false, grund: 'abgelehnt', meldung: 'Name oder Zugangsdaten stimmen nicht.' };
     } catch (e) {
       // 401 ist die reguläre Ablehnung durch auth.php, alles andere ein
       // technisches Problem — die Unterscheidung ist wichtig, damit
@@ -119,7 +217,7 @@ export class RollenService {
         return {
           gueltig: false,
           grund: 'abgelehnt',
-          meldung: 'Rolle oder Zugangsdaten stimmen nicht.',
+          meldung: 'Name oder Zugangsdaten stimmen nicht.',
         };
       }
 

@@ -9,12 +9,19 @@ declare(strict_types=1);
  * Datenverzeichnisses und ist deshalb über api.php nicht abrufbar — sonst
  * wären die Hashes öffentlich.
  *
- * Aufruf:
- *   POST auth.php   Body: {"name": "...", "credential": "..."}
+ * Aufrufe:
+ *   POST auth.php                 Body: {"name": "...", "credential": "..."}
+ *     -> 200 {"gueltig": true, "name": "...", "berechtigungen": {...}}
+ *     -> 401 {"gueltig": false}
  *
- * Antwort:
- *   200 {"gueltig": true, "name": "..."}
- *   401 {"gueltig": false}
+ *   GET  auth.php?aktion=rollen   nur die Namen, für eine Auswahlliste
+ *     -> 200 {"rollen": ["Kassenwart", "Mitglied"]}
+ *
+ *   POST auth.php?aktion=rollen   Body wie oben, mit gültigen Zugangsdaten
+ *     -> 200 {"rollen": [{"name": "...", "berechtigungen": {...}}, ...]}
+ *     -> 403, wenn die Rolle dafür nicht berechtigt ist
+ *
+ * Hashes verlassen den Server unter keinen Umständen.
  *
  * Was dieser Endpunkt NICHT tut: eine Sitzung eröffnen oder ein Token
  * ausstellen. Er beantwortet allein die Frage, ob Name und Zugangsdaten
@@ -67,9 +74,12 @@ if ($apiKey === 'HIER_LANGEN_ZUFAELLIGEN_STRING_EINSETZEN' || !hash_equals($apiK
     exit;
 }
 
-if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+$methode = $_SERVER['REQUEST_METHOD'] ?? '';
+$aktion = (string) ($_GET['aktion'] ?? '');
+
+if ($methode !== 'POST' && !($methode === 'GET' && $aktion === 'rollen')) {
     http_response_code(405);
-    echo json_encode(['error' => 'Nur POST erlaubt']);
+    echo json_encode(['error' => 'Nur POST erlaubt (Ausnahme: GET ?aktion=rollen)']);
     exit;
 }
 
@@ -89,11 +99,11 @@ function verzoegern(): void
     usleep(250_000);
 }
 
-$eingabe = json_decode((string) file_get_contents('php://input'), true);
+$eingabe = $methode === 'POST' ? json_decode((string) file_get_contents('php://input'), true) : null;
 $name = is_array($eingabe) ? (string) ($eingabe['name'] ?? '') : '';
 $credential = is_array($eingabe) ? (string) ($eingabe['credential'] ?? '') : '';
 
-if ($name === '' || $credential === '') {
+if ($methode === 'POST' && ($name === '' || $credential === '')) {
     verzoegern();
     http_response_code(400);
     echo json_encode(['error' => 'Name und Zugangsdaten sind erforderlich']);
@@ -147,6 +157,29 @@ if (!is_array($rollen)) {
 
 if ($rollen === []) {
     error_log('auth.php: Die Rollendatei enthält keine Einträge.');
+}
+
+/**
+ * Stufe 1: nur die Namen.
+ *
+ * Rollennamen sind keine Geheimnisse — sie stehen auf jeder Einladung zur
+ * Generalversammlung. Für eine Auswahlliste beim Anmelden ist das die
+ * angemessene Auskunft: Sie erspart das fehleranfällige Abtippen, ohne zu
+ * verraten, was eine Rolle darf oder wie ihre Zugangsdaten lauten.
+ *
+ * Dass damit die Namen bekannt sind, nimmt der Zeitgleichheit beim
+ * Prüfen (siehe unten) ihren Zweck teilweise. Das ist vertretbar: Der
+ * Schutz liegt im Passwort, nicht in der Verborgenheit des Namens.
+ */
+if ($methode === 'GET' && $aktion === 'rollen') {
+    $namen = [];
+    foreach ($rollen as $rolle) {
+        if (isset($rolle['name'])) {
+            $namen[] = (string) $rolle['name'];
+        }
+    }
+    echo json_encode(['rollen' => $namen]);
+    exit;
 }
 
 /**
@@ -213,6 +246,38 @@ verzoegern();
 if (!$stimmt) {
     http_response_code(401);
     echo json_encode(['gueltig' => false]);
+    exit;
+}
+
+/**
+ * Stufe 2: Namen samt Berechtigungen.
+ *
+ * Wer welche Rechte hat, verrät, welche Rolle sich für einen Angriff
+ * lohnt. Diese Auskunft gibt es deshalb erst nach bestandener Prüfung und
+ * nur für Rollen, die selbst Verwaltungsrechte haben — wer die Rechte
+ * anderer einsehen will, muss sie auch vergeben dürfen.
+ *
+ * Hashes bleiben auch hier außen vor.
+ */
+if ($aktion === 'rollen') {
+    if (!$gefundeneRechte['verwaltung']) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Diese Rolle darf die Rollenliste nicht einsehen']);
+        exit;
+    }
+
+    $liste = [];
+    foreach ($rollen as $rolle) {
+        if (!isset($rolle['name'])) {
+            continue;
+        }
+        $liste[] = [
+            'name' => (string) $rolle['name'],
+            'berechtigungen' => berechtigungenLesen($rolle, (string) $rolle['name']),
+        ];
+    }
+
+    echo json_encode(['rollen' => $liste]);
     exit;
 }
 

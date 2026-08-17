@@ -16,6 +16,7 @@ import { VerwaltungComponent } from './features/verwaltung/verwaltung.component'
 import { MarkdownViewerComponent } from './shared/markdown-viewer/markdown-viewer.component';
 import { LoginComponent } from './features/homepage/login/login.component';
 import { TermineComponent } from './features/homepage/termine/termine.component';
+import { RollenComponent } from './features/homepage/rollen/rollen.component';
 
 export const routes: Routes = [
   {
@@ -38,6 +39,10 @@ export const routes: Routes = [
       {
         path: 'kegeltermine',
         component: TermineComponent
+      },
+      {
+        path: 'rollen',
+        component: RollenComponent,
       },
 
       {

@@ -1,0 +1,25 @@
+<div class="karte">
+<h2>Vorhandene Rollen</h2>
+
+  <table>
+    <thead>
+    <th>Rolle</th>
+    <th>TermineAbmelden</th>
+    <th>Terminplanung</th>
+    <th>Verwaltung</th>
+    </thead>
+
+    <tbody>
+      @for (rolle of rollen(); track rolle) {
+        <tr>
+        <td>{{rolle.name}}</td>
+        <td>{{rolle.berechtigungen.termineAbmelden === true ? 'x' : '-' }}</td>
+        <td>{{rolle.berechtigungen.terminplanung === true ? 'x' : '-' }}</td>
+        <td>{{rolle.berechtigungen.verwaltung === true ? 'x' : '-' }}</td>
+        </tr>
+      }
+    </tbody>
+
+  </table>
+
+</div>
