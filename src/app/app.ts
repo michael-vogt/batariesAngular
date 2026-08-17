@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@ang
 import { RouterOutlet } from '@angular/router';
 import { FileStorageService } from './core/kegelverein/persistenz/file-storage.service';
 import { VereinsdatenService } from './core/kegelverein/vereinsdaten.service';
+import { TerminService } from './core/kegelverein/termin.service';
 
 @Component({
   selector: 'app-root',
@@ -15,9 +16,13 @@ export class App implements OnInit {
 
   private readonly storage = inject(FileStorageService);
   private readonly daten = inject(VereinsdatenService);
+  private readonly termine = inject(TerminService);
 
   async ngOnInit(): Promise<void> {
     const verbunden = await this.storage.automatischVerbinden();
-    if (verbunden) await this.daten.initialisieren();
+    if (verbunden) {
+      await this.daten.initialisieren();
+      await this.termine.laden();
+    }
   }
 }
