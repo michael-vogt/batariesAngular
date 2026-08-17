@@ -6,7 +6,7 @@ import { FileStorageService } from '../../../core/kegelverein/persistenz/file-st
 import { erzeugeUebersicht, jetzt } from '../../../core/kegelverein/termin.logic';
 import { Kegeltermin } from '../../../core/kegelverein/kegelverein.models';
 import { aktuellerStatus } from '../../../core/kegelverein/mitglied.util';
-import { UserService } from '../../../core/user.service';
+import { LoginService } from '../../../core/login-service';
 
 /** Vorschlag für einen neuen Termin: nächster Freitag, 19:30 Uhr. */
 function vorschlagBeginn(): string {
@@ -26,7 +26,7 @@ export class TermineComponent {
   protected readonly termine = inject(TerminService);
   protected readonly storage = inject(FileStorageService);
   private readonly mitgliederService = inject(MitgliederService);
-  private readonly userService = inject(UserService);
+  private readonly loginService = inject(LoginService);
 
   protected readonly neuBeginn = signal(vorschlagBeginn());
   protected readonly neuOrt = signal('');
@@ -38,7 +38,7 @@ export class TermineComponent {
   protected readonly abmeldeGrund = signal('');
   protected readonly formularFehler = signal<string | null>(null);
 
-  protected readonly istAdminAngemeldet = computed<boolean>(() => { return this.userService.istAdminAngemeldet(); });
+  protected readonly istAdminAngemeldet = computed<boolean>(() => { return this.loginService.hatBerechtigung('verwaltung'); });
 
   constructor() {
     // Termine liegen in einer eigenen Datei und werden geladen, sobald

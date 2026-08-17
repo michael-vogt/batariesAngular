@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { LoginComponent } from '../login/login.component';
-import { UserService } from '../../../core/user.service';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { LoginService } from '../../../core/login-service';
 
 @Component({
   selector: 'app-rahmen',
@@ -10,5 +10,5 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
   styleUrl: './rahmen.component.scss',
 })
 export class RahmenComponent {
-  protected userService = inject(UserService);
+  protected loginService = inject(LoginService);
 }

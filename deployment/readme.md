@@ -7,18 +7,47 @@ Server. Dadurch entfällt CORS vollständig — die App ruft ihre eigene Herkunf
 
 ```
 /www/htdocs/w005d352/
-├── config.php                 ← API-Key + Pfad zum Datenverzeichnis
-├── data/                      ← manifest.json, mitglieder.json, kegeljahre/, backups/
+├── config.php                 ← API-Key, Pfade
+├── rollen.json                ← Rollen für die Anmeldung (nur Hashes)
+├── rollen-hash.php            ← Hilfsskript, wird nur auf der Kommandozeile genutzt
+├── data/                      ← manifest.json, mitglieder.json, termine.json, kegeljahre/, backups/
 └── bataries/angular/
     ├── index.html             ← gebaute App
     ├── main-<hash>.js
     ├── styles-<hash>.css
     ├── .htaccess              ← app.htaccess aus diesem Ordner, umbenannt
     └── api/
-        └── api.php
+        ├── api.php
+        └── auth.php           ← prüft Rolle und Zugangsdaten
 ```
 
-`config.php` und `data/` liegen weiterhin **oberhalb** des Webroots.
+`config.php`, `rollen.json` und `data/` liegen **oberhalb** des Webroots.
+
+Dass `rollen.json` neben `config.php` liegt und nicht unter `data/`, ist kein
+Zufall: `api.php` kann jede `.json`-Datei im Datenverzeichnis ausliefern. Läge
+die Rollendatei dort, wären die Hashes über die API abrufbar.
+
+## Rollen einrichten
+
+Je Rolle einen Eintrag erzeugen:
+
+```bash
+php rollen-hash.php kassenwart "ein-gutes-passwort"
+```
+
+Die Ausgabe in das Feld `rollen` von `rollen.json` übernehmen. In der Datei
+steht ausschließlich der bcrypt-Hash; das Passwort selbst wird nirgends
+gespeichert und lässt sich daraus nicht zurückrechnen.
+
+Prüfen lässt sich das Ergebnis so:
+
+```bash
+curl -i -X POST -H "X-Api-Key: $KEY" -H "Content-Type: application/json" \
+  -d '{"name":"kassenwart","credential":"ein-gutes-passwort"}' \
+  "https://www.bataries.de/angular/api/auth.php"
+```
+
+Erwartet: `200` mit `{"gueltig":true,...}`, bei falschem Passwort `401`.
 
 ## 1. Bauen
 

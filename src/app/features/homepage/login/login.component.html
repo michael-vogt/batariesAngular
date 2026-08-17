@@ -1,7 +1,14 @@
 <div class="karte">
   <h2>Login</h2>
-  @if(!userService.istNutzerAngemeldet()) {
+  @if(!loginService.istNutzerAngemeldet()) {
   <div class="formular-zeile">
+    <label>
+      Rolle
+      <select [(ngModel)]="username">
+        <option value="Mitglied">Mitglied</option>
+        <option value="Kassenwart">Kassenwart</option>
+      </select>
+    </label>
     <label>
       Passwort
       <input
@@ -13,11 +20,12 @@
     </label>
     <button type="button" [disabled]="!password()" (click)="login()">anmelden</button>
   </div>
-    @if (userService.fehler()) {
-      <p class="fehler">{{userService.fehler()}}</p>
+    @if (loginService.fehler()) {
+      <p class="fehler">{{loginService.fehler()}}</p>
     }
   } @else {
-    <p>Angemeldet als {{userService.currentRole()}}</p>
+    <!--<p>Angemeldet als {{userService.currentRole()}}</p>-->
+    <p>Angemeldet als {{ loginService.currentNutzer()?.username }}</p>
     <button type="button" (click)="logout()">Logout</button>
   }
 </div>

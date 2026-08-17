@@ -13,7 +13,7 @@ export interface ServerVerbindung {
 
 /**
  * Implementiert PersistenzAdapter über HTTP gegen das PHP-Backend
- * (siehe deployment/api.php). Funktioniert in jedem Browser.
+ * (siehe server-php/public_html/api.php). Funktioniert in jedem Browser.
  *
  * Die Zugangsdaten (baseUrl + apiKey) kommen aus einem Einstellungen-
  * Formular und werden nach erfolgreichem Verbindungstest im localStorage
@@ -33,6 +33,23 @@ export class PhpApiAdapter implements PersistenzAdapter {
 
   /** Adresse der aktiven Verbindung, leer wenn nicht verbunden. */
   readonly aktiveBaseUrl = computed(() => this._verbindung()?.baseUrl ?? '');
+
+  /**
+   * Adresse eines Endpunkts neben api.php, etwa auth.php.
+   *
+   * Wird aus der konfigurierten Adresse abgeleitet, damit nicht jeder
+   * Endpunkt einzeln eingetragen werden muss — sie liegen im selben
+   * Verzeichnis auf dem Server.
+   */
+  endpunktUrl(datei: string): string {
+    const v = this.pruefeVerbunden();
+    return v.baseUrl.replace(/[^/]+$/, datei);
+  }
+
+  /** API-Key der aktiven Verbindung — für Aufrufe außerhalb dieses Adapters. */
+  apiKeyKopfzeile(): Record<string, string> {
+    return { 'X-Api-Key': this.pruefeVerbunden().apiKey };
+  }
 
   hatVerbindung(): boolean {
     return this._verbindung() !== null;
