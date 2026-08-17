@@ -1,4 +1,4 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { computed, inject, signal, Service } from '@angular/core';
 import { KegeljahrStore } from './kegeljahr.store';
 import { Kegeljahr } from './kegelverein.models';
 import { FileStorageService, SicherungsInhalt } from './persistenz/file-storage.service';
@@ -20,7 +20,7 @@ export type LadeStatus = 'leer' | 'laedt' | 'bereit' | 'fehler';
  * (speichern()): jeder Schreibvorgang legt serverseitig ein Backup an, und
  * das bei jedem Tastendruck zu tun würde die Rotation sinnlos machen.
  */
-@Injectable({ providedIn: 'root' })
+@Service()
 export class VereinsdatenService {
   private readonly store = inject(KegeljahrStore);
   private readonly storage = inject(FileStorageService);

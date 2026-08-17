@@ -1,4 +1,4 @@
-import { Injectable, computed, inject } from '@angular/core';
+import { computed, inject, Service } from '@angular/core';
 import { KegeljahrStore } from './kegeljahr.store';
 import {
   berechneMitgliedFinanzen,
@@ -17,7 +17,7 @@ import { Buchung, KontoNummer, Mitglied } from './kegelverein.models';
  * aus accounting.logic.ts. Komponenten injizieren nur diesen Service,
  * nie den Store direkt für Buchhaltungs-Fragen.
  */
-@Injectable({ providedIn: 'root' })
+@Service()
 export class AccountingService {
   private readonly store = inject(KegeljahrStore);
 

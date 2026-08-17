@@ -1,4 +1,4 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { computed, signal, Service } from '@angular/core';
 import { Buchung, Kegelabend, Kegeljahr, Kegeltermin, Mitglied } from './kegelverein.models';
 
 /**
@@ -11,7 +11,7 @@ import { Buchung, Kegelabend, Kegeljahr, Kegeltermin, Mitglied } from './kegelve
  * zu NgRx (Actions ≈ die public-Methoden, Selectors ≈ die computed-Felder)
  * ohne Umbau der Aufrufer möglich ist.
  */
-@Injectable({ providedIn: 'root' })
+@Service()
 export class KegeljahrStore {
   private readonly _kegeljahre = signal<Kegeljahr[]>([]);
   private readonly _aktuellesKegeljahrId = signal<string | null>(null);

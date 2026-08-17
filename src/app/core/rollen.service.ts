@@ -1,7 +1,9 @@
-import { Injectable, inject } from '@angular/core';
+import { Service, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { PhpApiAdapter } from './kegelverein/persistenz/php-api-adapter';
+
+export type Berechtigung = 'verwaltung' | 'terminPlanung' | 'termineAbmelden';
 
 /**
  * Was eine Rolle darf.
@@ -13,14 +15,17 @@ import { PhpApiAdapter } from './kegelverein/persistenz/php-api-adapter';
 export interface Berechtigungen {
   /** Zugang zu Mitgliedern, Buchführung, Abrechnung und Jahresabschluss. */
   verwaltung: boolean;
-  /** Zugang zur Terminplanung samt Abmeldungen. */
-  termine: boolean;
+  /** Zugang zur Terminplanung */
+  terminplanung: boolean;
+  /** Zugang zur Terminplanung zwecks Abmeldung. */
+  termineAbmelden: boolean;
 }
 
 /** Keine Berechtigung — Ausgangswert und Rückfallebene. */
 export const KEINE_BERECHTIGUNGEN: Berechtigungen = {
   verwaltung: false,
-  termine: false,
+  terminplanung: false,
+  termineAbmelden: false,
 };
 
 /** Ergebnis einer Prüfung von Rolle und Zugangsdaten. */
@@ -48,7 +53,7 @@ interface AuthAntwort {
  * schränkt nichts ein — das gehört in eine Anmeldung, die darauf
  * aufsetzt.
  */
-@Injectable({ providedIn: 'root' })
+@Service()
 export class RollenService {
   private readonly http = inject(HttpClient);
   private readonly adapter = inject(PhpApiAdapter);
@@ -95,7 +100,8 @@ export class RollenService {
           // Im Zweifel lieber zu wenig erlauben als zu viel.
           berechtigungen: {
             verwaltung: antwort.berechtigungen?.verwaltung === true,
-            termine: antwort.berechtigungen?.termine === true,
+            terminplanung: antwort.berechtigungen?.terminplanung === true,
+            termineAbmelden: antwort.berechtigungen?.termineAbmelden === true,
           },
         };
       }

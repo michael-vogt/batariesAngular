@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Service } from '@angular/core';
 import { KegeljahrStore } from './kegeljahr.store';
 import { berechneKegelabendErgebnisse } from './kegelabend.logic';
 import { Kegelabend, KegelabendErgebnisZeile, Mitglied } from './kegelverein.models';
@@ -7,7 +7,7 @@ import { AccountingService } from './accounting.service';
 /**
  * Kegelabend: kombiniert Store mit der reinen Ergebnis-/Strafenlogik.
  */
-@Injectable({ providedIn: 'root' })
+@Service()
 export class KegelabendService {
   private readonly store = inject(KegeljahrStore);
   private readonly accounting = inject(AccountingService);

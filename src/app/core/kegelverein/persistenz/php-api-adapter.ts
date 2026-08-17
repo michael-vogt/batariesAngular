@@ -1,4 +1,4 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { computed, inject, signal, Service } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { PersistenzAdapter } from './persistenz-adapter';
@@ -20,7 +20,7 @@ export interface ServerVerbindung {
  * abgelegt, damit sie nicht bei jedem Seitenaufruf neu eingegeben
  * werden müssen.
  */
-@Injectable({ providedIn: 'root' })
+@Service()
 export class PhpApiAdapter implements PersistenzAdapter {
   private readonly http = inject(HttpClient);
 

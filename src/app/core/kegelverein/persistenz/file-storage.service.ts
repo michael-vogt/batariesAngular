@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { inject, signal, Service } from '@angular/core';
 import { PERSISTENZ_ADAPTER } from './persistenz-adapter.token';
 import {
   BackupEintrag,
@@ -36,7 +36,7 @@ export type VerbindungsStatus = 'nicht_verbunden' | 'verbunden';
  * nur das Adapter-Interface — dadurch bleibt der Service ohne laufenden
  * Webserver testbar (Adapter durch In-Memory-Fake ersetzen).
  */
-@Injectable({ providedIn: 'root' })
+@Service()
 export class FileStorageService {
   private readonly adapter = inject(PERSISTENZ_ADAPTER);
 

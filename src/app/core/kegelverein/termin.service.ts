@@ -1,4 +1,4 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { computed, inject, signal, Service } from '@angular/core';
 import { FileStorageService } from './persistenz/file-storage.service';
 import { KegeljahrStore } from './kegeljahr.store';
 import { Kegeltermin } from './kegelverein.models';
@@ -17,7 +17,7 @@ export type TerminStatus = 'leer' | 'laedt' | 'bereit' | 'fehler';
  * Damit die Anzeige nicht vom Server abweicht, wenn das Schreiben
  * fehlschlägt, wird die Änderung erst danach in den Zustand übernommen.
  */
-@Injectable({ providedIn: 'root' })
+@Service()
 export class TerminService {
   private readonly storage = inject(FileStorageService);
   private readonly store = inject(KegeljahrStore);

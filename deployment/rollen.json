@@ -6,7 +6,8 @@
       "hash": "$2y$12$t4/9wSqB1JDBfRBjvPewt.sJv/XWNLqDo/RcBKOQtNkYZZVPOoFi.",
       "berechtigungen": {
         "verwaltung": true,
-        "termine": true
+        "terminplanung": true,
+        "termineAbmelden": true
       }
     },
     {
@@ -14,7 +15,8 @@
       "hash": "$2y$12$/jM.q5pXDvFA7Scbnr7MO.h00uTWOAKlExFUP/ODcDl2trt.IepK2",
       "berechtigungen": {
         "verwaltung": false,
-        "termine": true
+        "terminplanung": false,
+        "termineAbmelden": true
       }
     }
   ]

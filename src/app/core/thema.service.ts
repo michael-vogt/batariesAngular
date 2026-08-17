@@ -1,4 +1,4 @@
-import { Injectable, effect, signal } from '@angular/core';
+import { Service, effect, signal } from '@angular/core';
 
 export type Thema = 'hell' | 'bash';
 
@@ -11,7 +11,7 @@ const SPEICHER_SCHLUESSEL = 'kegelverein-thema';
  * `data-thema` am <html>-Element, die Farbwerte kommen aus tokens.css.
  * Dadurch braucht keine Komponente das Thema zu kennen.
  */
-@Injectable({ providedIn: 'root' })
+@Service()
 export class ThemaService {
   private readonly _thema = signal<Thema>(this.geladenesThema());
   readonly thema = this._thema.asReadonly();

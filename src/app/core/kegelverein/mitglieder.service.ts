@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Service, inject } from '@angular/core';
 import { KegeljahrStore } from './kegeljahr.store';
 import { Mitglied } from './kegelverein.models';
 
@@ -6,7 +6,7 @@ import { Mitglied } from './kegelverein.models';
  * Mitgliederverwaltung: dünner CRUD-Wrapper um den Store.
  * Keine eigene Fachlogik nötig — bleibt hier bewusst simpel.
  */
-@Injectable({ providedIn: 'root' })
+@Service()
 export class MitgliederService {
   private readonly store = inject(KegeljahrStore);
 

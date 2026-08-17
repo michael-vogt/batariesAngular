@@ -1,5 +1,5 @@
 import { inject, Service, signal } from '@angular/core';
-import { Berechtigungen, RollenService } from './rollen.service';
+import { Berechtigung, Berechtigungen, RollenService } from './rollen.service';
 
 interface Nutzer {
   username: string;
@@ -16,7 +16,7 @@ export class LoginService {
   readonly currentNutzer = this._currentNutzer.asReadonly();
   readonly fehler = signal<string | null>(null);
 
-  hatBerechtigung(attribut: string): boolean {
+  nutzerHatBerechtigung(attribut: Berechtigung): boolean {
     if (!this._currentNutzer)
       return false;
 

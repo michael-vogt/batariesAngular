@@ -38,7 +38,7 @@ export class TermineComponent {
   protected readonly abmeldeGrund = signal('');
   protected readonly formularFehler = signal<string | null>(null);
 
-  protected readonly istAdminAngemeldet = computed<boolean>(() => { return this.loginService.hatBerechtigung('verwaltung'); });
+  protected readonly istAdminAngemeldet = computed<boolean>(() => { return this.loginService.nutzerHatBerechtigung('verwaltung'); });
 
   constructor() {
     // Termine liegen in einer eigenen Datei und werden geladen, sobald
