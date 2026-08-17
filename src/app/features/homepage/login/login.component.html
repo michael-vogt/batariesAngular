@@ -24,7 +24,6 @@
       <p class="fehler">{{loginService.fehler()}}</p>
     }
   } @else {
-    <!--<p>Angemeldet als {{userService.currentRole()}}</p>-->
     <p>Angemeldet als {{ loginService.currentNutzer()?.username }}</p>
     <button type="button" (click)="logout()">Logout</button>
   }

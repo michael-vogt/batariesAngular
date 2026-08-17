@@ -109,7 +109,7 @@ export class RollenService {
       return {
         gueltig: false,
         grund: 'abgelehnt',
-        meldung: 'Name oder Zugangsdaten stimmen nicht.',
+        meldung: 'Rolle oder Zugangsdaten stimmen nicht.',
       };
     } catch (e) {
       // 401 ist die reguläre Ablehnung durch auth.php, alles andere ein
@@ -119,7 +119,7 @@ export class RollenService {
         return {
           gueltig: false,
           grund: 'abgelehnt',
-          meldung: 'Name oder Zugangsdaten stimmen nicht.',
+          meldung: 'Rolle oder Zugangsdaten stimmen nicht.',
         };
       }
 

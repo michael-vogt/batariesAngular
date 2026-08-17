@@ -14,7 +14,7 @@ export class LoginService {
   private readonly _fehler = signal<string | null>(null);
 
   readonly currentNutzer = this._currentNutzer.asReadonly();
-  readonly fehler = signal<string | null>(null);
+  readonly fehler = this._fehler.asReadonly();
 
   nutzerHatBerechtigung(attribut: Berechtigung): boolean {
     if (!this._currentNutzer)
