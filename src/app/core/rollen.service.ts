@@ -3,7 +3,27 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { PhpApiAdapter } from './kegelverein/persistenz/php-api-adapter';
 
-export type Berechtigung = 'verwaltung' | 'terminPlanung' | 'termineAbmelden';
+//export type Berechtigung = 'verwaltung' | 'terminPlanung' | 'termineAbmelden';
+
+export const BERECHTIGUNGSLISTE = [
+  {
+    schluessel: 'verwaltung',
+    titel: 'Verwaltung',
+    beschreibung: 'Mitglieder, Buchführung, Abrechnung, Jahresabschluss, Sicherungen'
+  },
+  {
+    schluessel: 'terminplanung',
+    titel: 'Terminplanung',
+    beschreibung: 'Termine anlegen und löschen'
+  },
+  {
+    schluessel: 'termineAbmelden',
+    titel: 'Von Terminen abmelden',
+    beschreibung: 'sich von Terminen abmelden'
+  }
+] as const;
+
+export type Berechtigung = (typeof BERECHTIGUNGSLISTE)[number]['schluessel'];
 
 /**
  * Was eine Rolle darf.
@@ -12,21 +32,36 @@ export type Berechtigung = 'verwaltung' | 'terminPlanung' | 'termineAbmelden';
  * Rollendatei fehlt, kommt als false zurück. Die Gegenseite muss deshalb
  * nicht zwischen "nicht erteilt" und "nicht eingetragen" unterscheiden.
  */
-export interface Berechtigungen {
-  /** Mitglieder, Buchführung, Abrechnung, Jahresabschluss, Sicherungen. */
+/*export interface Berechtigungen {
   verwaltung: boolean;
-  /** Termine anlegen und löschen. */
   terminplanung: boolean;
-  /** Sich und andere von Terminen abmelden. */
   termineAbmelden: boolean;
-}
+}*/
+export type Berechtigungen = Record<Berechtigung, boolean>;
+
 
 /** Keine Berechtigung — Ausgangswert und Rückfallebene. */
-export const KEINE_BERECHTIGUNGEN: Berechtigungen = {
+/*export const KEINE_BERECHTIGUNGEN: Berechtigungen = {
   verwaltung: false,
   terminplanung: false,
   termineAbmelden: false,
-};
+};*/
+export const KEINE_BERECHTIGUNGEN: Berechtigungen = Object.fromEntries(
+  BERECHTIGUNGSLISTE.map(b => [b.schluessel, false]),
+) as Berechtigungen;
+
+/**
+ * Bringt eine Antwort des Servers in die feste Form.
+ *
+ * Fehlende Angaben gelten als nicht erteilt: Im Zweifel lieber zu wenig
+ * erlauben als zu viel.
+ */
+export function normalisiereBerechtigungen(roh: Partial<Berechtigungen> | undefined): Berechtigungen {
+  return Object.fromEntries(
+    BERECHTIGUNGSLISTE.map(b => [b.schluessel, roh?.[b.schluessel] === true]),
+  ) as Berechtigungen;
+}
+
 
 /** Ergebnis einer Prüfung von Rolle und Zugangsdaten. */
 export type PruefErgebnis =
@@ -63,6 +98,12 @@ interface AuthAntwort {
 export class RollenService {
   private readonly http = inject(HttpClient);
   private readonly adapter = inject(PhpApiAdapter);
+
+  /*readonly berechtigungsNamen: (keyof Berechtigungen)[] = [
+    'termineAbmelden',
+    'terminplanung',
+    'verwaltung',
+  ];*/
 
   private readonly _rollennamen = signal<string[]>([]);
   private readonly _namenLaden = signal(false);
@@ -161,6 +202,68 @@ export class RollenService {
   }
 
   /**
+   * Legt eine neue Rolle an.
+   *
+   * Verlangt die Zugangsdaten einer Rolle mit Verwaltungsrecht — es gibt
+   * keine Sitzung, jeder schreibende Aufruf weist sich erneut aus.
+   *
+   * Das Passwort wird im Klartext übertragen und erst auf dem Server
+   * gehasht. Ein im Browser erzeugter Hash wäre wertlos: Wer ihn
+   * abfängt, könnte sich damit anmelden, und der Server hätte keine
+   * Möglichkeit zu prüfen, wie er zustande kam. Voraussetzung ist
+   * deshalb HTTPS.
+   */
+  async rolleAnlegen(
+    ausweis: { name: string; credential: string },
+    neueRolle: { name: string; passwort: string; berechtigungen: Berechtigungen },
+  ): Promise<{ angelegt: true } | { angelegt: false; meldung: string }> {
+    if (!this.adapter.hatVerbindung()) {
+      return { angelegt: false, meldung: 'Keine Serververbindung.' };
+    }
+
+    try {
+      await firstValueFrom(
+        this.http.post<{ angelegt: boolean }>(
+          `${this.adapter.endpunktUrl('auth.php')}?aktion=rolle-anlegen`,
+          {
+            name: ausweis.name.trim(),
+            credential: ausweis.credential,
+            neueRolle: {
+              name: neueRolle.name.trim(),
+              passwort: neueRolle.passwort,
+              berechtigungen: neueRolle.berechtigungen,
+            },
+          },
+          { headers: this.adapter.apiKeyKopfzeile() },
+        ),
+      );
+
+      // Die Auswahlliste beim Anmelden soll die neue Rolle sofort kennen.
+      await this.namenAktualisieren();
+      return { angelegt: true };
+    } catch (e) {
+      return { angelegt: false, meldung: this.fehlertext(e) };
+    }
+  }
+
+  /**
+   * Übersetzt eine Fehlerantwort in einen Satz für die Oberfläche.
+   *
+   * Die Meldungen des Servers sind bereits verständlich formuliert und
+   * werden bevorzugt; nur wenn keine da ist, greift eine allgemeine.
+   */
+  private fehlertext(e: unknown): string {
+    if (e instanceof HttpErrorResponse) {
+      const vomServer = (e.error as { error?: string } | null)?.error;
+      if (vomServer) return vomServer;
+
+      if (e.status === 401) return 'Die eigenen Zugangsdaten stimmen nicht.';
+      if (e.status === 403) return 'Diese Rolle darf keine Rollen anlegen.';
+    }
+    return 'Die Rolle konnte nicht angelegt werden.';
+  }
+
+  /**
    * Prüft Name und Zugangsdaten.
    *
    * Wirft nicht, sondern liefert das Ergebnis als Wert: Eine abgelehnte
@@ -198,17 +301,15 @@ export class RollenService {
         return {
           gueltig: true,
           name: antwort.name,
-          // Fehlende Angaben sicherheitshalber als nicht erteilt werten:
-          // Im Zweifel lieber zu wenig erlauben als zu viel.
-          berechtigungen: {
-            verwaltung: antwort.berechtigungen?.verwaltung === true,
-            terminplanung: antwort.berechtigungen?.terminplanung === true,
-            termineAbmelden: antwort.berechtigungen?.termineAbmelden === true,
-          },
+          berechtigungen: normalisiereBerechtigungen(antwort.berechtigungen),
         };
       }
 
-      return { gueltig: false, grund: 'abgelehnt', meldung: 'Name oder Zugangsdaten stimmen nicht.' };
+      return {
+        gueltig: false,
+        grund: 'abgelehnt',
+        meldung: 'Name oder Zugangsdaten stimmen nicht.',
+      };
     } catch (e) {
       // 401 ist die reguläre Ablehnung durch auth.php, alles andere ein
       // technisches Problem — die Unterscheidung ist wichtig, damit

@@ -34,7 +34,7 @@
     "@vitest/browser-playwright": "^4.1.10",
     "archiver": "^8.0.0",
     "jsdom": "^28.0.0",
-    "marked": "^18.0.9",
+    "marked": "^18.0.10",
     "prettier": "^3.8.1",
     "typescript": "~6.0.3",
     "vitest": "^4.0.8"

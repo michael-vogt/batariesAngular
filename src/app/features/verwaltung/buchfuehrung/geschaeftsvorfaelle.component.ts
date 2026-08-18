@@ -26,7 +26,7 @@ export class GeschaeftsvorfaelleComponent {
   // damit die Templates darauf zugreifen können.
   protected readonly euro = euro;
   private readonly accounting = inject(AccountingService);
-  private readonly mitgliederService = inject(MitgliederService);
+  protected readonly mitgliederService = inject(MitgliederService);
   protected readonly daten = inject(VereinsdatenService);
 
   constructor() {

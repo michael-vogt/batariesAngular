@@ -58,9 +58,6 @@
         <label>
           Buchungsdatum
           <input type="date" [ngModel]="beitragDatum()" (ngModelChange)="beitragDatum.set($event)" />
-          @if (istHeute(beitragDatum())) {
-            <small class="datum-hinweis">heutiges Datum — Stichtag prüfen</small>
-          }
         </label>
         <label>
           Beitrag aktiv (€)
@@ -73,6 +70,10 @@
                  [ngModel]="beitragPassiv()" (ngModelChange)="beitragPassiv.set($event)" />
         </label>
       </div>
+
+      @if (istHeute(beitragDatum())) {
+        <small class="datum-hinweis">Buchungsdatum ist heutiges Datum — Stichtag prüfen</small>
+      }
 
       <p class="hinweis">
         Maßgeblich ist der Status zum Buchungsdatum, nicht der heutige. Gastkegler und
@@ -89,7 +90,7 @@
           <tbody>
             @for (b of beitragVorschau(); track b.id) {
               <tr>
-                <td>{{ b.buchungstext }}</td>
+                <td>{{ mitgliederService.suchen(b.mitgliedId ?? '')?.name }}</td>
                 <td class="zahl">{{ euro(b.betrag) }}</td>
               </tr>
             }
@@ -117,11 +118,12 @@
         <label>
           Buchungsdatum
           <input type="date" [ngModel]="einnahmeDatum()" (ngModelChange)="einnahmeDatum.set($event)" />
-          @if (istHeute(einnahmeDatum())) {
-            <small class="datum-hinweis">heutiges Datum — Stichtag prüfen</small>
-          }
         </label>
       </div>
+
+      @if (istHeute(beitragDatum())) {
+        <small class="datum-hinweis">Buchungsdatum ist heutiges Datum — Stichtag prüfen</small>
+      }
 
       <p class="hinweis">
         Zahlungen tilgen zuerst Beiträge, dann Strafen, dann Umlagen. Über den offenen Betrag
@@ -188,11 +190,12 @@
         <label>
           Buchungsdatum
           <input type="date" [ngModel]="verrechnungDatum()" (ngModelChange)="verrechnungDatum.set($event)" />
-          @if (istHeute(verrechnungDatum())) {
-            <small class="datum-hinweis">heutiges Datum — Stichtag prüfen</small>
-          }
         </label>
       </div>
+
+      @if (istHeute(beitragDatum())) {
+        <small class="datum-hinweis">Buchungsdatum ist heutiges Datum — Stichtag prüfen</small>
+      }
 
       <p class="hinweis">
         Bestehendes Restguthaben wird gegen offene Forderungen aufgerechnet — zuerst Beiträge,
@@ -231,9 +234,6 @@
         <label>
           Buchungsdatum
           <input type="date" [ngModel]="geburtstagDatum()" (ngModelChange)="geburtstagDatum.set($event)" />
-          @if (istHeute(geburtstagDatum())) {
-            <small class="datum-hinweis">heutiges Datum — Stichtag prüfen</small>
-          }
         </label>
         <label>
           Ausrichter
@@ -245,6 +245,10 @@
           </select>
         </label>
       </div>
+
+      @if (istHeute(beitragDatum())) {
+        <small class="datum-hinweis">Buchungsdatum ist heutiges Datum — Stichtag prüfen</small>
+      }
 
       <p class="hinweis">
         10 € je teilnehmender Person. Der gesammelte Betrag wird dem Ausrichter als

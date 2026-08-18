@@ -1,7 +1,7 @@
 <div class="karte">
 <h2>Vorhandene Rollen</h2>
 
-  <table>
+  <table class="daten">
     <thead>
     <th>Rolle</th>
     <th>TermineAbmelden</th>
@@ -13,13 +13,65 @@
       @for (rolle of rollen(); track rolle) {
         <tr>
         <td>{{rolle.name}}</td>
-        <td>{{rolle.berechtigungen.termineAbmelden === true ? 'x' : '-' }}</td>
-        <td>{{rolle.berechtigungen.terminplanung === true ? 'x' : '-' }}</td>
-        <td>{{rolle.berechtigungen.verwaltung === true ? 'x' : '-' }}</td>
+
+          @for (b of berechtigungsliste; track b.schluessel) {
+            <td>
+              {{ rolle.berechtigungen[b.schluessel] ? '✅' : '❌' }}
+            </td>
+          }
         </tr>
       }
     </tbody>
 
   </table>
+</div>
 
+<div class="karte">
+  <h2>Neue Rolle anlegen</h2>
+
+  <div class="formular-zeile">
+    <label>
+      Name
+      <input type="text" [ngModel]="neuName()" (ngModelChange)="neuName.set($event)" />
+    </label>
+    <label>
+      Passwort
+      <input type="password" autocomplete="new-password"
+             [ngModel]="neuPasswort()" (ngModelChange)="neuPasswort.set($event)" />
+    </label>
+    <small class="leise">(mindestens 8 Zeichen)</small>
+  </div>
+
+  <fieldset class="rechte">
+    <legend>Berechtigungen</legend>
+    @for (b of berechtigungsliste; track b.schluessel) {
+      <label class="recht">
+        <input
+          type="checkbox"
+          [checked]="neuRechte()[b.schluessel]"
+          (change)="rechtUmschalten(b.schluessel)"
+          />
+        <span>{{ b.titel }}</span><br/>
+        <small class="leise">({{b.beschreibung}})</small>
+      </label>
+    }
+  </fieldset>
+
+  <div class="formular-zeile">
+    <label>
+      Eigener Rollenname
+      <input type="text" [ngModel]="eigenerName()" (ngModelChange)="eigenerName.set($event)" />
+    </label>
+    <label>
+      Eigenes Passwort
+      <input type="password" autocomplete="current-password"
+             [ngModel]="eigenesPasswort()" (ngModelChange)="eigenesPasswort.set($event)" />
+    </label>
+    <button type="button" class="primaer" [disabled]="legtAn()" (click)="anlegen()">
+      {{ legtAn() ? 'Legt an…' : 'Rolle anlegen' }}
+    </button>
+  </div>
+
+  @if (anlegeFehler(); as text) { <p class="fehler">{{ text }}</p> }
+  @if (anlegeMeldung(); as text) { <p class="ok">{{ text }}</p> }
 </div>

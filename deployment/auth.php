@@ -21,6 +21,11 @@ declare(strict_types=1);
  *     -> 200 {"rollen": [{"name": "...", "berechtigungen": {...}}, ...]}
  *     -> 403, wenn die Rolle dafür nicht berechtigt ist
  *
+ *   POST auth.php?aktion=rolle-anlegen
+ *     Body: {"name","credential","neueRolle":{"name","passwort","berechtigungen"}}
+ *     -> 201 {"angelegt": true, "name": "..."}
+ *     -> 403 ohne Verwaltungsrecht, 409 bei vergebenem Namen
+ *
  * Hashes verlassen den Server unter keinen Umständen.
  *
  * Was dieser Endpunkt NICHT tut: eine Sitzung eröffnen oder ein Token
@@ -278,6 +283,97 @@ if ($aktion === 'rollen') {
     }
 
     echo json_encode(['rollen' => $liste]);
+    exit;
+}
+
+/**
+ * Schreibt die Rollendatei atomar: erst in eine temporäre Datei daneben,
+ * dann per rename() ersetzen. Ein abgebrochener Schreibvorgang kann so
+ * nicht die bestehende Datei zerstören — sonst käme niemand mehr hinein.
+ */
+function rollenSchreiben(string $pfad, array $daten): void
+{
+    $temp = $pfad . '.tmp.' . bin2hex(random_bytes(4));
+    $inhalt = json_encode($daten, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+    if ($inhalt === false || file_put_contents($temp, $inhalt) === false) {
+        throw new RuntimeException('Rollendatei konnte nicht geschrieben werden');
+    }
+    if (!rename($temp, $pfad)) {
+        @unlink($temp);
+        throw new RuntimeException('Rollendatei konnte nicht ersetzt werden');
+    }
+}
+
+if ($aktion === 'rolle-anlegen') {
+    if (!$gefundeneRechte['verwaltung']) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Diese Rolle darf keine Rollen anlegen']);
+        exit;
+    }
+
+    $neu = is_array($eingabe['neueRolle'] ?? null) ? $eingabe['neueRolle'] : [];
+    $neuName = trim((string) ($neu['name'] ?? ''));
+    $neuPasswort = (string) ($neu['passwort'] ?? '');
+    $neuRechte = is_array($neu['berechtigungen'] ?? null) ? $neu['berechtigungen'] : [];
+
+    if ($neuName === '') {
+        http_response_code(400);
+        echo json_encode(['error' => 'Der Rollenname fehlt']);
+        exit;
+    }
+    if (strlen($neuPasswort) < 8) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Das Passwort muss mindestens 8 Zeichen haben']);
+        exit;
+    }
+
+    // Namen ohne Rücksicht auf Groß-/Kleinschreibung vergleichen: Beim
+    // Anmelden wird ebenso verglichen, zwei Rollen "Kassenwart" und
+    // "kassenwart" wären also nicht auseinanderzuhalten.
+    foreach ($rollen as $vorhanden) {
+        if (isset($vorhanden['name']) && strcasecmp((string) $vorhanden['name'], $neuName) === 0) {
+            http_response_code(409);
+            echo json_encode(['error' => "Eine Rolle namens \"{$neuName}\" gibt es bereits"]);
+            exit;
+        }
+    }
+
+    // Nur bekannte Berechtigungen übernehmen; unbekannte werden verworfen
+    // und gemeldet, damit ein Tippfehler nicht stillschweigend wirkungslos
+    // bleibt.
+    $gefiltert = [];
+    foreach ($neuRechte as $schluessel => $wert) {
+        if (in_array($schluessel, BEKANNTE_BERECHTIGUNGEN, true)) {
+            $gefiltert[$schluessel] = $wert === true;
+        } else {
+            error_log("auth.php: Unbekannte Berechtigung \"{$schluessel}\" beim Anlegen von \"{$neuName}\" verworfen.");
+        }
+    }
+    foreach (BEKANNTE_BERECHTIGUNGEN as $recht) {
+        $gefiltert[$recht] = $gefiltert[$recht] ?? false;
+    }
+
+    $rollenDaten['schemaVersion'] = 2;
+    $rollenDaten['rollen'][] = [
+        'name' => $neuName,
+        'hash' => password_hash($neuPasswort, PASSWORD_BCRYPT, ['cost' => 12]),
+        'berechtigungen' => $gefiltert,
+    ];
+
+    try {
+        rollenSchreiben($rollenDatei, $rollenDaten);
+    } catch (Throwable $e) {
+        error_log('auth.php: ' . $e->getMessage());
+        http_response_code(500);
+        echo json_encode(['error' => 'Die Rolle konnte nicht gespeichert werden']);
+        exit;
+    }
+
+    error_log("auth.php: Rolle \"{$neuName}\" von \"{$gefundenerName}\" angelegt.");
+
+    http_response_code(201);
+    echo json_encode(['angelegt' => true, 'name' => $neuName]);
     exit;
 }
 
