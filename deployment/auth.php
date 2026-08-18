@@ -26,6 +26,14 @@ declare(strict_types=1);
  *     -> 201 {"angelegt": true, "name": "..."}
  *     -> 403 ohne Verwaltungsrecht, 409 bei vergebenem Namen
  *
+ *   POST auth.php?aktion=rolle-aendern
+ *     Body: {"name","credential","rolle":{"name","neuerName?","passwort?","berechtigungen?"}}
+ *     -> 200 {"geaendert": true, "name": "..."}
+ *
+ *   POST auth.php?aktion=rolle-loeschen
+ *     Body: {"name","credential","rolle":{"name"}}
+ *     -> 200 {"geloescht": true, "name": "..."}
+ *
  * Hashes verlassen den Server unter keinen Umständen.
  *
  * Was dieser Endpunkt NICHT tut: eine Sitzung eröffnen oder ein Token
@@ -305,6 +313,53 @@ function rollenSchreiben(string $pfad, array $daten): void
     }
 }
 
+/** Position einer Rolle in der Liste; null, wenn es sie nicht gibt. */
+function rolleFinden(array $rollen, string $name): ?int
+{
+    foreach ($rollen as $i => $r) {
+        if (isset($r['name']) && strcasecmp((string) $r['name'], $name) === 0) {
+            return $i;
+        }
+    }
+    return null;
+}
+
+/**
+ * Zählt die Rollen mit Verwaltungsrecht.
+ *
+ * Grundlage für die Sperre gegen Aussperren: Verlöre die letzte Rolle
+ * mit Verwaltungsrecht dieses Recht oder würde gelöscht, käme niemand
+ * mehr an die Rollenverwaltung — reparieren ließe sich das nur noch von
+ * Hand auf dem Server.
+ */
+function anzahlVerwalter(array $rollen): int
+{
+    $anzahl = 0;
+    foreach ($rollen as $r) {
+        if ((($r['berechtigungen'] ?? [])['verwaltung'] ?? false) === true) {
+            $anzahl++;
+        }
+    }
+    return $anzahl;
+}
+
+/** Übernimmt nur bekannte Berechtigungen; unbekannte werden gemeldet. */
+function rechteFiltern(array $roh, string $wofuer): array
+{
+    $gefiltert = [];
+    foreach ($roh as $schluessel => $wert) {
+        if (in_array($schluessel, BEKANNTE_BERECHTIGUNGEN, true)) {
+            $gefiltert[$schluessel] = $wert === true;
+        } else {
+            error_log("auth.php: Unbekannte Berechtigung \"{$schluessel}\" bei \"{$wofuer}\" verworfen.");
+        }
+    }
+    foreach (BEKANNTE_BERECHTIGUNGEN as $recht) {
+        $gefiltert[$recht] = $gefiltert[$recht] ?? false;
+    }
+    return $gefiltert;
+}
+
 if ($aktion === 'rolle-anlegen') {
     if (!$gefundeneRechte['verwaltung']) {
         http_response_code(403);
@@ -331,28 +386,13 @@ if ($aktion === 'rolle-anlegen') {
     // Namen ohne Rücksicht auf Groß-/Kleinschreibung vergleichen: Beim
     // Anmelden wird ebenso verglichen, zwei Rollen "Kassenwart" und
     // "kassenwart" wären also nicht auseinanderzuhalten.
-    foreach ($rollen as $vorhanden) {
-        if (isset($vorhanden['name']) && strcasecmp((string) $vorhanden['name'], $neuName) === 0) {
-            http_response_code(409);
-            echo json_encode(['error' => "Eine Rolle namens \"{$neuName}\" gibt es bereits"]);
-            exit;
-        }
+    if (rolleFinden($rollen, $neuName) !== null) {
+        http_response_code(409);
+        echo json_encode(['error' => "Eine Rolle namens \"{$neuName}\" gibt es bereits"]);
+        exit;
     }
 
-    // Nur bekannte Berechtigungen übernehmen; unbekannte werden verworfen
-    // und gemeldet, damit ein Tippfehler nicht stillschweigend wirkungslos
-    // bleibt.
-    $gefiltert = [];
-    foreach ($neuRechte as $schluessel => $wert) {
-        if (in_array($schluessel, BEKANNTE_BERECHTIGUNGEN, true)) {
-            $gefiltert[$schluessel] = $wert === true;
-        } else {
-            error_log("auth.php: Unbekannte Berechtigung \"{$schluessel}\" beim Anlegen von \"{$neuName}\" verworfen.");
-        }
-    }
-    foreach (BEKANNTE_BERECHTIGUNGEN as $recht) {
-        $gefiltert[$recht] = $gefiltert[$recht] ?? false;
-    }
+    $gefiltert = rechteFiltern($neuRechte, $neuName);
 
     $rollenDaten['schemaVersion'] = 2;
     $rollenDaten['rollen'][] = [
@@ -374,6 +414,122 @@ if ($aktion === 'rolle-anlegen') {
 
     http_response_code(201);
     echo json_encode(['angelegt' => true, 'name' => $neuName]);
+    exit;
+}
+
+if ($aktion === 'rolle-aendern' || $aktion === 'rolle-loeschen') {
+    if (!$gefundeneRechte['verwaltung']) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Diese Rolle darf keine Rollen bearbeiten']);
+        exit;
+    }
+
+    $ziel = is_array($eingabe['rolle'] ?? null) ? $eingabe['rolle'] : [];
+    $zielName = trim((string) ($ziel['name'] ?? ''));
+
+    if ($zielName === '') {
+        http_response_code(400);
+        echo json_encode(['error' => 'Es fehlt die Angabe, welche Rolle gemeint ist']);
+        exit;
+    }
+
+    $index = rolleFinden($rollen, $zielName);
+    if ($index === null) {
+        http_response_code(404);
+        echo json_encode(['error' => "Eine Rolle namens \"{$zielName}\" gibt es nicht"]);
+        exit;
+    }
+
+    $bisher = $rollen[$index];
+    $hatteVerwaltung = (($bisher['berechtigungen'] ?? [])['verwaltung'] ?? false) === true;
+
+    // ---------------- Löschen ----------------
+    if ($aktion === 'rolle-loeschen') {
+        if ($hatteVerwaltung && anzahlVerwalter($rollen) <= 1) {
+            http_response_code(409);
+            echo json_encode([
+                'error' => 'Das ist die letzte Rolle mit Verwaltungsrecht — '
+                    . 'ohne sie käme niemand mehr an die Rollenverwaltung.',
+            ]);
+            exit;
+        }
+
+        array_splice($rollen, $index, 1);
+        $rollenDaten['rollen'] = $rollen;
+
+        try {
+            rollenSchreiben($rollenDatei, $rollenDaten);
+        } catch (Throwable $e) {
+            error_log('auth.php: ' . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['error' => 'Die Rolle konnte nicht gelöscht werden']);
+            exit;
+        }
+
+        error_log("auth.php: Rolle \"{$zielName}\" von \"{$gefundenerName}\" gelöscht.");
+        echo json_encode(['geloescht' => true, 'name' => $zielName]);
+        exit;
+    }
+
+    // ---------------- Ändern ----------------
+    $geaendert = $bisher;
+
+    // Umbenennen — der Name ist zugleich die Anmeldekennung.
+    $neuerName = trim((string) ($ziel['neuerName'] ?? ''));
+    if ($neuerName !== '' && strcasecmp($neuerName, $zielName) !== 0) {
+        if (rolleFinden($rollen, $neuerName) !== null) {
+            http_response_code(409);
+            echo json_encode(['error' => "Eine Rolle namens \"{$neuerName}\" gibt es bereits"]);
+            exit;
+        }
+        $geaendert['name'] = $neuerName;
+    }
+
+    // Passwort nur ersetzen, wenn eines übergeben wurde. Ein leeres Feld
+    // bedeutet "unverändert" — sonst müsste man es bei jeder
+    // Rechteänderung erneut eingeben.
+    $neuesPasswort = (string) ($ziel['passwort'] ?? '');
+    if ($neuesPasswort !== '') {
+        if (strlen($neuesPasswort) < 8) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Das Passwort muss mindestens 8 Zeichen haben']);
+            exit;
+        }
+        $geaendert['hash'] = password_hash($neuesPasswort, PASSWORD_BCRYPT, ['cost' => 12]);
+    }
+
+    if (is_array($ziel['berechtigungen'] ?? null)) {
+        $neueRechte = rechteFiltern($ziel['berechtigungen'], $zielName);
+
+        // Sperre gegen Aussperren: Das Verwaltungsrecht der letzten Rolle,
+        // die es hat, lässt sich nicht entziehen.
+        if ($hatteVerwaltung && $neueRechte['verwaltung'] !== true && anzahlVerwalter($rollen) <= 1) {
+            http_response_code(409);
+            echo json_encode([
+                'error' => 'Das ist die letzte Rolle mit Verwaltungsrecht — '
+                    . 'es lässt sich ihr nicht entziehen.',
+            ]);
+            exit;
+        }
+
+        $geaendert['berechtigungen'] = $neueRechte;
+    }
+
+    $rollen[$index] = $geaendert;
+    $rollenDaten['rollen'] = $rollen;
+    $rollenDaten['schemaVersion'] = 2;
+
+    try {
+        rollenSchreiben($rollenDatei, $rollenDaten);
+    } catch (Throwable $e) {
+        error_log('auth.php: ' . $e->getMessage());
+        http_response_code(500);
+        echo json_encode(['error' => 'Die Änderung konnte nicht gespeichert werden']);
+        exit;
+    }
+
+    error_log("auth.php: Rolle \"{$zielName}\" von \"{$gefundenerName}\" geändert.");
+    echo json_encode(['geaendert' => true, 'name' => $geaendert['name']]);
     exit;
 }
 

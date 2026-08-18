@@ -1,5 +1,5 @@
 .karte {
-  margin-bottom: var(--abstand-6);
+  margin-bottom: var(--abstand-4);
 }
 
 .karte h2 {
@@ -8,15 +8,91 @@
   font-weight: 600;
 }
 
+.karte > .hinweis {
+  margin: 0 0 var(--abstand-3);
+  max-width: 46rem;
+}
+
 .formular-zeile {
-  display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--abstand-3);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--abstand-3);
+  margin-bottom: var(--abstand-3);
 }
 
 .formular-zeile label {
-  display: flex; flex-direction: column; gap: var(--abstand-1);
-  font-size: 0.8125rem; color: var(--farbe-text-leise);
+  display: flex;
+  flex-direction: column;
+  gap: var(--abstand-1);
+  font-size: 0.8125rem;
+  color: var(--farbe-text-leise);
 }
 
-.rechte label {
-  display: block;
+td.mitte,
+th:not(:first-child):not(:last-child) {
+  text-align: center;
+}
+
+td.aktionen {
+  white-space: nowrap;
+}
+
+tr.wird-bearbeitet > td {
+  background: var(--farbe-akzent-hell);
+}
+
+tr.bearbeiten-zeile > td {
+  background: var(--farbe-flaeche);
+  padding: var(--abstand-4);
+}
+
+.marke-geschuetzt {
+  margin-left: var(--abstand-2);
+  padding: 0 var(--abstand-2);
+  border-radius: 999px;
+  background: var(--farbe-warnung-hell);
+  color: var(--farbe-warnung);
+  font-size: 0.75rem;
+}
+
+/* Berechtigungen untereinander, damit die Erläuterung Platz hat. */
+.rechte {
+  display: grid;
+  gap: var(--abstand-2);
+  margin: 0 0 var(--abstand-3);
+  padding: var(--abstand-3);
+  border: 1px solid var(--farbe-rand);
+  border-radius: var(--radius);
+}
+
+.rechte legend {
+  padding: 0 var(--abstand-2);
+  font-size: 0.8125rem;
+  color: var(--farbe-text-leise);
+}
+
+.recht {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: var(--abstand-1) var(--abstand-2);
+  cursor: pointer;
+}
+
+.recht small {
+  grid-column: 2;
+  font-size: 0.75rem;
+}
+
+.recht input:disabled + span {
+  color: var(--farbe-text-leise);
+}
+
+.visuell-versteckt {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
 }

@@ -1,28 +1,36 @@
-import { Injectable, effect, inject, signal, Service } from '@angular/core';
+import { effect, inject, signal, Service } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { PhpApiAdapter } from './kegelverein/persistenz/php-api-adapter';
 
-//export type Berechtigung = 'verwaltung' | 'terminPlanung' | 'termineAbmelden';
-
+/**
+ * Die Berechtigungen, die es gibt — mit Beschriftung für die Oberfläche.
+ *
+ * Diese Liste ist die einzige Stelle, an der eine Berechtigung steht:
+ * Typ, Ausgangswert und die Auswahlfelder im Formular leiten sich daraus
+ * ab. Eine neue Berechtigung ist damit ein Eintrag hier — plus derselbe
+ * Name in auth.php unter BEKANNTE_BERECHTIGUNGEN, denn die Prüfung
+ * geschieht serverseitig und kann diese Liste nicht kennen.
+ */
 export const BERECHTIGUNGSLISTE = [
   {
     schluessel: 'verwaltung',
     titel: 'Verwaltung',
-    beschreibung: 'Mitglieder, Buchführung, Abrechnung, Jahresabschluss, Sicherungen'
+    beschreibung: 'Mitglieder, Buchführung, Abrechnung, Jahresabschluss, Sicherungen',
   },
   {
     schluessel: 'terminplanung',
     titel: 'Terminplanung',
-    beschreibung: 'Termine anlegen und löschen'
+    beschreibung: 'Termine anlegen und löschen',
   },
   {
     schluessel: 'termineAbmelden',
     titel: 'Von Terminen abmelden',
-    beschreibung: 'sich von Terminen abmelden'
-  }
+    beschreibung: 'sich und andere von Terminen abmelden',
+  },
 ] as const;
 
+/** Ein einzelner Berechtigungsschlüssel, abgeleitet aus der Liste. */
 export type Berechtigung = (typeof BERECHTIGUNGSLISTE)[number]['schluessel'];
 
 /**
@@ -32,22 +40,11 @@ export type Berechtigung = (typeof BERECHTIGUNGSLISTE)[number]['schluessel'];
  * Rollendatei fehlt, kommt als false zurück. Die Gegenseite muss deshalb
  * nicht zwischen "nicht erteilt" und "nicht eingetragen" unterscheiden.
  */
-/*export interface Berechtigungen {
-  verwaltung: boolean;
-  terminplanung: boolean;
-  termineAbmelden: boolean;
-}*/
 export type Berechtigungen = Record<Berechtigung, boolean>;
 
-
 /** Keine Berechtigung — Ausgangswert und Rückfallebene. */
-/*export const KEINE_BERECHTIGUNGEN: Berechtigungen = {
-  verwaltung: false,
-  terminplanung: false,
-  termineAbmelden: false,
-};*/
 export const KEINE_BERECHTIGUNGEN: Berechtigungen = Object.fromEntries(
-  BERECHTIGUNGSLISTE.map(b => [b.schluessel, false]),
+  BERECHTIGUNGSLISTE.map((b) => [b.schluessel, false]),
 ) as Berechtigungen;
 
 /**
@@ -56,12 +53,13 @@ export const KEINE_BERECHTIGUNGEN: Berechtigungen = Object.fromEntries(
  * Fehlende Angaben gelten als nicht erteilt: Im Zweifel lieber zu wenig
  * erlauben als zu viel.
  */
-export function normalisiereBerechtigungen(roh: Partial<Berechtigungen> | undefined): Berechtigungen {
+export function normalisiereBerechtigungen(
+  roh: Partial<Berechtigungen> | undefined,
+): Berechtigungen {
   return Object.fromEntries(
-    BERECHTIGUNGSLISTE.map(b => [b.schluessel, roh?.[b.schluessel] === true]),
+    BERECHTIGUNGSLISTE.map((b) => [b.schluessel, roh?.[b.schluessel] === true]),
   ) as Berechtigungen;
 }
-
 
 /** Ergebnis einer Prüfung von Rolle und Zugangsdaten. */
 export type PruefErgebnis =
@@ -98,12 +96,6 @@ interface AuthAntwort {
 export class RollenService {
   private readonly http = inject(HttpClient);
   private readonly adapter = inject(PhpApiAdapter);
-
-  /*readonly berechtigungsNamen: (keyof Berechtigungen)[] = [
-    'termineAbmelden',
-    'terminplanung',
-    'verwaltung',
-  ];*/
 
   private readonly _rollennamen = signal<string[]>([]);
   private readonly _namenLaden = signal(false);
@@ -247,6 +239,66 @@ export class RollenService {
   }
 
   /**
+   * Ändert eine bestehende Rolle.
+   *
+   * Übergeben wird nur, was sich ändern soll: Ein leeres Passwortfeld
+   * bedeutet "unverändert" — sonst müsste es bei jeder Rechteänderung
+   * erneut eingetippt werden.
+   *
+   * Der Server verweigert es, der letzten Rolle mit Verwaltungsrecht
+   * dieses Recht zu entziehen. Sonst käme niemand mehr an die
+   * Rollenverwaltung.
+   */
+  async rolleAendern(
+    ausweis: { name: string; credential: string },
+    aenderung: {
+      name: string;
+      neuerName?: string;
+      passwort?: string;
+      berechtigungen?: Berechtigungen;
+    },
+  ): Promise<{ erfolg: true; name: string } | { erfolg: false; meldung: string }> {
+    return this.schreibenderAufruf('rolle-aendern', ausweis, { rolle: aenderung });
+  }
+
+  /** Löscht eine Rolle. Die letzte mit Verwaltungsrecht bleibt geschützt. */
+  async rolleLoeschen(
+    ausweis: { name: string; credential: string },
+    name: string,
+  ): Promise<{ erfolg: true; name: string } | { erfolg: false; meldung: string }> {
+    return this.schreibenderAufruf('rolle-loeschen', ausweis, { rolle: { name } });
+  }
+
+  /**
+   * Gemeinsamer Weg für alle schreibenden Aufrufe: Ausweis anhängen,
+   * senden, Fehlermeldung des Servers durchreichen.
+   */
+  private async schreibenderAufruf(
+    aktion: string,
+    ausweis: { name: string; credential: string },
+    nutzlast: Record<string, unknown>,
+  ): Promise<{ erfolg: true; name: string } | { erfolg: false; meldung: string }> {
+    if (!this.adapter.hatVerbindung()) {
+      return { erfolg: false, meldung: 'Keine Serververbindung.' };
+    }
+
+    try {
+      const antwort = await firstValueFrom(
+        this.http.post<{ name?: string }>(
+          `${this.adapter.endpunktUrl('auth.php')}?aktion=${aktion}`,
+          { name: ausweis.name.trim(), credential: ausweis.credential, ...nutzlast },
+          { headers: this.adapter.apiKeyKopfzeile() },
+        ),
+      );
+
+      await this.namenAktualisieren();
+      return { erfolg: true, name: antwort?.name ?? '' };
+    } catch (e) {
+      return { erfolg: false, meldung: this.fehlertext(e) };
+    }
+  }
+
+  /**
    * Übersetzt eine Fehlerantwort in einen Satz für die Oberfläche.
    *
    * Die Meldungen des Servers sind bereits verständlich formuliert und
@@ -258,9 +310,9 @@ export class RollenService {
       if (vomServer) return vomServer;
 
       if (e.status === 401) return 'Die eigenen Zugangsdaten stimmen nicht.';
-      if (e.status === 403) return 'Diese Rolle darf keine Rollen anlegen.';
+      if (e.status === 403) return 'Diese Rolle darf die Rollenverwaltung nicht ändern.';
     }
-    return 'Die Rolle konnte nicht angelegt werden.';
+    return 'Der Vorgang konnte nicht ausgeführt werden.';
   }
 
   /**
