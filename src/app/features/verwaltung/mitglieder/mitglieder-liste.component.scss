@@ -1,16 +1,18 @@
-.kopf-aktionen {
-  display: flex;
-  align-items: center;
-  gap: var(--abstand-3);
-}
-
 .gruppe {
   margin-top: var(--abstand-6);
 }
 
+.gruppe h2,
+.neu h2 {
+  margin: 0 0 var(--abstand-3);
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
 .gruppe h2 {
-  display: flex; align-items: center; gap: var(--abstand-2);
-  margin: 0 0 var(--abstand-3); font-size: 1.0625rem; font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-2);
 }
 
 .gruppe .anzahl {
@@ -49,32 +51,4 @@ tr.verlauf .hinweis {
 
 .neu {
   margin-top: var(--abstand-6);
-}
-
-.neu h2 {
-  margin: 0 0 var(--abstand-3);
-  font-size: 1.0625rem;
-  font-weight: 600;
-}
-
-.formular-zeile {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: var(--abstand-3);
-}
-
-.formular-zeile label {
-  display: flex;
-  flex-direction: column;
-  gap: var(--abstand-1);
-  font-size: 0.8125rem;
-  color: var(--farbe-text-leise);
-}
-
-.visuell-versteckt {
-  position: absolute;
-  width: 1px; height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
 }

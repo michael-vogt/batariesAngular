@@ -71,8 +71,19 @@ export class RollenComponent {
   protected readonly bearbeitet = signal<string | null>(null);
   protected readonly bearbeitetName = signal('');
   protected readonly bearbeitetPasswort = signal('');
+  protected readonly bearbeitetPasswortWdh = signal('');
   protected readonly bearbeitetRechte = signal<Berechtigungen>({ ...KEINE_BERECHTIGUNGEN });
   protected readonly bearbeitenFehler = signal<string | null>(null);
+
+  /**
+   * Weichen die beiden Passwortfelder voneinander ab?
+   *
+   * Erst ab dem ersten Zeichen im Wiederholungsfeld — sonst stünde die
+   * Meldung schon da, bevor überhaupt getippt wurde.
+   */
+  protected readonly bearbeitetPasswortWeichtAb = computed(
+    () => this.bearbeitetPasswortWdh() !== '' && this.bearbeitetPasswort() !== this.bearbeitetPasswortWdh(),
+  );
 
   /**
    * Anzahl der Rollen mit Verwaltungsrecht.
@@ -98,6 +109,7 @@ export class RollenComponent {
     this.bearbeitet.set(rolle.name);
     this.bearbeitetName.set(rolle.name);
     this.bearbeitetPasswort.set('');
+    this.bearbeitetPasswortWdh.set('');
     this.bearbeitetRechte.set({ ...rolle.berechtigungen });
     this.bearbeitenFehler.set(null);
   }
@@ -105,6 +117,7 @@ export class RollenComponent {
   protected bearbeitenAbbrechen(): void {
     this.bearbeitet.set(null);
     this.bearbeitetPasswort.set('');
+    this.bearbeitetPasswortWdh.set('');
     this.bearbeitenFehler.set(null);
   }
 
@@ -115,6 +128,13 @@ export class RollenComponent {
   protected async aenderungSpeichern(): Promise<void> {
     const name = this.bearbeitet();
     if (!name) return;
+
+    // Nur prüfen, wenn überhaupt ein neues Passwort gesetzt werden soll —
+    // beide Felder leer heißt: Passwort bleibt, wie es ist.
+    if (this.bearbeitetPasswort() !== this.bearbeitetPasswortWdh()) {
+      this.bearbeitenFehler.set('Die beiden Passwörter stimmen nicht überein.');
+      return;
+    }
 
     this.laedt.set(true);
     this.bearbeitenFehler.set(null);
@@ -166,16 +186,27 @@ export class RollenComponent {
 
   protected readonly neuName = signal('');
   protected readonly neuPasswort = signal('');
+  protected readonly neuPasswortWdh = signal('');
   protected readonly neuRechte = signal<Berechtigungen>({ ...KEINE_BERECHTIGUNGEN });
   protected readonly legtAn = signal(false);
   protected readonly anlegeFehler = signal<string | null>(null);
   protected readonly anlegeMeldung = signal<string | null>(null);
+
+  protected readonly neuPasswortWeichtAb = computed(
+    () => this.neuPasswortWdh() !== '' && this.neuPasswort() !== this.neuPasswortWdh(),
+  );
 
   protected rechtUmschalten(recht: Berechtigung): void {
     this.neuRechte.update(r => ({ ...r, [recht]: !r[recht] }));
   }
 
   protected async anlegen(): Promise<void> {
+    if (this.neuPasswort() !== this.neuPasswortWdh()) {
+      this.anlegeFehler.set('Die beiden Passwörter stimmen nicht überein.');
+      this.anlegeMeldung.set(null);
+      return;
+    }
+
     this.legtAn.set(true);
     this.anlegeFehler.set(null);
     this.anlegeMeldung.set(null);
@@ -189,6 +220,7 @@ export class RollenComponent {
       this.anlegeMeldung.set(`Rolle „${this.neuName()}“ wurde angelegt.`);
       this.neuName.set('');
       this.neuPasswort.set('');
+      this.neuPasswortWdh.set('');
       this.neuRechte.set({ ...KEINE_BERECHTIGUNGEN });
       if (this.geladen()) await this.ladeRollen();
     } else {

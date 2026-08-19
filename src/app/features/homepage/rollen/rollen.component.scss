@@ -2,31 +2,13 @@
   margin-bottom: var(--abstand-4);
 }
 
-.karte h2 {
-  margin: 0 0 var(--abstand-3);
-  font-size: 1.0625rem;
-  font-weight: 600;
-}
-
 .karte > .hinweis {
   margin: 0 0 var(--abstand-3);
   max-width: 46rem;
 }
 
 .formular-zeile {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: var(--abstand-3);
   margin-bottom: var(--abstand-3);
-}
-
-.formular-zeile label {
-  display: flex;
-  flex-direction: column;
-  gap: var(--abstand-1);
-  font-size: 0.8125rem;
-  color: var(--farbe-text-leise);
 }
 
 td.mitte,
@@ -89,10 +71,33 @@ tr.bearbeiten-zeile > td {
   color: var(--farbe-text-leise);
 }
 
-.visuell-versteckt {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
+/* Abweichende Wiederholung: farbige Kontur plus Hinweis, damit der
+   Unterschied nicht nur über die Farbe erkennbar ist. */
+input.weicht-ab {
+  border-color: var(--farbe-soll);
+}
+
+/*
+ * Platz für den Hinweis unter jedem Feld, unabhängig davon, ob gerade
+ * einer angezeigt wird.
+ *
+ * Die Felder stehen in einer Flex-Zeile mit align-items: flex-end — eine
+ * wachsende Beschriftung würde das Eingabefeld nach oben schieben und die
+ * ganze Zeile springen lassen. Die Zeile ist deshalb immer vorhanden und
+ * bleibt bei fehlendem Text schlicht leer.
+ */
+.hinweis-zeile {
+  display: block;
+  min-height: 1.1rem;
+  font-size: 0.75rem;
+  line-height: 1.1rem;
+}
+
+.hinweis-zeile.abweichung {
+  color: var(--farbe-soll);
+}
+
+.abweichung {
+  color: var(--farbe-soll);
+  font-size: 0.75rem;
 }

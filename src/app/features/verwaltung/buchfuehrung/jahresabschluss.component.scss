@@ -2,12 +2,6 @@
   margin-bottom: var(--abstand-6);
 }
 
-.karte h2 {
-  margin: 0 0 var(--abstand-3);
-  font-size: 1.0625rem;
-  font-weight: 600;
-}
-
 .meldung {
   margin: 0 0 var(--abstand-4);
 }
@@ -77,19 +71,7 @@
 }
 
 .erstes-jahr .formular-zeile {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: var(--abstand-3);
   margin: var(--abstand-4) 0 0;
-}
-
-.erstes-jahr .formular-zeile label {
-  display: flex;
-  flex-direction: column;
-  gap: var(--abstand-1);
-  font-size: 0.8125rem;
-  color: var(--farbe-text-leise);
 }
 
 .bericht-kopf {

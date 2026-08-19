@@ -1,20 +1,7 @@
-.kopf-aktionen {
-  display: flex;
-  align-items: center;
-  gap: var(--abstand-3);
-}
-
 .karte {
   margin-bottom: var(--abstand-6);
 }
 
-.karte h2 {
-  margin: 0 0 var(--abstand-3);
-  font-size: 1.0625rem;
-  font-weight: 600;
-}
-
-.formular-zeile,
 .filter {
   display: flex;
   flex-wrap: wrap;
@@ -22,7 +9,6 @@
   gap: var(--abstand-3);
 }
 
-.formular-zeile label,
 .filter label {
   display: flex;
   flex-direction: column;
@@ -31,16 +17,8 @@
   color: var(--farbe-text-leise);
 }
 
-/* Der Buchungstext bekommt mehr Platz als die Auswahlfelder — er ist das
-   einzige Feld mit freiem Inhalt und später der Anker für die Suche. */
-.formular-zeile label.breit {
-  flex: 1 1 18rem;
-}
-
 .zahl-feld {
   width: 7rem;
-  text-align: right;
-  font-family: var(--schrift-zahl);
 }
 
 .filter {
@@ -54,14 +32,6 @@
 .fehler + .hinweis {
   margin: var(--abstand-3) 0 0;
   max-width: 48rem;
-}
-
-.visuell-versteckt {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
 }
 
 /* Das Formular wechselt sichtbar in den Bearbeitungsmodus, damit nicht
@@ -118,30 +88,6 @@ tr.wird-bearbeitet {
 }
 
 tr.ausgewaehlt {
-  background: var(--farbe-akzent-hell);
-}
-
-/* Erscheint nur bei getroffener Auswahl, direkt über der Tabelle —
-   dort, wo der Blick nach dem Anhaken ohnehin ist. */
-.auswahl-leiste {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--abstand-3);
-  margin-bottom: var(--abstand-3);
-  padding: var(--abstand-2) var(--abstand-3);
-  border: 1px solid var(--farbe-akzent);
-  border-radius: var(--radius);
-  background: var(--farbe-akzent-hell);
-  font-size: 0.9375rem;
-}
-
-.wahl-spalte {
-  width: 2.5rem;
-  text-align: center;
-}
-
-tr.ist-ausgewaehlt {
   background: var(--farbe-akzent-hell);
 }
 

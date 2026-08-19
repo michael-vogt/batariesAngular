@@ -87,16 +87,30 @@
                       [ngModel]="bearbeitetName()"
                       (ngModelChange)="bearbeitetName.set($event)"
                     />
+                    <small class="hinweis-zeile"></small>
                   </label>
                   <label>
                     Neues Passwort
                     <input
                       type="password"
                       autocomplete="new-password"
-                      placeholder="leer lassen = unverändert"
                       [ngModel]="bearbeitetPasswort()"
                       (ngModelChange)="bearbeitetPasswort.set($event)"
                     />
+                    <small class="hinweis-zeile leise">leer = unverändert</small>
+                  </label>
+                  <label>
+                    Wiederholen
+                    <input
+                      type="password"
+                      autocomplete="new-password"
+                      [class.weicht-ab]="bearbeitetPasswortWeichtAb()"
+                      [ngModel]="bearbeitetPasswortWdh()"
+                      (ngModelChange)="bearbeitetPasswortWdh.set($event)"
+                    />
+                    <small class="hinweis-zeile" [class.abweichung]="bearbeitetPasswortWeichtAb()">
+                      {{ bearbeitetPasswortWeichtAb() ? 'stimmt nicht überein' : '' }}
+                    </small>
                   </label>
                 </div>
 
@@ -156,6 +170,7 @@
     <label>
       Name
       <input type="text" [ngModel]="neuName()" (ngModelChange)="neuName.set($event)" />
+      <small class="hinweis-zeile"></small>
     </label>
     <label>
       Passwort
@@ -165,8 +180,23 @@
         [ngModel]="neuPasswort()"
         (ngModelChange)="neuPasswort.set($event)"
       />
+      <small class="hinweis-zeile leise">mindestens 8 Zeichen</small>
     </label>
-    <small class="leise">mindestens 8 Zeichen</small>
+    <label>
+      Wiederholen
+      <input
+        type="password"
+        autocomplete="new-password"
+        [class.weicht-ab]="neuPasswortWeichtAb()"
+        [ngModel]="neuPasswortWdh()"
+        (ngModelChange)="neuPasswortWdh.set($event)"
+      />
+      <!-- Immer vorhanden, damit das Ein- und Ausblenden die Feldhöhe
+           nicht verändert und die Zeile nicht springt. -->
+      <small class="hinweis-zeile" [class.abweichung]="neuPasswortWeichtAb()">
+        {{ neuPasswortWeichtAb() ? 'stimmt nicht überein' : '' }}
+      </small>
+    </label>
   </div>
 
   <fieldset class="rechte">
@@ -184,7 +214,7 @@
     }
   </fieldset>
 
-  <button type="button" class="primaer" [disabled]="legtAn() || !eigenerName() || !eigenesPasswort()" (click)="anlegen()">
+  <button type="button" class="primaer" [disabled]="legtAn()" (click)="anlegen()">
     {{ legtAn() ? 'Legt an…' : 'Rolle anlegen' }}
   </button>
 

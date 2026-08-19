@@ -16,20 +16,8 @@
   margin: var(--abstand-1) 0 0;
 }
 
-.kopf-aktionen {
-  display: flex;
-  align-items: center;
-  gap: var(--abstand-3);
-}
-
 .karte {
   margin-bottom: var(--abstand-6);
-}
-
-.karte h2 {
-  margin: 0 0 var(--abstand-3);
-  font-size: 1.0625rem;
-  font-weight: 600;
 }
 
 tr.abwesend td {
@@ -47,17 +35,6 @@ tr.abwesend td {
 
 .zahl-feld {
   width: 4.5rem;
-  text-align: right;
-  font-family: var(--schrift-zahl);
-}
-
-.formular-zeile {
-  display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--abstand-3);
-}
-
-.formular-zeile label {
-  display: flex; flex-direction: column; gap: var(--abstand-1);
-  font-size: 0.8125rem; color: var(--farbe-text-leise);
 }
 
 .hinzufuegen {
@@ -186,10 +163,6 @@ button.status[data-status='verloren'] {
 .uebernahme .hinweis {
   margin: var(--abstand-2) 0 0;
   max-width: 46rem;
-}
-
-.visuell-versteckt {
-  position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);
 }
 
 /* Deutlich sichtbar, weil daran hängt, ob der Knopf darunter bucht oder

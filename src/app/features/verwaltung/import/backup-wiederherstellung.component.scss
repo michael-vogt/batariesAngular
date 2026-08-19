@@ -15,9 +15,6 @@
   display: flex;
   align-items: center;
   gap: var(--abstand-2);
-  margin: 0 0 var(--abstand-3);
-  font-size: 1.0625rem;
-  font-weight: 600;
 }
 
 .anzahl {
@@ -96,8 +93,5 @@ code {
 }
 
 .kopf-aktionen {
-  display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: var(--abstand-3);
 }

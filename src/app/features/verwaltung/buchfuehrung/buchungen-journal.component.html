@@ -138,16 +138,6 @@
     </div>
 
     @if (anzahlAusgewaehlt() > 0) {
-      <div class="auswahl-leiste">
-        <span>{{ anzahlAusgewaehlt() }} ausgewählt</span>
-        <button type="button" (click)="ausgewaehlteLoeschen()">Ausgewählte löschen</button>
-        <button type="button" class="leise-aktion" (click)="auswahlAufheben()">
-          Auswahl aufheben
-        </button>
-      </div>
-    }
-
-    @if (anzahlAusgewaehlt() > 0) {
       <div class="auswahlleiste">
         <span>
           <strong>{{ anzahlAusgewaehlt() }}</strong> ausgewählt
