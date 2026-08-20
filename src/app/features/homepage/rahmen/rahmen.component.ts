@@ -1,7 +1,17 @@
-import { Component, inject } from '@angular/core';
-import { LoginComponent } from '../login/login.component';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Component, inject, signal } from '@angular/core';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { filter, map } from 'rxjs';
 import { LoginService } from '../../../core/login-service';
+import { VereinsdatenService } from '../../../core/kegelverein/vereinsdaten.service';
+import { FileStorageService } from '../../../core/kegelverein/persistenz/file-storage.service';
+import { ThemaService } from '../../../core/thema.service';
+
+interface NavPunkt {
+  /** Relativ zum Verwaltungsbereich, ohne führenden Schrägstrich. */
+  pfad: string;
+  titel: string;
+}
 
 @Component({
   selector: 'app-rahmen',
@@ -10,5 +20,91 @@ import { LoginService } from '../../../core/login-service';
   styleUrl: './rahmen.component.scss',
 })
 export class RahmenComponent {
-  protected loginService = inject(LoginService);
+  protected readonly loginService = inject(LoginService);
+  protected readonly daten = inject(VereinsdatenService);
+  protected readonly storage = inject(FileStorageService);
+  protected readonly thema = inject(ThemaService);
+
+  private readonly router = inject(Router);
+
+  /**
+   * Ob die aktuelle Route im Verwaltungsbereich liegt. Steuert, ob sich die
+   * Verwaltungs-Unterpunkte in der Sidebar aufklappen und ob die
+   * verwaltungsspezifische Statusleiste (Verbindung, Kegeljahr, Verwerfen)
+   * im Kopf erscheint — außerhalb der Verwaltung ergeben diese Angaben
+   * keinen Sinn.
+   */
+  protected readonly inVerwaltung = toSignal(
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map((event) => event.urlAfterRedirects.includes('/verwaltung')),
+    ),
+    { initialValue: this.router.url.includes('/verwaltung') },
+  );
+
+  protected readonly jahrWechselt = signal(false);
+  protected readonly verwirft = signal(false);
+
+  protected readonly verwaltungsPunkte: NavPunkt[] = [
+    { pfad: 'mitglieder', titel: 'Mitglieder' },
+    { pfad: 'kegelabende', titel: 'Kegelabende' },
+    { pfad: 'buchfuehrung/journal', titel: 'Journal' },
+    { pfad: 'buchfuehrung/vorfaelle', titel: 'Geschäftsvorfälle' },
+    { pfad: 'buchfuehrung/konten', titel: 'Konten' },
+    { pfad: 'abrechnung', titel: 'Abrechnung' },
+    { pfad: 'buchfuehrung/abschluss', titel: 'Jahresabschluss' },
+  ];
+
+  protected readonly weitereVerwaltungsPunkte: NavPunkt[] = [
+    { pfad: 'anleitung', titel: 'Anleitung' },
+    { pfad: 'import', titel: 'Altdaten importieren' },
+    { pfad: 'sicherungen', titel: 'Sicherungen' },
+    { pfad: 'einstellungen', titel: 'Einstellungen' },
+  ];
+
+  /**
+   * Setzt auf den zuletzt gespeicherten Stand zurück. Die Rückfrage nennt
+   * ausdrücklich, dass nichts wiederhergestellt werden kann — der Schritt
+   * ist nicht umkehrbar.
+   */
+  protected async verwerfen(): Promise<void> {
+    const bestaetigt = confirm(
+      'Alle nicht gespeicherten Änderungen verwerfen und den zuletzt gespeicherten Stand laden?\n\n' +
+        'Das lässt sich nicht rückgängig machen.',
+    );
+    if (!bestaetigt) return;
+
+    this.verwirft.set(true);
+    try {
+      await this.daten.verwerfen();
+    } catch {
+      // Fehlertext steht in daten.fehler() und wird auf den Seiten angezeigt.
+    } finally {
+      this.verwirft.set(false);
+    }
+  }
+
+  protected async jahrWechseln(event: Event): Promise<void> {
+    const id = (event.target as HTMLSelectElement).value;
+    if (!id || id === this.daten.aktuellesJahr()?.id) return;
+
+    // Ungespeicherte Änderungen gingen beim Wechsel verloren, weil der
+    // Store nur das geladene Jahr hält.
+    if (this.daten.ungespeichert()) {
+      const weiter = confirm(
+        'Es gibt nicht gespeicherte Änderungen. Beim Wechsel des Kegeljahres gehen sie verloren. Trotzdem wechseln?',
+      );
+      if (!weiter) {
+        (event.target as HTMLSelectElement).value = this.daten.aktuellesJahr()?.id ?? '';
+        return;
+      }
+    }
+
+    this.jahrWechselt.set(true);
+    try {
+      await this.daten.kegeljahrWechseln(id);
+    } finally {
+      this.jahrWechselt.set(false);
+    }
+  }
 }

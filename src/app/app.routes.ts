@@ -7,7 +7,6 @@ import { BuchungenJournalComponent } from './features/verwaltung/buchfuehrung/bu
 import { KontenUebersichtComponent } from './features/verwaltung/buchfuehrung/konten-uebersicht.component';
 import { GeschaeftsvorfaelleComponent } from './features/verwaltung/buchfuehrung/geschaeftsvorfaelle.component';
 import { JahresabschlussComponent } from './features/verwaltung/buchfuehrung/jahresabschluss.component';
-import { HauptnavigationComponent } from './features/verwaltung/hauptnavigation/hauptnavigation.component';
 import { AnleitungComponent } from './features/verwaltung/anleitung/anleitung.component';
 import { BackupWiederherstellungComponent } from './features/verwaltung/import/backup-wiederherstellung.component';
 import { VerbindungEinstellungenComponent } from './features/verwaltung/einstellungen/verbindung-einstellungen.component';

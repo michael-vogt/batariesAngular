@@ -1,4 +1,13 @@
-<app-hauptnavigation />
-<main>
-  <router-outlet />
-</main>
+@if (daten.status() === 'laedt') {
+  <p class="lade-hinweis">Daten werden geladen…</p>
+}
+
+@if (daten.migrationsHinweise().length > 0) {
+  <div class="migration">
+    @for (hinweis of daten.migrationsHinweise(); track hinweis) {
+      <p>{{ hinweis }}</p>
+    }
+  </div>
+}
+
+<router-outlet />

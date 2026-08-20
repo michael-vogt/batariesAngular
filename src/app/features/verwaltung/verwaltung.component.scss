@@ -1,3 +1,21 @@
-main {
-  display: block;
+.lade-hinweis,
+.migration {
+  margin: 0 0 var(--abstand-4);
+  color: var(--farbe-text-leise);
+  font-size: 0.9375rem;
+}
+
+.migration {
+  color: var(--farbe-warnung);
+}
+
+.migration p {
+  margin: 0 0 var(--abstand-1);
+}
+
+@media print {
+  .lade-hinweis,
+  .migration {
+    display: none;
+  }
 }

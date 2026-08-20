@@ -19,8 +19,15 @@
 
 .header {
   grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--abstand-4);
   padding: var(--abstand-3) var(--abstand-6);
   border-width: 0 0 1px;
+}
+
+.titel {
   font-size: 1.5rem;
   font-weight: 600;
 }
@@ -48,6 +55,102 @@
   background: var(--farbe-flaeche);
 }
 
+/* Verwaltungs-Unterpunkte: eingerückt unter dem "Verwaltung"-Eintrag,
+   sichtbar nur während man sich im Verwaltungsbereich befindet.
+   Selektor bewusst über ".menu .unterliste", weil ".menu ul" (Klasse +
+   Elementselektor) sonst spezifischer wäre und margin/padding hier
+   überschreiben würde. */
+.menu .unterliste {
+  margin: var(--abstand-1) 0 var(--abstand-2);
+  padding-left: var(--abstand-4);
+}
+
+.unterliste a {
+  font-size: 0.9375rem;
+}
+
+/* Import und Einstellungen sind Verwaltungsaufgaben, keine täglichen
+   Wege — optisch zurückgenommen. */
+.unterliste a.leise-punkt {
+  color: var(--farbe-text-leise);
+  font-size: 0.875rem;
+}
+
+.unterliste .trenner {
+  height: 1px;
+  margin: var(--abstand-2) var(--abstand-3);
+  background: var(--farbe-rand);
+}
+
 .content {
   padding: var(--abstand-8);
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-2);
+  margin-left: auto;
+}
+
+.jahr-anzeige {
+  color: var(--farbe-text-leise);
+  font-size: 0.875rem;
+}
+
+.jahr-wahl select {
+  font-size: 0.875rem;
+}
+
+/* Dezenter Punkt statt Textbanner: der Hinweis soll dauerhaft sichtbar
+   sein können, ohne bei jeder Eingabe die Aufmerksamkeit zu ziehen. */
+.ungespeichert {
+  color: var(--farbe-warnung);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.nicht-verbunden {
+  padding: var(--abstand-1) var(--abstand-3);
+  border-radius: 999px;
+  background: var(--farbe-warnung-hell);
+  color: var(--farbe-warnung);
+  font-size: 0.8125rem;
+  text-decoration: none;
+}
+
+/* Umschalter des Erscheinungsbilds: bewusst klein und ohne Beschriftung —
+   er wird selten gebraucht und soll den Kopf nicht dominieren. */
+.thema-schalter {
+  padding: var(--abstand-1) var(--abstand-2);
+  font-family: var(--schrift-zahl);
+  font-size: 0.875rem;
+  line-height: 1.2;
+  color: var(--farbe-text-leise);
+}
+
+.thema-schalter:hover {
+  color: var(--farbe-akzent);
+  border-color: var(--farbe-akzent);
+}
+
+/* Nur sichtbar, solange es etwas zu verwerfen gibt — direkt neben dem
+   Ungespeichert-Punkt, damit Hinweis und Gegenmaßnahme zusammenstehen. */
+.verwerfen {
+  padding: var(--abstand-1) var(--abstand-3);
+  font-size: 0.8125rem;
+  color: var(--farbe-text-leise);
+}
+
+.verwerfen:hover:not(:disabled) {
+  color: var(--farbe-soll);
+  border-color: var(--farbe-soll);
+}
+
+/* Beim Drucken gehört die Bedienung des Programms nicht aufs Papier. */
+@media print {
+  .header,
+  .menu {
+    display: none;
+  }
 }
