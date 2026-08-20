@@ -6,10 +6,10 @@
       <button
         type="button"
         class="thema-schalter"
-        [title]="thema.thema() === 'hell' ? 'Zum Terminal-Thema wechseln' : 'Zum hellen Thema wechseln'"
-        [attr.aria-label]="thema.thema() === 'hell' ? 'Terminal-Thema einschalten' : 'Helles Thema einschalten'"
+        [title]="'Zum ' + thema.beschreibung(thema.naechstes()).wechselnZu + ' wechseln'"
+        [attr.aria-label]="thema.beschreibung(thema.naechstes()).einschalten + ' einschalten'"
         (click)="thema.umschalten()"
-      >{{ thema.thema() === 'hell' ? '>_' : '☀' }}</button>
+      >{{ thema.beschreibung(thema.naechstes()).symbol }}</button>
 
       @if (inVerwaltung()) {
         @if (storage.status() !== 'verbunden') {

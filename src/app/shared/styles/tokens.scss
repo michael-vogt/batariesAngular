@@ -81,6 +81,37 @@
   color-scheme: dark;
 }
 
+/* ---------------------------------------------------------------
+   Kegelbahn-Thema
+   ---------------------------------------------------------------
+   Warme Holztöne wie auf einer Kegelbahn, dazu das satte Grün des
+   Bahnauslaufs als Akzent. Rot bleibt Soll-Beträgen vorbehalten, damit
+   die Soll/Haben-Farbgebung über alle Themen hinweg gleich bleibt —
+   nur die Grundstimmung ändert sich. */
+[data-thema='kegelbahn'] {
+  --farbe-flaeche: #f4e8d0;
+  --farbe-karte: #fffcf5;
+  --farbe-rand: #d9bf8e;
+  --farbe-linie: #e4d2a8;
+  --farbe-tabellenkopf: #eeddb0;
+  --farbe-text: #3a2c18;
+  --farbe-text-leise: #8c7452;
+  --farbe-akzent: #3f6b3a;
+  --farbe-akzent-hell: #e6efe1;
+  --farbe-soll: #a13324;
+  --farbe-soll-hell: #fbe6e1;
+  --farbe-haben: #3f6b3a;
+  --farbe-warnung: #96631c;
+  --farbe-warnung-hell: #f6ead2;
+
+  color-scheme: light;
+}
+
+/* Anspielung auf den Kegel-Sport, analog zum "$ " im Terminal-Thema. */
+[data-thema='kegelbahn'] .seiten-kopf h1::before {
+  content: '🎳 ';
+}
+
 a[target="_blank"]:not(.no-icon)::after {
   content: "";
   display: inline-block;

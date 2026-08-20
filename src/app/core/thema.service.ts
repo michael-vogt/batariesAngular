@@ -1,8 +1,24 @@
-import { Service, effect, signal } from '@angular/core';
+import { Service, computed, effect, signal } from '@angular/core';
 
-export type Thema = 'hell' | 'bash';
+export type Thema = 'hell' | 'bash' | 'kegelbahn';
+
+interface ThemaBeschreibung {
+  symbol: string;
+  /** Für "Zum {{wechselnZu}} wechseln". */
+  wechselnZu: string;
+  /** Für "{{einschalten}} einschalten". */
+  einschalten: string;
+}
 
 const SPEICHER_SCHLUESSEL = 'kegelverein-thema';
+
+const REIHENFOLGE: Thema[] = ['hell', 'bash', 'kegelbahn'];
+
+const BESCHREIBUNGEN: Record<Thema, ThemaBeschreibung> = {
+  hell: { symbol: '☀', wechselnZu: 'hellen Thema', einschalten: 'Helles Thema' },
+  bash: { symbol: '>_', wechselnZu: 'Terminal-Thema', einschalten: 'Terminal-Thema' },
+  kegelbahn: { symbol: '🎳', wechselnZu: 'Kegelbahn-Thema', einschalten: 'Kegelbahn-Thema' },
+};
 
 /**
  * Verwaltet das gewählte Erscheinungsbild.
@@ -15,6 +31,9 @@ const SPEICHER_SCHLUESSEL = 'kegelverein-thema';
 export class ThemaService {
   private readonly _thema = signal<Thema>(this.geladenesThema());
   readonly thema = this._thema.asReadonly();
+
+  /** Das Thema, zu dem ein Klick auf den Umschalter als Nächstes wechselt. */
+  readonly naechstes = computed(() => this.naechstesNach(this._thema()));
 
   constructor() {
     effect(() => {
@@ -29,19 +48,24 @@ export class ThemaService {
     });
   }
 
-  /**
-   * Wechselt zwischen den beiden Themen. Eine setzen(thema)-Variante gäbe
-   * es erst, wenn ein drittes Thema dazukäme — bei zweien wäre sie nur
-   * ein Umweg.
-   */
+  /** Wechselt reihum zum jeweils nächsten Thema. */
   umschalten(): void {
-    this._thema.update(aktuell => (aktuell === 'hell' ? 'bash' : 'hell'));
+    this._thema.update((aktuell) => this.naechstesNach(aktuell));
+  }
+
+  beschreibung(thema: Thema): ThemaBeschreibung {
+    return BESCHREIBUNGEN[thema];
+  }
+
+  private naechstesNach(thema: Thema): Thema {
+    const index = REIHENFOLGE.indexOf(thema);
+    return REIHENFOLGE[(index + 1) % REIHENFOLGE.length];
   }
 
   private geladenesThema(): Thema {
     try {
       const gespeichert = localStorage.getItem(SPEICHER_SCHLUESSEL);
-      if (gespeichert === 'hell' || gespeichert === 'bash') return gespeichert;
+      if (REIHENFOLGE.includes(gespeichert as Thema)) return gespeichert as Thema;
     } catch {
       // Kein Zugriff auf localStorage — mit dem Standard weitermachen.
     }
