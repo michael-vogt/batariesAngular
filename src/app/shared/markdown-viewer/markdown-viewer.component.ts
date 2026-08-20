@@ -25,8 +25,14 @@ export class MarkdownViewerComponent {
     }
   )
 
+  /**
+   * Bewusst ohne führenden Schrägstrich: ein absoluter Pfad würde immer
+   * die Domain-Wurzel treffen, unabhängig vom baseHref der App. Relativ
+   * löst der Browser gegen das von Angular gesetzte <base href> auf —
+   * das passt zu jedem Unterpfad, unter dem die App bereitgestellt wird.
+   */
   readonly resource = httpResource.text(
-    () => `/docs/${this.page()}.md`
+    () => `docs/${this.page()}.md`
   );
 
   readonly html = computed(() => {

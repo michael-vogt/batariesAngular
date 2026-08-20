@@ -147,10 +147,17 @@
   border-color: var(--farbe-soll);
 }
 
-/* Beim Drucken gehört die Bedienung des Programms nicht aufs Papier. */
+/* Beim Drucken gehört die Bedienung des Programms nicht aufs Papier.
+   Das Grid muss dabei mitweichen — sonst bleibt die 240px-Spalte des
+   ausgeblendeten Menüs reserviert und der Inhalt bekommt nur den Rest
+   der Seite. */
 @media print {
   .header,
   .menu {
     display: none;
+  }
+
+  .layout {
+    display: block;
   }
 }

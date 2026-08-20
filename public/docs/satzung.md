@@ -1,4 +1,5 @@
 # Allgemein gültige Satzung
+Stand: 11.10.2024
 
 ## §1 Mitgliedschaft
 1. Neuaufnahmen müssen ohne Gegenstimme erfolgen.
