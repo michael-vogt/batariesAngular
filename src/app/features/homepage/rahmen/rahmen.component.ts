@@ -2,10 +2,10 @@ import { Component, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
-import { LoginService } from '../../../core/login-service';
 import { VereinsdatenService } from '../../../core/kegelverein/vereinsdaten.service';
 import { FileStorageService } from '../../../core/kegelverein/persistenz/file-storage.service';
 import { ThemaService } from '../../../core/thema.service';
+import { AnmeldungService } from '../../../core/anmeldung.service';
 
 interface NavPunkt {
   /** Relativ zum Verwaltungsbereich, ohne führenden Schrägstrich. */
@@ -20,7 +20,7 @@ interface NavPunkt {
   styleUrl: './rahmen.component.scss',
 })
 export class RahmenComponent {
-  protected readonly loginService = inject(LoginService);
+  protected readonly anmeldungService = inject(AnmeldungService);
   protected readonly daten = inject(VereinsdatenService);
   protected readonly storage = inject(FileStorageService);
   protected readonly thema = inject(ThemaService);

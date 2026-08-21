@@ -1,5 +1,5 @@
 <div class="seite">
-  @if (loginService.istNutzerAngemeldet()) {
+  @if (anmeldungService.angemeldet()) {
   <header class="seiten-kopf">
     <div>
       <h1>Kegeltermine</h1>
@@ -21,7 +21,7 @@
       <p class="fehler">{{ text }}</p>
     }
 
-    @if (istAdminAngemeldet()) {
+    @if (anmeldungService.darf('terminplanung')) {
     <div class="karte">
       <h2>Neuer Termin</h2>
       <div class="formular-zeile">
@@ -87,7 +87,7 @@
               }
             </p>
           </div>
-          @if (istAdminAngemeldet()) {
+          @if (anmeldungService.darf('verwaltung')) {
           <button type="button" class="leise-aktion" (click)="loeschen(u.termin)">Löschen</button>
           }
         </div>
@@ -114,7 +114,7 @@
                   <td>{{ a.abmeldung.grund }}</td>
                   <td>{{ zeitpunktKurz(a.abmeldung.gemeldetAm) }}</td>
                   <td>
-                    @if (istAdminAngemeldet()) {
+                    @if (anmeldungService.darf('verwaltung')) {
                     <button
                       type="button"
                       class="leise-aktion"

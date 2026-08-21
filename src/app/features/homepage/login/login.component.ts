@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { datumKurz } from '../../../shared/format.util';
 import { RollenService } from '../../../core/rollen.service';
-import { LoginService } from '../../../core/login-service';
+import { AnmeldungService } from '../../../core/anmeldung.service';
 
 const STORE_KEY_LAST_USERNAME = "login_username";
 
@@ -16,7 +16,7 @@ export class LoginComponent {
   protected username = signal<string>('Mitglied');
   protected readonly password = signal<string>('');
   protected readonly rollenService = inject(RollenService);
-  protected readonly loginService = inject(LoginService);
+  protected readonly anmeldungService = inject(AnmeldungService);
 
   ngOnInit() {
     const user = localStorage.getItem(STORE_KEY_LAST_USERNAME);
@@ -29,15 +29,16 @@ export class LoginComponent {
     const username = this.username();
     const password = this.password();
 
-    await this.loginService.login(username, password);
+    await this.anmeldungService.anmelden(username, password);
+
     this.password.set('');
-    if (!this.loginService.fehler()) {
+    if (!this.anmeldungService.fehler()) {
       localStorage.setItem(STORE_KEY_LAST_USERNAME, this.username());
     }
   }
 
   protected logout(): void {
-    this.loginService.logout();
+    this.anmeldungService.abmelden();
   }
 
   protected readonly datumKurz = datumKurz;

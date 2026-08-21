@@ -7,7 +7,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { map } from 'rxjs';
 import { FormsModule } from '@angular/forms';
-import { LoginService } from '../../../core/login-service';
 
 export type KegelterminAnzeigeModus = 'alle' | 'nur_naechster';
 
@@ -20,7 +19,6 @@ export type KegelterminAnzeigeModus = 'alle' | 'nur_naechster';
 export class KegeltermineListeComponent {
   protected readonly terminService = inject(TerminService);
   protected readonly mitgliederService = inject(MitgliederService);
-  protected readonly loginService = inject(LoginService);
 
   private readonly route = inject(ActivatedRoute);
 
@@ -49,5 +47,4 @@ export class KegeltermineListeComponent {
 
   protected readonly datumZeitKurz = datumZeitKurz;
   protected readonly datumKurz = datumKurz;
-  protected readonly datumZeitLang = datumZeitLang;
 }

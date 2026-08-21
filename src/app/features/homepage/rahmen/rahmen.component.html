@@ -51,7 +51,7 @@
       <li><a [routerLink]="['home']" routerLinkActive="aktiv">Hauptseite</a></li>
       <li><a [routerLink]="['dokument', 'satzung']" routerLinkActive="aktiv">Satzung</a></li>
       <li><a [routerLink]="['kegeltermine']" routerLinkActive="aktiv">Kegeltermine</a></li>
-      @if (loginService.nutzerHatBerechtigung('verwaltung')) {
+      @if (anmeldungService.darf('verwaltung')) {
         <li>
           <a [routerLink]="['verwaltung']" routerLinkActive="aktiv">Verwaltung</a>
           @if (inVerwaltung()) {

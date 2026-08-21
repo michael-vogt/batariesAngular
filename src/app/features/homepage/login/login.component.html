@@ -1,6 +1,6 @@
 <div class="karte">
   <h2>Login</h2>
-  @if(!loginService.istNutzerAngemeldet()) {
+  @if(!anmeldungService.angemeldet()) {
   <div class="formular-zeile">
     <label>
       Rolle
@@ -24,11 +24,11 @@
     @if (rollenService.namenLaden()) {
       <small class="leise">Rollen werden geladen...</small>
     }
-    @if (loginService.fehler()) {
-      <p class="fehler">{{loginService.fehler()}}</p>
+    @if (anmeldungService.fehler()) {
+      <p class="fehler">{{anmeldungService.fehler()}}</p>
     }
   } @else {
-    <p>Angemeldet als {{ loginService.currentNutzer()?.username }}</p>
+    <p>Angemeldet als {{ anmeldungService.name() }}</p>
     <button type="button" (click)="logout()">Logout</button>
   }
 </div>
