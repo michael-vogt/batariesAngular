@@ -6,7 +6,7 @@
       Rolle
       <select [(ngModel)]="username">
         @for (rolle of rollenService.rollennamen(); track rolle) {
-          <option value="{{rolle}}">{{ rolle }}</option>
+          <option [value]="rolle">{{ rolle }}</option>
         }
       </select>
     </label>
@@ -32,5 +32,3 @@
     <button type="button" (click)="logout()">Logout</button>
   }
 </div>
-
-<app-abmeldungen/>

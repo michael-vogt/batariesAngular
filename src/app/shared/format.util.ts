@@ -62,3 +62,14 @@ export function datumZeitKurz(iso: string): string {
     minute: '2-digit'
   });
 }
+
+export function datumZeitLang(iso: string): string {
+  return new Date(iso).toLocaleDateString('de-DE', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}

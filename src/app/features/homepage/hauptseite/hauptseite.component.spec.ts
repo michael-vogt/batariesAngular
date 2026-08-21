@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AbmeldungenComponent } from './abmeldungen.component';
+import { HauptseiteComponent } from './hauptseite.component';
 
-describe('AbmeldungenComponent', () => {
-  let component: AbmeldungenComponent;
-  let fixture: ComponentFixture<AbmeldungenComponent>;
+describe('HauptseiteComponent', () => {
+  let component: HauptseiteComponent;
+  let fixture: ComponentFixture<HauptseiteComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AbmeldungenComponent],
+      imports: [HauptseiteComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AbmeldungenComponent);
+    fixture = TestBed.createComponent(HauptseiteComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

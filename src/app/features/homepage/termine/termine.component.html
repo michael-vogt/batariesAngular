@@ -1,4 +1,5 @@
 <div class="seite">
+  @if (loginService.istNutzerAngemeldet()) {
   <header class="seiten-kopf">
     <div>
       <h1>Kegeltermine</h1>
@@ -176,5 +177,12 @@
         }
       </div>
     }
+  }
+  } @else {
+    <div class="karte">
+      <h2>Nicht angemeldet</h2>
+      <p>Diese Funktion steht nur angemeldeten Benutzern zur Verfügung!</p>
+    </div>
+    <app-login/>
   }
 </div>

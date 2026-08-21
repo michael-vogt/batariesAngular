@@ -81,7 +81,11 @@ export function erzeugeAbrechnung(params: {
     });
   }
 
-  zeilen.sort((a, b) => a.name.localeCompare(b.name, 'de'));
+  zeilen.sort((a, b) => {
+    const nachname_a = a.name.split(' ').pop()!;
+    const nachname_b = b.name.split(' ').pop()!;
+    return nachname_a.localeCompare(nachname_b, 'de');
+  });
 
   const summe = (auswahl: (z: AbrechnungsZeile) => number) =>
     runde(zeilen.reduce((s, z) => s + auswahl(z), 0));

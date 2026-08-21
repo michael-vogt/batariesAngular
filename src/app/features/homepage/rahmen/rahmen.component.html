@@ -50,7 +50,6 @@
     <ul>
       <li><a [routerLink]="['home']" routerLinkActive="aktiv">Hauptseite</a></li>
       <li><a [routerLink]="['dokument', 'satzung']" routerLinkActive="aktiv">Satzung</a></li>
-      @if (loginService.nutzerHatBerechtigung('termineAbmelden')) {
       <li><a [routerLink]="['kegeltermine']" routerLinkActive="aktiv">Kegeltermine</a></li>
       @if (loginService.nutzerHatBerechtigung('verwaltung')) {
         <li>
@@ -68,8 +67,6 @@
           }
         </li>
       }
-      }
-      <li><a [routerLink]="['rollen']" routerLinkActive="aktiv">Rollen</a></li>
     </ul>
   </nav>
 

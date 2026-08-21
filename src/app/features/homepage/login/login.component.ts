@@ -1,27 +1,29 @@
-import { Component, effect, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { KegeljahrStore } from '../../../core/kegelverein/kegeljahr.store';
 import { datumKurz } from '../../../shared/format.util';
-import { TerminService } from '../../../core/kegelverein/termin.service';
-import { AbmeldungenComponent } from '../abmeldungen/abmeldungen.component';
 import { RollenService } from '../../../core/rollen.service';
 import { LoginService } from '../../../core/login-service';
-import { AsyncPipe } from '@angular/common';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { from } from 'rxjs';
+
+const STORE_KEY_LAST_USERNAME = "login_username";
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule, AbmeldungenComponent],
+  imports: [FormsModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
 export class LoginComponent {
   protected username = signal<string>('Mitglied');
   protected readonly password = signal<string>('');
-  protected readonly terminService = inject(TerminService);
   protected readonly rollenService = inject(RollenService);
   protected readonly loginService = inject(LoginService);
+
+  ngOnInit() {
+    const user = localStorage.getItem(STORE_KEY_LAST_USERNAME);
+    if (user) {
+      this.username.set(user);
+    }
+  }
 
   protected async login(): Promise<void> {
     const username = this.username();
@@ -29,6 +31,9 @@ export class LoginComponent {
 
     await this.loginService.login(username, password);
     this.password.set('');
+    if (!this.loginService.fehler()) {
+      localStorage.setItem(STORE_KEY_LAST_USERNAME, this.username());
+    }
   }
 
   protected logout(): void {

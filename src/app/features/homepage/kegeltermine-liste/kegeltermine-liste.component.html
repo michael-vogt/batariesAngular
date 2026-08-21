@@ -1,0 +1,32 @@
+@for (u of uebersichten(); track u.termin.id) {
+  <div class="karte">
+  @if (modus() === 'nur_naechster') {
+    <h2>Abmeldung für das nächste Kegeln</h2>
+    <p>Datum: {{ datumKurz(u.termin.beginn ?? '')}}</p>
+  } @else {
+    <h2>Abmeldungen für das Kegeln am {{ datumKurz(u.termin.beginn ?? '') }}</h2>
+  }
+  @if (u.abgemeldet.length === 0) {
+    <p>noch keine Abmeldungen</p>
+  } @else {
+    <table class="daten short">
+      <thead>
+      <tr>
+        <th>Name</th>
+        <th>Abmeldedatum</th>
+        <th>Grund</th>
+      </tr>
+      </thead>
+      <tbody>
+        @for (abmeldung of u.abgemeldet; track abmeldung.abmeldung.id) {
+          <tr>
+            <td>{{ mitgliederService.suchen(abmeldung.abmeldung.mitgliedId)?.name }}</td>
+            <td>{{ datumZeitKurz(abmeldung.abmeldung.gemeldetAm) }}</td>
+            <td>{{ abmeldung.abmeldung.grund }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+  </div>
+}

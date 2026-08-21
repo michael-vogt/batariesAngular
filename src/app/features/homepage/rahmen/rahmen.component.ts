@@ -59,6 +59,7 @@ export class RahmenComponent {
     { pfad: 'anleitung', titel: 'Anleitung' },
     { pfad: 'import', titel: 'Altdaten importieren' },
     { pfad: 'sicherungen', titel: 'Sicherungen' },
+    { pfad: 'rollen', titel: 'Rollen' },
     { pfad: 'einstellungen', titel: 'Einstellungen' },
   ];
 

@@ -15,7 +15,11 @@ import { VerwaltungComponent } from './features/verwaltung/verwaltung.component'
 import { MarkdownViewerComponent } from './shared/markdown-viewer/markdown-viewer.component';
 import { LoginComponent } from './features/homepage/login/login.component';
 import { TermineComponent } from './features/homepage/termine/termine.component';
-import { RollenComponent } from './features/homepage/rollen/rollen.component';
+import { RollenComponent } from './features/verwaltung/rollen/rollen.component';
+import {
+  KegeltermineListeComponent
+} from './features/homepage/kegeltermine-liste/kegeltermine-liste.component';
+import { HauptseiteComponent } from './features/homepage/hauptseite/hauptseite.component';
 
 export const routes: Routes = [
   {
@@ -29,7 +33,7 @@ export const routes: Routes = [
     children: [
       {
         path: 'home',
-        component: LoginComponent,
+        component: HauptseiteComponent,
       },
       {
         path: 'dokument/:seite',
@@ -37,11 +41,7 @@ export const routes: Routes = [
       },
       {
         path: 'kegeltermine',
-        component: TermineComponent
-      },
-      {
-        path: 'rollen',
-        component: RollenComponent,
+        component: TermineComponent,
       },
 
       {
@@ -109,6 +109,10 @@ export const routes: Routes = [
           {
             path: 'einstellungen',
             component: VerbindungEinstellungenComponent,
+          },
+          {
+            path: 'rollen',
+            component: RollenComponent,
           },
         ],
       },

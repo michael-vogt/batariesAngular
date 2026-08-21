@@ -7,6 +7,7 @@ import { erzeugeUebersicht, jetzt } from '../../../core/kegelverein/termin.logic
 import { Kegeltermin } from '../../../core/kegelverein/kegelverein.models';
 import { aktuellerStatus } from '../../../core/kegelverein/mitglied.util';
 import { LoginService } from '../../../core/login-service';
+import { LoginComponent } from '../login/login.component';
 
 /** Vorschlag für einen neuen Termin: nächster Freitag, 19:30 Uhr. */
 function vorschlagBeginn(): string {
@@ -18,7 +19,7 @@ function vorschlagBeginn(): string {
 
 @Component({
   selector: 'app-termine',
-  imports: [FormsModule],
+  imports: [FormsModule, LoginComponent],
   templateUrl: './termine.component.html',
   styleUrl: './termine.component.scss',
 })
@@ -26,7 +27,7 @@ export class TermineComponent {
   protected readonly termine = inject(TerminService);
   protected readonly storage = inject(FileStorageService);
   private readonly mitgliederService = inject(MitgliederService);
-  private readonly loginService = inject(LoginService);
+  protected readonly loginService = inject(LoginService);
 
   protected readonly neuBeginn = signal(vorschlagBeginn());
   protected readonly neuOrt = signal('');
@@ -38,7 +39,9 @@ export class TermineComponent {
   protected readonly abmeldeGrund = signal('');
   protected readonly formularFehler = signal<string | null>(null);
 
-  protected readonly istAdminAngemeldet = computed<boolean>(() => { return this.loginService.nutzerHatBerechtigung('verwaltung'); });
+  protected readonly istAdminAngemeldet = computed<boolean>(() => {
+    return this.loginService.nutzerHatBerechtigung('verwaltung');
+  });
 
   constructor() {
     // Termine liegen in einer eigenen Datei und werden geladen, sobald
