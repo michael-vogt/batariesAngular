@@ -6,6 +6,9 @@ import { VereinsdatenService } from '../../../core/kegelverein/vereinsdaten.serv
 import { erzeugeAbrechnung } from '../../../core/kegelverein/abrechnung.logic';
 import { datumKurz, euro } from '../../../shared/format.util';
 
+import { jsPDF} from 'jspdf';
+import autoTable from 'jspdf-autotable';
+
 @Component({
   selector: 'app-abrechnung',
   imports: [FormsModule],
@@ -58,9 +61,6 @@ export class AbrechnungComponent {
     this.pdfFehler.set(null);
 
     try {
-      const { jsPDF } = await import('jspdf');
-      const { default: autoTable } = await import('jspdf-autotable');
-
       const a = this.abrechnung();
       const doc = new jsPDF({ orientation: 'landscape' });
 

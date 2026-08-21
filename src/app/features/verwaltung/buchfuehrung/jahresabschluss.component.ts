@@ -6,6 +6,9 @@ import { AbschlussVorschau } from '../../../core/kegelverein/jahresabschluss.log
 import { erzeugeJahresbericht } from '../../../core/kegelverein/bilanz.logic';
 import { datumKurz, euro } from '../../../shared/format.util';
 
+import { jsPDF} from 'jspdf';
+import autoTable from 'jspdf-autotable';
+
 /**
  * Vorschlag für den Beginn: der 1. Oktober des laufenden Kegeljahres.
  * Vor Oktober liegt der Beginn im Vorjahr.
@@ -128,9 +131,6 @@ export class JahresabschlussComponent {
     this.pdfLaeuft.set(true);
 
     try {
-      const { jsPDF } = await import('jspdf');
-      const { default: autoTable } = await import('jspdf-autotable');
-
       const doc = new jsPDF();
       const geld = (n: number) => `${this.euro(n)} €`;
       const jahr = b.bezeichnung.replace('Kegeljahr ', '');

@@ -20,6 +20,7 @@ import {
   KegeltermineListeComponent
 } from './features/homepage/kegeltermine-liste/kegeltermine-liste.component';
 import { HauptseiteComponent } from './features/homepage/hauptseite/hauptseite.component';
+import { AbrechnungComponent } from './features/verwaltung/abrechnung/abrechnung.component';
 
 export const routes: Routes = [
   {
@@ -55,17 +56,19 @@ export const routes: Routes = [
           },
           {
             path: 'anleitung',
-            loadComponent: () =>
+            component: AnleitungComponent,
+            /*loadComponent: () =>
               import('./features/verwaltung/anleitung/anleitung.component').then(
                 (m) => m.AnleitungComponent,
-              ),
+              ),*/
           },
           {
             path: 'abrechnung',
-            loadComponent: () =>
+            component: AbrechnungComponent,
+            /*loadComponent: () =>
               import('./features/verwaltung/abrechnung/abrechnung.component').then(
                 (m) => m.AbrechnungComponent,
-              ),
+              ),*/
           },
           {
             path: 'buchfuehrung/journal',
@@ -89,10 +92,11 @@ export const routes: Routes = [
           },
           {
             path: 'kegelabende/:id',
-            loadComponent: () =>
+            component: KegelabendDetailComponent,
+            /*loadComponent: () =>
               import('./features/verwaltung/kegelabend/kegelabend-detail.component').then(
                 (m) => m.KegelabendDetailComponent,
-              ),
+              ),*/
           },
           {
             path: 'mitglieder',
