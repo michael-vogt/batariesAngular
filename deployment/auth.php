@@ -22,12 +22,12 @@ declare(strict_types=1);
  *     -> 403, wenn die Rolle dafür nicht berechtigt ist
  *
  *   POST auth.php?aktion=rolle-anlegen
- *     Body: {"name","credential","neueRolle":{"name","passwort","berechtigungen"}}
+ *     Body: {"name","credential","neueRolle":{"name","passwort","berechtigungen","mitgliedId?"}}
  *     -> 201 {"angelegt": true, "name": "..."}
  *     -> 403 ohne Verwaltungsrecht, 409 bei vergebenem Namen
  *
  *   POST auth.php?aktion=rolle-aendern
- *     Body: {"name","credential","rolle":{"name","neuerName?","passwort?","berechtigungen?"}}
+ *     Body: {"name","credential","rolle":{"name","neuerName?","passwort?","berechtigungen?","mitgliedId?"}}
  *     -> 200 {"geaendert": true, "name": "..."}
  *
  *   POST auth.php?aktion=rolle-loeschen
@@ -55,6 +55,7 @@ $config = require __DIR__ . '/../config.php';
 $apiKey = (string) $config['apiKey'];
 $erlaubterOrigin = (string) ($config['erlaubterOrigin'] ?? '');
 $rollenDatei = (string) ($config['rollenDatei'] ?? __DIR__ . '/../rollen.json');
+$dataDir = (string) ($config['dataDir'] ?? __DIR__ . '/../data');
 
 // ---------------------------------------------------------------
 // CORS
@@ -229,6 +230,7 @@ function berechtigungenLesen(array $rolle, string $rollenname): array
 $gefundenerHash = null;
 $gefundenerName = null;
 $gefundeneRechte = [];
+$gefundeneZuordnung = null;
 
 foreach ($rollen as $rolle) {
     // Rollennamen ohne Rücksicht auf Groß-/Kleinschreibung vergleichen —
@@ -237,6 +239,7 @@ foreach ($rollen as $rolle) {
         $gefundenerHash = (string) ($rolle['hash'] ?? '');
         $gefundenerName = (string) $rolle['name'];
         $gefundeneRechte = berechtigungenLesen($rolle, $gefundenerName);
+        $gefundeneZuordnung = isset($rolle['mitgliedId']) ? (string) $rolle['mitgliedId'] : null;
         break;
     }
 }
@@ -287,6 +290,7 @@ if ($aktion === 'rollen') {
         $liste[] = [
             'name' => (string) $rolle['name'],
             'berechtigungen' => berechtigungenLesen($rolle, (string) $rolle['name']),
+            'mitgliedId' => isset($rolle['mitgliedId']) ? (string) $rolle['mitgliedId'] : null,
         ];
     }
 
@@ -343,6 +347,56 @@ function anzahlVerwalter(array $rollen): int
     return $anzahl;
 }
 
+/**
+ * Prüft eine Mitgliedszuordnung gegen die Stammdaten.
+ *
+ * Ein Verweis auf ein nicht vorhandenes Mitglied würde in der Oberfläche
+ * nur als "unbekannt" erscheinen, und niemand käme darauf, warum. Da
+ * Rollen selten geschrieben werden, ist die Prüfung hier billig.
+ *
+ * Gibt es die Mitgliederdatei nicht, wird die Zuordnung durchgelassen:
+ * Auf einem frisch eingerichteten Server soll das Anlegen einer Rolle
+ * nicht daran scheitern.
+ */
+function mitgliedVorhanden(string $dataDir, string $mitgliedId): bool
+{
+    $datei = rtrim($dataDir, '/') . '/mitglieder.json';
+    if (!is_readable($datei)) {
+        error_log('auth.php: mitglieder.json nicht lesbar — Zuordnung ungeprüft übernommen.');
+        return true;
+    }
+
+    $inhalt = json_decode((string) file_get_contents($datei), true);
+    foreach (($inhalt['mitglieder'] ?? []) as $m) {
+        if (($m['id'] ?? null) === $mitgliedId) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Liest die Mitgliedszuordnung aus einer Anfrage.
+ *
+ * Rückgabe: der Wert, null zum Entfernen der Zuordnung, oder false bei
+ * einer unbekannten Kennung. Ein leerer String bedeutet ausdrücklich
+ * "keine Zuordnung" — so lässt sie sich über die Oberfläche auch wieder
+ * lösen.
+ */
+function zuordnungLesen(array $quelle, string $dataDir): string|null|false
+{
+    if (!array_key_exists('mitgliedId', $quelle)) {
+        return null;
+    }
+
+    $id = trim((string) ($quelle['mitgliedId'] ?? ''));
+    if ($id === '') {
+        return null;
+    }
+
+    return mitgliedVorhanden($dataDir, $id) ? $id : false;
+}
+
 /** Übernimmt nur bekannte Berechtigungen; unbekannte werden gemeldet. */
 function rechteFiltern(array $roh, string $wofuer): array
 {
@@ -394,12 +448,25 @@ if ($aktion === 'rolle-anlegen') {
 
     $gefiltert = rechteFiltern($neuRechte, $neuName);
 
+    $zuordnung = zuordnungLesen($neu, $dataDir);
+    if ($zuordnung === false) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Das zugeordnete Mitglied gibt es nicht']);
+        exit;
+    }
+
     $rollenDaten['schemaVersion'] = 2;
-    $rollenDaten['rollen'][] = [
+    $eintrag = [
         'name' => $neuName,
         'hash' => password_hash($neuPasswort, PASSWORD_BCRYPT, ['cost' => 12]),
         'berechtigungen' => $gefiltert,
     ];
+    // Nur setzen, wenn zugeordnet — ein leeres Feld in der Datei wäre
+    // nur Rauschen.
+    if ($zuordnung !== null) {
+        $eintrag['mitgliedId'] = $zuordnung;
+    }
+    $rollenDaten['rollen'][] = $eintrag;
 
     try {
         rollenSchreiben($rollenDatei, $rollenDaten);
@@ -498,6 +565,22 @@ if ($aktion === 'rolle-aendern' || $aktion === 'rolle-loeschen') {
         $geaendert['hash'] = password_hash($neuesPasswort, PASSWORD_BCRYPT, ['cost' => 12]);
     }
 
+    // Zuordnung: Feld weggelassen = unverändert, leer = Zuordnung lösen.
+    if (array_key_exists('mitgliedId', $ziel)) {
+        $zuordnung = zuordnungLesen($ziel, $dataDir);
+        if ($zuordnung === false) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Das zugeordnete Mitglied gibt es nicht']);
+            exit;
+        }
+
+        if ($zuordnung === null) {
+            unset($geaendert['mitgliedId']);
+        } else {
+            $geaendert['mitgliedId'] = $zuordnung;
+        }
+    }
+
     if (is_array($ziel['berechtigungen'] ?? null)) {
         $neueRechte = rechteFiltern($ziel['berechtigungen'], $zielName);
 
@@ -537,4 +620,7 @@ echo json_encode([
     'gueltig' => true,
     'name' => $gefundenerName,
     'berechtigungen' => $gefundeneRechte,
+    // Damit die Anwendung weiß, wer angemeldet ist — etwa um sich selbst
+    // in der Abmeldeliste vorzuwählen.
+    'mitgliedId' => $gefundeneZuordnung,
 ]);

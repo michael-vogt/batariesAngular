@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MitgliederService } from '../../../core/kegelverein/mitglieder.service';
 import {
   BERECHTIGUNGSLISTE,
   Berechtigung,
@@ -18,6 +19,29 @@ import {
 export class RollenComponent {
   protected readonly rollenService = inject(RollenService);
   protected readonly berechtigungsliste = BERECHTIGUNGSLISTE;
+
+  private readonly mitgliederService = inject(MitgliederService);
+
+  /** Mitglieder zur Auswahl, nach Namen sortiert. */
+  protected readonly mitglieder = computed(() =>
+    [...this.mitgliederService.mitglieder()].sort((a, b) => a.name.localeCompare(b.name, 'de')),
+  );
+
+  /**
+   * Name zu einer Mitgliedskennung.
+   *
+   * Verweist eine Rolle auf ein inzwischen gelöschtes Mitglied, steht
+   * hier „unbekannt“ — die Oberfläche hebt das farblich hervor, damit es
+   * auffällt statt still danebenzustehen.
+   */
+  protected mitgliedName(id: string | null): string {
+    if (!id) return '';
+    return this.mitglieder().find((m) => m.id === id)?.name ?? 'unbekannt';
+  }
+
+  protected zuordnungVerwaist(id: string | null): boolean {
+    return !!id && !this.mitglieder().some((m) => m.id === id);
+  }
 
   /**
    * Eigene Zugangsdaten.
@@ -73,6 +97,7 @@ export class RollenComponent {
   protected readonly bearbeitetPasswort = signal('');
   protected readonly bearbeitetPasswortWdh = signal('');
   protected readonly bearbeitetRechte = signal<Berechtigungen>({ ...KEINE_BERECHTIGUNGEN });
+  protected readonly bearbeitetMitgliedId = signal('');
   protected readonly bearbeitenFehler = signal<string | null>(null);
 
   /**
@@ -82,7 +107,9 @@ export class RollenComponent {
    * Meldung schon da, bevor überhaupt getippt wurde.
    */
   protected readonly bearbeitetPasswortWeichtAb = computed(
-    () => this.bearbeitetPasswortWdh() !== '' && this.bearbeitetPasswort() !== this.bearbeitetPasswortWdh(),
+    () =>
+      this.bearbeitetPasswortWdh() !== '' &&
+      this.bearbeitetPasswort() !== this.bearbeitetPasswortWdh(),
   );
 
   /**
@@ -93,7 +120,7 @@ export class RollenComponent {
    * nach dem Klick.
    */
   protected readonly anzahlVerwalter = computed(
-    () => this.rollen().filter(r => r.berechtigungen.verwaltung).length,
+    () => this.rollen().filter((r) => r.berechtigungen.verwaltung).length,
   );
 
   protected istLetzterVerwalter(rolle: RolleMitRechten): boolean {
@@ -111,6 +138,7 @@ export class RollenComponent {
     this.bearbeitetPasswort.set('');
     this.bearbeitetPasswortWdh.set('');
     this.bearbeitetRechte.set({ ...rolle.berechtigungen });
+    this.bearbeitetMitgliedId.set(rolle.mitgliedId ?? '');
     this.bearbeitenFehler.set(null);
   }
 
@@ -122,7 +150,7 @@ export class RollenComponent {
   }
 
   protected bearbeitetRechtUmschalten(recht: Berechtigung): void {
-    this.bearbeitetRechte.update(r => ({ ...r, [recht]: !r[recht] }));
+    this.bearbeitetRechte.update((r) => ({ ...r, [recht]: !r[recht] }));
   }
 
   protected async aenderungSpeichern(): Promise<void> {
@@ -147,6 +175,9 @@ export class RollenComponent {
         // Leeres Feld heißt: Passwort bleibt, wie es ist.
         passwort: this.bearbeitetPasswort() || undefined,
         berechtigungen: this.bearbeitetRechte(),
+        // Leere Auswahl bedeutet ausdrücklich "Zuordnung lösen", nicht
+        // "unverändert" — deshalb immer mitschicken.
+        mitgliedId: this.bearbeitetMitgliedId() || '',
       },
     );
 
@@ -161,7 +192,9 @@ export class RollenComponent {
   }
 
   protected async loeschen(rolle: RolleMitRechten): Promise<void> {
-    if (!confirm(`Rolle „${rolle.name}“ löschen? Eine Anmeldung damit ist danach nicht mehr möglich.`))
+    if (
+      !confirm(`Rolle „${rolle.name}“ löschen? Eine Anmeldung damit ist danach nicht mehr möglich.`)
+    )
       return;
 
     this.laedt.set(true);
@@ -188,6 +221,7 @@ export class RollenComponent {
   protected readonly neuPasswort = signal('');
   protected readonly neuPasswortWdh = signal('');
   protected readonly neuRechte = signal<Berechtigungen>({ ...KEINE_BERECHTIGUNGEN });
+  protected readonly neuMitgliedId = signal('');
   protected readonly legtAn = signal(false);
   protected readonly anlegeFehler = signal<string | null>(null);
   protected readonly anlegeMeldung = signal<string | null>(null);
@@ -197,7 +231,7 @@ export class RollenComponent {
   );
 
   protected rechtUmschalten(recht: Berechtigung): void {
-    this.neuRechte.update(r => ({ ...r, [recht]: !r[recht] }));
+    this.neuRechte.update((r) => ({ ...r, [recht]: !r[recht] }));
   }
 
   protected async anlegen(): Promise<void> {
@@ -213,7 +247,12 @@ export class RollenComponent {
 
     const ergebnis = await this.rollenService.rolleAnlegen(
       { name: this.eigenerName(), credential: this.eigenesPasswort() },
-      { name: this.neuName(), passwort: this.neuPasswort(), berechtigungen: this.neuRechte() },
+      {
+        name: this.neuName(),
+        passwort: this.neuPasswort(),
+        berechtigungen: this.neuRechte(),
+        mitgliedId: this.neuMitgliedId() || null,
+      },
     );
 
     if (ergebnis.angelegt) {
@@ -222,6 +261,7 @@ export class RollenComponent {
       this.neuPasswort.set('');
       this.neuPasswortWdh.set('');
       this.neuRechte.set({ ...KEINE_BERECHTIGUNGEN });
+      this.neuMitgliedId.set('');
       if (this.geladen()) await this.ladeRollen();
     } else {
       this.anlegeFehler.set(ergebnis.meldung);

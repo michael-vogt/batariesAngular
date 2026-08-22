@@ -123,9 +123,19 @@ export class TermineComponent {
 
   // --- Abmeldungen -----------------------------------------------------
 
-  protected abmeldungOeffnen(terminId: string): void {
+  protected abmeldungOeffnen(termin: Kegeltermin): void {
+    const terminId = termin.id;
     this.abmeldeFuer.set(this.abmeldeFuer() === terminId ? null : terminId);
-    this.abmeldeMitgliedId.set('');
+
+    // Gehört zur angemeldeten Rolle ein Mitglied und ist es für diesen
+    // Termin noch abmeldbar, ist es eine sinnvolle Vorauswahl — meist
+    // meldet sich jemand ohnehin selbst ab.
+    const eigeneMitgliedId = this.anmeldungService.mitgliedId();
+    const vorauswahl =
+      eigeneMitgliedId && this.abmeldbare(termin).some((m) => m.id === eigeneMitgliedId)
+        ? eigeneMitgliedId
+        : '';
+    this.abmeldeMitgliedId.set(vorauswahl);
     this.abmeldeGrund.set('');
     this.formularFehler.set(null);
   }

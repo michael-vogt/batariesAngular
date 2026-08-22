@@ -138,6 +138,7 @@
                 <select
                   [ngModel]="abmeldeMitgliedId()"
                   (ngModelChange)="abmeldeMitgliedId.set($event)"
+                  [disabled]="!anmeldungService.darf('verwaltung')"
                 >
                   <option value="">– auswählen –</option>
                   @for (m of abmeldbare(u.termin); track m.id) {
@@ -163,7 +164,7 @@
               >
                 Abmelden
               </button>
-              <button type="button" class="leise-aktion" (click)="abmeldungOeffnen(u.termin.id)">
+              <button type="button" class="leise-aktion" (click)="abmeldungOeffnen(u.termin)">
                 Abbrechen
               </button>
             </div>
@@ -173,7 +174,7 @@
             }
           </div>
         } @else if (!u.vergangen) {
-          <button type="button" (click)="abmeldungOeffnen(u.termin.id)">Abmeldung eintragen</button>
+          <button type="button" (click)="abmeldungOeffnen(u.termin)">Abmeldung eintragen</button>
         }
       </div>
     }

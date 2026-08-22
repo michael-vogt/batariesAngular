@@ -43,6 +43,7 @@
         @for (b of berechtigungsliste; track b.schluessel) {
           <th [title]="b.beschreibung">{{ b.titel }}</th>
         }
+        <th>Mitglied</th>
         <th><span class="visuell-versteckt">Aktionen</span></th>
       </tr>
       </thead>
@@ -61,6 +62,9 @@
             @for (b of berechtigungsliste; track b.schluessel) {
               <td class="mitte">{{ rolle.berechtigungen[b.schluessel] ? '✅' : '❌' }}</td>
             }
+            <td [class.verwaist]="zuordnungVerwaist(rolle.mitgliedId)">
+              {{ mitgliedName(rolle.mitgliedId) || '—' }}
+            </td>
             <td class="aktionen">
               <button type="button" class="leise-aktion" (click)="bearbeitenOeffnen(rolle)">
                 {{ bearbeitet() === rolle.name ? 'Schließen' : 'Bearbeiten' }}
@@ -78,7 +82,7 @@
 
           @if (bearbeitet() === rolle.name) {
             <tr class="bearbeiten-zeile">
-              <td [attr.colspan]="berechtigungsliste.length + 2">
+              <td [attr.colspan]="berechtigungsliste.length + 3">
                 <div class="formular-zeile">
                   <label>
                     Name
@@ -111,6 +115,19 @@
                     <small class="hinweis-zeile" [class.abweichung]="bearbeitetPasswortWeichtAb()">
                       {{ bearbeitetPasswortWeichtAb() ? 'stimmt nicht überein' : '' }}
                     </small>
+                  </label>
+                  <label>
+                    Zugeordnetes Mitglied
+                    <select
+                      [ngModel]="bearbeitetMitgliedId()"
+                      (ngModelChange)="bearbeitetMitgliedId.set($event)"
+                    >
+                      <option value="">– keines –</option>
+                      @for (m of mitglieder(); track m.id) {
+                        <option [value]="m.id">{{ m.name }}</option>
+                      }
+                    </select>
+                    <small class="hinweis-zeile"></small>
                   </label>
                 </div>
 
@@ -191,11 +208,21 @@
         [ngModel]="neuPasswortWdh()"
         (ngModelChange)="neuPasswortWdh.set($event)"
       />
-      <!-- Immer vorhanden, damit das Ein- und Ausblenden die Feldhöhe
-           nicht verändert und die Zeile nicht springt. -->
+      <!-- Immer vorhanden: Ein- und Ausblenden würde die Feldhöhe ändern
+           und die ganze Zeile springen lassen. -->
       <small class="hinweis-zeile" [class.abweichung]="neuPasswortWeichtAb()">
         {{ neuPasswortWeichtAb() ? 'stimmt nicht überein' : '' }}
       </small>
+    </label>
+    <label>
+      Zugeordnetes Mitglied
+      <select [ngModel]="neuMitgliedId()" (ngModelChange)="neuMitgliedId.set($event)">
+        <option value="">– keines –</option>
+        @for (m of mitglieder(); track m.id) {
+          <option [value]="m.id">{{ m.name }}</option>
+        }
+      </select>
+      <small class="hinweis-zeile leise">optional</small>
     </label>
   </div>
 

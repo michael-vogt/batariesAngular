@@ -82,9 +82,9 @@ input.weicht-ab {
  * einer angezeigt wird.
  *
  * Die Felder stehen in einer Flex-Zeile mit align-items: flex-end — eine
- * wachsende Beschriftung würde das Eingabefeld nach oben schieben und die
- * ganze Zeile springen lassen. Die Zeile ist deshalb immer vorhanden und
- * bleibt bei fehlendem Text schlicht leer.
+ * wachsende Beschriftung schiebt das Eingabefeld sonst nach oben und die
+ * ganze Zeile springt. Die Zeile ist deshalb immer da und bleibt bei
+ * fehlendem Text leer.
  */
 .hinweis-zeile {
   display: block;
@@ -97,7 +97,9 @@ input.weicht-ab {
   color: var(--farbe-soll);
 }
 
-.abweichung {
+/* Verweis auf ein gelöschtes Mitglied — sichtbar machen statt still
+   "unbekannt" anzuzeigen. */
+td.verwaist {
   color: var(--farbe-soll);
-  font-size: 0.75rem;
+  font-style: italic;
 }

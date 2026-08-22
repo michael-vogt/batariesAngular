@@ -1,4 +1,4 @@
-import { computed, inject, signal, Service } from '@angular/core';
+import { Injectable, Service, computed, inject, signal } from '@angular/core';
 import {
   Berechtigung,
   Berechtigungen,
@@ -12,6 +12,8 @@ const SPEICHER_SCHLUESSEL = 'kegelverein-anmeldung';
 interface AngemeldeteRolle {
   name: string;
   berechtigungen: Berechtigungen;
+  /** Zugeordnetes Mitglied, falls die Rolle eines hat. */
+  mitgliedId: string | null;
 }
 
 /**
@@ -47,6 +49,14 @@ export class AnmeldungService {
   readonly name = computed(() => this._rolle()?.name ?? '');
   readonly berechtigungen = computed(() => this._rolle()?.berechtigungen ?? KEINE_BERECHTIGUNGEN);
 
+  /**
+   * Kennung des zugeordneten Mitglieds, falls vorhanden.
+   *
+   * Damit lässt sich etwa beim Abmelden von einem Termin die eigene
+   * Person vorwählen, statt sie in einer Liste zu suchen.
+   */
+  readonly mitgliedId = computed(() => this._rolle()?.mitgliedId ?? null);
+
   /** Kurzform für die Templates: `@if (anmeldung.darf('verwaltung')) { … }` */
   darf(recht: Berechtigung): boolean {
     return this.berechtigungen()[recht];
@@ -67,6 +77,7 @@ export class AnmeldungService {
       const rolle: AngemeldeteRolle = {
         name: ergebnis.name,
         berechtigungen: ergebnis.berechtigungen,
+        mitgliedId: ergebnis.mitgliedId,
       };
       this._rolle.set(rolle);
       this.inSpeicher(rolle);
@@ -107,6 +118,7 @@ export class AnmeldungService {
         // Normalisieren, damit eine seither hinzugekommene Berechtigung
         // nicht undefined ist, sondern als nicht erteilt gilt.
         berechtigungen: normalisiereBerechtigungen(gelesen.berechtigungen),
+        mitgliedId: typeof gelesen.mitgliedId === 'string' ? gelesen.mitgliedId : null,
       };
     } catch {
       return null;

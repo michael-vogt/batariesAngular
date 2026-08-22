@@ -1,4 +1,4 @@
-import { effect, inject, signal, Service } from '@angular/core';
+import { Injectable, effect, inject, signal, Service } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { PhpApiAdapter } from './kegelverein/persistenz/php-api-adapter';
@@ -44,7 +44,7 @@ export type Berechtigungen = Record<Berechtigung, boolean>;
 
 /** Keine Berechtigung — Ausgangswert und Rückfallebene. */
 export const KEINE_BERECHTIGUNGEN: Berechtigungen = Object.fromEntries(
-  BERECHTIGUNGSLISTE.map((b) => [b.schluessel, false]),
+  BERECHTIGUNGSLISTE.map(b => [b.schluessel, false]),
 ) as Berechtigungen;
 
 /**
@@ -53,29 +53,37 @@ export const KEINE_BERECHTIGUNGEN: Berechtigungen = Object.fromEntries(
  * Fehlende Angaben gelten als nicht erteilt: Im Zweifel lieber zu wenig
  * erlauben als zu viel.
  */
-export function normalisiereBerechtigungen(
-  roh: Partial<Berechtigungen> | undefined,
-): Berechtigungen {
+export function normalisiereBerechtigungen(roh: Partial<Berechtigungen> | undefined): Berechtigungen {
   return Object.fromEntries(
-    BERECHTIGUNGSLISTE.map((b) => [b.schluessel, roh?.[b.schluessel] === true]),
+    BERECHTIGUNGSLISTE.map(b => [b.schluessel, roh?.[b.schluessel] === true]),
   ) as Berechtigungen;
 }
 
 /** Ergebnis einer Prüfung von Rolle und Zugangsdaten. */
 export type PruefErgebnis =
-  | { gueltig: true; name: string; berechtigungen: Berechtigungen }
+  | { gueltig: true; name: string; berechtigungen: Berechtigungen; mitgliedId: string | null }
   | { gueltig: false; grund: 'abgelehnt' | 'nicht_erreichbar' | 'unvollstaendig'; meldung: string };
 
 /** Eine Rolle samt ihren Rechten — nur für Berechtigte einsehbar. */
 export interface RolleMitRechten {
   name: string;
   berechtigungen: Berechtigungen;
+  /**
+   * Zugeordnetes Mitglied, sofern eines hinterlegt ist.
+   *
+   * Optional: Eine Rolle wie „Kassenwart“ kann von wechselnden Personen
+   * genutzt werden und braucht keine Zuordnung. Ist eine gesetzt, weiß
+   * die Anwendung, wer angemeldet ist — etwa um sich selbst in der
+   * Abmeldeliste vorzuwählen.
+   */
+  mitgliedId: string | null;
 }
 
 interface AuthAntwort {
   gueltig: boolean;
   name?: string;
   berechtigungen?: Partial<Berechtigungen>;
+  mitgliedId?: string | null;
 }
 
 /**
@@ -207,7 +215,13 @@ export class RollenService {
    */
   async rolleAnlegen(
     ausweis: { name: string; credential: string },
-    neueRolle: { name: string; passwort: string; berechtigungen: Berechtigungen },
+    neueRolle: {
+      name: string;
+      passwort: string;
+      berechtigungen: Berechtigungen;
+      /** Leer oder weggelassen: keine Zuordnung. */
+      mitgliedId?: string | null;
+    },
   ): Promise<{ angelegt: true } | { angelegt: false; meldung: string }> {
     if (!this.adapter.hatVerbindung()) {
       return { angelegt: false, meldung: 'Keine Serververbindung.' };
@@ -224,6 +238,7 @@ export class RollenService {
               name: neueRolle.name.trim(),
               passwort: neueRolle.passwort,
               berechtigungen: neueRolle.berechtigungen,
+              mitgliedId: neueRolle.mitgliedId ?? '',
             },
           },
           { headers: this.adapter.apiKeyKopfzeile() },
@@ -256,6 +271,11 @@ export class RollenService {
       neuerName?: string;
       passwort?: string;
       berechtigungen?: Berechtigungen;
+      /**
+       * Feld weglassen: Zuordnung bleibt. Leerer String oder null:
+       * Zuordnung wird gelöst.
+       */
+      mitgliedId?: string | null;
     },
   ): Promise<{ erfolg: true; name: string } | { erfolg: false; meldung: string }> {
     return this.schreibenderAufruf('rolle-aendern', ausweis, { rolle: aenderung });
@@ -354,14 +374,11 @@ export class RollenService {
           gueltig: true,
           name: antwort.name,
           berechtigungen: normalisiereBerechtigungen(antwort.berechtigungen),
+          mitgliedId: antwort.mitgliedId ?? null,
         };
       }
 
-      return {
-        gueltig: false,
-        grund: 'abgelehnt',
-        meldung: 'Name oder Zugangsdaten stimmen nicht.',
-      };
+      return { gueltig: false, grund: 'abgelehnt', meldung: 'Name oder Zugangsdaten stimmen nicht.' };
     } catch (e) {
       // 401 ist die reguläre Ablehnung durch auth.php, alles andere ein
       // technisches Problem — die Unterscheidung ist wichtig, damit
