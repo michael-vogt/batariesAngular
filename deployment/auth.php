@@ -49,7 +49,7 @@ declare(strict_types=1);
  * ergeben, und niemand käme darauf, warum. Beim Ergänzen einer neuen
  * Berechtigung ist sie hier einzutragen.
  */
-const BEKANNTE_BERECHTIGUNGEN = ['verwaltung', 'terminplanung', 'termineAbmelden'];
+const BEKANNTE_BERECHTIGUNGEN = ['verwaltung', 'terminplanung', 'termine'];
 
 $config = require __DIR__ . '/../config.php';
 $apiKey = (string) $config['apiKey'];

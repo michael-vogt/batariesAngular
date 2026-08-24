@@ -7,7 +7,7 @@
       "berechtigungen": {
         "verwaltung": true,
         "terminplanung": true,
-        "termineAbmelden": true
+        "termine": true
       }
     },
     {
@@ -16,8 +16,28 @@
       "berechtigungen": {
         "verwaltung": false,
         "terminplanung": false,
-        "termineAbmelden": true
+        "termine": true
       }
+    },
+    {
+      "name": "Michael Vogt",
+      "hash": "$2y$12$ApsIFuC2ZHu4TCeBkrrZG.9HlvYvvSby/aChxZUoL3oXEyZVW3Taa",
+      "berechtigungen": {
+        "verwaltung": true,
+        "terminplanung": true,
+        "termine": true
+      },
+      "mitgliedId": "5a9eb68d-ee8f-4140-a0e4-0deb2e68ecc7"
+    },
+    {
+      "name": "Terminwart",
+      "hash": "$2y$12$Ideb5e7Go9c5ACRpBDBYJ.J/0EsNAmWDE.kVRawDcDUFVCwVyJbXK",
+      "berechtigungen": {
+        "verwaltung": false,
+        "terminplanung": true,
+        "termine": true
+      },
+      "mitgliedId": "0d216a93-6a94-4528-a3a2-1abf082d95c0"
     }
   ]
 }

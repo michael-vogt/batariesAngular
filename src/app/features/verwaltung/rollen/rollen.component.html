@@ -62,7 +62,7 @@
             @for (b of berechtigungsliste; track b.schluessel) {
               <td class="mitte">{{ rolle.berechtigungen[b.schluessel] ? '✅' : '❌' }}</td>
             }
-            <td [class.verwaist]="zuordnungVerwaist(rolle.mitgliedId)">
+            <td class="mitte" [class.verwaist]="zuordnungVerwaist(rolle.mitgliedId)">
               {{ mitgliedName(rolle.mitgliedId) || '—' }}
             </td>
             <td class="aktionen">

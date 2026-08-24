@@ -24,9 +24,9 @@ export const BERECHTIGUNGSLISTE = [
     beschreibung: 'Termine anlegen und löschen',
   },
   {
-    schluessel: 'termineAbmelden',
-    titel: 'Von Terminen abmelden',
-    beschreibung: 'sich und andere von Terminen abmelden',
+    schluessel: 'termine',
+    titel: 'Termine',
+    beschreibung: 'Termine einsehen, sich abmelden',
   },
 ] as const;
 
