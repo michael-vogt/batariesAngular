@@ -9,6 +9,9 @@
     <label>
       Eigener Rollenname
       <input type="text" [ngModel]="eigenerName()" (ngModelChange)="eigenerName.set($event)" />
+      <small class="hinweis-zeile">
+        {{ anmeldung.angemeldet() ? 'aus der Anmeldung übernommen' : '' }}
+      </small>
     </label>
     <label>
       Eigenes Passwort
@@ -19,8 +22,9 @@
         (ngModelChange)="eigenesPasswort.set($event)"
         (keyup.enter)="ladeRollen()"
       />
+      <small class="hinweis-zeile"></small>
     </label>
-    <button type="button" [disabled]="laedt()" (click)="ladeRollen()">
+    <button class="abstand-unten" type="button" [disabled]="laedt()" (click)="ladeRollen()">
       {{ laedt() ? 'Lädt…' : 'Rollen anzeigen' }}
     </button>
   </div>
@@ -62,7 +66,7 @@
             @for (b of berechtigungsliste; track b.schluessel) {
               <td class="mitte">{{ rolle.berechtigungen[b.schluessel] ? '✅' : '❌' }}</td>
             }
-            <td class="mitte" [class.verwaist]="zuordnungVerwaist(rolle.mitgliedId)">
+            <td [class.verwaist]="zuordnungVerwaist(rolle.mitgliedId)">
               {{ mitgliedName(rolle.mitgliedId) || '—' }}
             </td>
             <td class="aktionen">
@@ -75,126 +79,33 @@
               <button
                 type="button"
                 class="leise-aktion"
-                [disabled]="istLetzterVerwalter(rolle) || laedt()"
+                [disabled]="istLetzterVerwalter(rolle) || speichert()"
                 (click)="loeschen(rolle)"
               >
                 Löschen
               </button>
             </td>
           </tr>
-
-          @if (bearbeitet() === rolle.name) {
-            <tr class="bearbeiten-zeile">
-              <td [attr.colspan]="berechtigungsliste.length + 3">
-                <div class="formular-zeile">
-                  <label>
-                    Name
-                    <input
-                      type="text"
-                      [ngModel]="bearbeitetName()"
-                      (ngModelChange)="bearbeitetName.set($event)"
-                    />
-                    <small class="hinweis-zeile"></small>
-                  </label>
-                  <label>
-                    Neues Passwort
-                    <input
-                      type="password"
-                      autocomplete="new-password"
-                      [ngModel]="bearbeitetPasswort()"
-                      (ngModelChange)="bearbeitetPasswort.set($event)"
-                    />
-                    <small class="hinweis-zeile leise">leer = unverändert</small>
-                  </label>
-                  <label>
-                    Wiederholen
-                    <input
-                      type="password"
-                      autocomplete="new-password"
-                      [class.weicht-ab]="bearbeitetPasswortWeichtAb()"
-                      [ngModel]="bearbeitetPasswortWdh()"
-                      (ngModelChange)="bearbeitetPasswortWdh.set($event)"
-                    />
-                    <small class="hinweis-zeile" [class.abweichung]="bearbeitetPasswortWeichtAb()">
-                      {{ bearbeitetPasswortWeichtAb() ? 'stimmt nicht überein' : '' }}
-                    </small>
-                  </label>
-                  <label>
-                    Zugeordnetes Mitglied
-                    <select
-                      [ngModel]="bearbeitetMitgliedId()"
-                      (ngModelChange)="bearbeitetMitgliedId.set($event)"
-                    >
-                      <option value="">– keines –</option>
-                      @for (m of mitglieder(); track m.id) {
-                        <option [value]="m.id">{{ m.name }}</option>
-                      }
-                    </select>
-                    <small class="hinweis-zeile"></small>
-                  </label>
-                </div>
-
-                <fieldset class="rechte">
-                  <legend>Berechtigungen</legend>
-                  @for (b of berechtigungsliste; track b.schluessel) {
-                    <label class="recht">
-                      <input
-                        type="checkbox"
-                        [checked]="bearbeitetRechte()[b.schluessel]"
-                        [disabled]="b.schluessel === 'verwaltung' && istLetzterVerwalter(rolle)"
-                        (change)="bearbeitetRechtUmschalten(b.schluessel)"
-                      />
-                      <span>{{ b.titel }}</span>
-                      <small class="leise">{{ b.beschreibung }}</small>
-                    </label>
-                  }
-                </fieldset>
-
-                @if (istLetzterVerwalter(rolle)) {
-                  <p class="hinweis">
-                    Dies ist die letzte Rolle mit Verwaltungsrecht. Es lässt sich ihr nicht
-                    entziehen — sonst käme niemand mehr hierher.
-                  </p>
-                }
-
-                <div class="formular-zeile">
-                  <button
-                    type="button"
-                    class="primaer"
-                    [disabled]="laedt()"
-                    (click)="aenderungSpeichern()"
-                  >
-                    {{ laedt() ? 'Speichert…' : 'Änderung speichern' }}
-                  </button>
-                  <button type="button" class="leise-aktion" (click)="bearbeitenAbbrechen()">
-                    Abbrechen
-                  </button>
-                </div>
-
-                @if (bearbeitenFehler(); as text) {
-                  <p class="fehler">{{ text }}</p>
-                }
-              </td>
-            </tr>
-          }
         }
       </tbody>
     </table>
   </div>
 }
 
-<div class="karte">
-  <h2>Neue Rolle anlegen</h2>
+<div class="karte" [class.bearbeiten-modus]="bearbeitet()">
+  <div class="form-kopf">
+    <h2>{{ formTitel() }}</h2>
+    @if (bearbeitet()) {
+      <button type="button" class="leise-aktion" (click)="formularZuruecksetzen()">
+        Bearbeiten beenden
+      </button>
+    }
+  </div>
 
   <div class="formular-zeile">
     <label>
       Name
-      <input
-        #neuNameFeld
-        type="text"
-        [ngModel]="neuName()"
-        (ngModelChange)="neuName.set($event)"
-      />
+      <input #nameFeld type="text" [ngModel]="formName()" (ngModelChange)="formName.set($event)" />
       <small class="hinweis-zeile"></small>
     </label>
     <label>
@@ -202,29 +113,29 @@
       <input
         type="password"
         autocomplete="new-password"
-        [ngModel]="neuPasswort()"
-        (ngModelChange)="neuPasswort.set($event)"
+        [ngModel]="formPasswort()"
+        (ngModelChange)="formPasswort.set($event)"
       />
-      <small class="hinweis-zeile leise">mindestens 8 Zeichen</small>
+      <small class="hinweis-zeile leise">{{ passwortHinweis() }}</small>
     </label>
     <label>
       Wiederholen
       <input
         type="password"
         autocomplete="new-password"
-        [class.weicht-ab]="neuPasswortWeichtAb()"
-        [ngModel]="neuPasswortWdh()"
-        (ngModelChange)="neuPasswortWdh.set($event)"
+        [class.weicht-ab]="passwortWeichtAb()"
+        [ngModel]="formPasswortWdh()"
+        (ngModelChange)="formPasswortWdh.set($event)"
       />
       <!-- Immer vorhanden: Ein- und Ausblenden würde die Feldhöhe ändern
            und die ganze Zeile springen lassen. -->
-      <small class="hinweis-zeile" [class.abweichung]="neuPasswortWeichtAb()">
-        {{ neuPasswortWeichtAb() ? 'stimmt nicht überein' : '' }}
+      <small class="hinweis-zeile" [class.abweichung]="passwortWeichtAb()">
+        {{ passwortWeichtAb() ? 'stimmt nicht überein' : '' }}
       </small>
     </label>
     <label>
       Zugeordnetes Mitglied
-      <select [ngModel]="neuMitgliedId()" (ngModelChange)="neuMitgliedId.set($event)">
+      <select [ngModel]="formMitgliedId()" (ngModelChange)="formMitgliedId.set($event)">
         <option value="">– keines –</option>
         @for (m of mitglieder(); track m.id) {
           <option [value]="m.id">{{ m.name }}</option>
@@ -240,7 +151,8 @@
       <label class="recht">
         <input
           type="checkbox"
-          [checked]="neuRechte()[b.schluessel]"
+          [checked]="formRechte()[b.schluessel]"
+          [disabled]="b.schluessel === 'verwaltung' && verwaltungGesperrt()"
           (change)="rechtUmschalten(b.schluessel)"
         />
         <span>{{ b.titel }}</span>
@@ -249,14 +161,23 @@
     }
   </fieldset>
 
-  <button type="button" class="primaer" [disabled]="legtAn()" (click)="anlegen()">
-    {{ legtAn() ? 'Legt an…' : 'Rolle anlegen' }}
-  </button>
+  @if (verwaltungGesperrt()) {
+    <p class="hinweis">
+      Dies ist die letzte Rolle mit Verwaltungsrecht. Es lässt sich ihr nicht entziehen — sonst
+      käme niemand mehr hierher.
+    </p>
+  }
 
-  @if (anlegeFehler(); as text) {
+  <div class="formular-zeile">
+    <button type="button" class="primaer" [disabled]="speichert()" (click)="speichern()">
+      {{ speichert() ? 'Speichert…' : formKnopf() }}
+    </button>
+  </div>
+
+  @if (formFehler(); as text) {
     <p class="fehler">{{ text }}</p>
   }
-  @if (anlegeMeldung(); as text) {
+  @if (formMeldung(); as text) {
     <p class="ok">{{ text }}</p>
   }
 </div>

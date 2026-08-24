@@ -103,3 +103,13 @@ td.verwaist {
   color: var(--farbe-soll);
   font-style: italic;
 }
+
+/* Im Bearbeitungsmodus abgesetzt, damit auf einen Blick erkennbar ist,
+   dass hier eine bestehende Rolle geändert wird und keine neue entsteht. */
+.karte.bearbeiten-modus {
+  border-left: 3px solid var(--farbe-akzent);
+}
+
+.abstand-unten {
+  margin-bottom: 1.1rem;
+}
