@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MitgliederService } from '../../../core/kegelverein/mitglieder.service';
 import {
@@ -9,6 +9,7 @@ import {
   RolleMitRechten,
   RollenService,
 } from '../../../core/rollen.service';
+import { AnmeldungService } from '../../../core/anmeldung.service';
 
 @Component({
   selector: 'app-rollen',
@@ -20,6 +21,7 @@ export class RollenComponent {
   protected readonly rollenService = inject(RollenService);
   protected readonly berechtigungsliste = BERECHTIGUNGSLISTE;
 
+  private readonly anmeldungService = inject(AnmeldungService);
   private readonly mitgliederService = inject(MitgliederService);
 
   /** Mitglieder zur Auswahl, nach Namen sortiert. */
@@ -51,7 +53,7 @@ export class RollenComponent {
    * wird mit ausgeliefert und ist in den Entwicklerwerkzeugen jedes
    * Browsers zu lesen.
    */
-  protected readonly eigenerName = signal('');
+  protected readonly eigenerName = signal(this.anmeldungService.name());
   protected readonly eigenesPasswort = signal('');
 
   protected readonly rollen = signal<RolleMitRechten[]>([]);
@@ -125,6 +127,39 @@ export class RollenComponent {
 
   protected istLetzterVerwalter(rolle: RolleMitRechten): boolean {
     return rolle.berechtigungen.verwaltung && this.anzahlVerwalter() <= 1;
+  }
+
+  /** Eingabefeld für den Namen der neuen Rolle — Ziel beim Duplizieren. */
+  private readonly neuNameFeld = viewChild<ElementRef<HTMLInputElement>>('neuNameFeld');
+
+  /**
+   * Übernimmt die Rechte einer Rolle in das Formular unten.
+   *
+   * Die Mitgliedszuordnung wird bewusst nicht mitkopiert: Ein Duplikat
+   * entsteht meist für eine andere Person, und eine übernommene Zuordnung
+   * wäre dann falsch, ohne aufzufallen.
+   *
+   * Ein offenes Bearbeitungsformular wird geschlossen — sonst stünden
+   * zwei Formulare gleichzeitig offen, die verschiedene Rollen meinen.
+   */
+  protected duplizieren(rolle: RolleMitRechten): void {
+    this.bearbeitenAbbrechen();
+
+    this.neuRechte.set({ ...rolle.berechtigungen });
+    this.neuName.set('');
+    this.neuPasswort.set('');
+    this.neuPasswortWdh.set('');
+    this.neuMitgliedId.set('');
+    this.anlegeFehler.set(null);
+    this.anlegeMeldung.set(
+      `Rechte von „${rolle.name}“ übernommen — Name und Passwort fehlen noch.`,
+    );
+
+    const feld = this.neuNameFeld()?.nativeElement;
+    // Das Formular steht unterhalb der Tabelle; ohne Scrollen wäre der
+    // Fokus im nicht sichtbaren Bereich.
+    feld?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    feld?.focus({ preventScroll: true });
   }
 
   protected bearbeitenOeffnen(rolle: RolleMitRechten): void {
