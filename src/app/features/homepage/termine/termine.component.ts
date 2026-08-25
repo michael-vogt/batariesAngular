@@ -4,10 +4,14 @@ import { TerminService } from '../../../core/kegelverein/termin.service';
 import { MitgliederService } from '../../../core/kegelverein/mitglieder.service';
 import { FileStorageService } from '../../../core/kegelverein/persistenz/file-storage.service';
 import { erzeugeUebersicht, jetzt } from '../../../core/kegelverein/termin.logic';
-import { Kegeltermin } from '../../../core/kegelverein/kegelverein.models';
+import { Kegelabend, Kegeltermin, Mitglied } from '../../../core/kegelverein/kegelverein.models';
 import { aktuellerStatus } from '../../../core/kegelverein/mitglied.util';
 import { LoginComponent } from '../login/login.component';
 import { AnmeldungService } from '../../../core/anmeldung.service';
+import { KegelabendService } from '../../../core/kegelverein/kegelabend.service';
+import { VereinsdatenService } from '../../../core/kegelverein/vereinsdaten.service';
+import { datumKurz } from '../../../shared/format.util';
+import { Router } from '@angular/router';
 
 /** Vorschlag für einen neuen Termin: nächster Freitag, 19:30 Uhr. */
 function vorschlagBeginn(): string {
@@ -16,6 +20,12 @@ function vorschlagBeginn(): string {
   const zz = (n: number) => String(n).padStart(2, '0');
   return `${d.getFullYear()}-${zz(d.getMonth() + 1)}-${zz(d.getDate())}T19:30`;
 }
+
+type TerminMeldung = {
+  terminId: string;
+  art: 'ok' | 'fehler';
+  text: string
+};
 
 @Component({
   selector: 'app-termine',
@@ -119,6 +129,81 @@ export class TermineComponent {
     } catch {
       // Fehlertext steht in termine.fehler()
     }
+  }
+
+  protected readonly terminMeldung = signal<TerminMeldung | null>(null);
+
+  protected meldungFuer(terminId: string): TerminMeldung | null {
+    const m = this.terminMeldung();
+    return m?.terminId === terminId ? m : null;
+  }
+
+  private readonly kegelabendService = inject(KegelabendService);
+  private readonly vereinsdatenService = inject(VereinsdatenService);
+  private readonly router = inject(Router);
+
+  //protected readonly meldung = signal<string | null>(null);
+  //protected readonly fehler = signal<string | null>(null);
+
+  protected async kegelterminErzeugen(termin: Kegeltermin): Promise<void> {
+    //this.meldung.set(null);
+    //this.fehler.set(null);
+    this.terminMeldung.set(null);
+
+    const ort = prompt('An welchem Ort fand das Kegeln statt?');
+    if (!ort) return;
+
+    const ka: Kegelabend = {
+      id: crypto.randomUUID(),
+      datum: termin.beginn.slice(0, 10),
+      ort: termin.ort?.trim() ?? ort,
+      teilnehmer: this.mitgliederService
+        .mitglieder()
+        .filter((m) => aktuellerStatus(m) === 'aktiv')
+        .map((m) => ({
+          id: m.id,
+          name: m.name,
+          anwesend: !termin.abmeldungen.some((a) => a.mitgliedId === m.id),
+          pumpen: 0,
+          neuner: 0,
+          eingeholt: 0,
+          schnaps: 0,
+          verspaetungStunden: this.berechnetVerspaetung(m, termin),
+        })),
+      runden: {},
+    };
+
+    this.kegelabendService.speichern(ka);
+    this.vereinsdatenService.aenderungVorgemerkt();
+
+    try {
+      await this.vereinsdatenService.speichern();
+      /*this.terminMeldung.set({
+        terminId: termin.id,
+        art: 'ok',
+        text: `Kegelabend vom ${datumKurz(ka.datum)} wurde angelegt.`,
+      });*/
+    } catch {
+      this.terminMeldung.set({
+        terminId: termin.id,
+        art: 'fehler',
+        text: this.vereinsdatenService.fehler() ?? 'Speichern fehlgeschlagen.',
+      });
+    }
+
+    await this.router.navigate(['/homepage/verwaltung/kegelabende/', ka.id]);
+  }
+
+  private berechnetVerspaetung(mitglied: Mitglied, termin: Kegeltermin): number {
+    const abmeldung = termin.abmeldungen.find((a) => a.mitgliedId === mitglied.id);
+    if (!abmeldung) return 0;
+
+    const abmeldeZeitpunkt = new Date(abmeldung.gemeldetAm);
+    const terminBeginn = new Date(termin.beginn);
+    const diffStunden = (terminBeginn.getTime() - abmeldeZeitpunkt.getTime()) / (1000 * 60 * 60);
+
+    if (diffStunden >= 48) return 4;
+    else return 12;
   }
 
   // --- Abmeldungen -----------------------------------------------------

@@ -68,6 +68,7 @@
     }
 
     @for (u of uebersichten(); track u.termin.id) {
+      @if (!u.vergangen || (u.vergangen && anmeldungService.darf('verwaltung'))) {
       <div class="karte termin" [class.vergangen]="u.vergangen">
         <div class="termin-kopf">
           <div>
@@ -88,7 +89,11 @@
             </p>
           </div>
           @if (anmeldungService.darf('verwaltung')) {
-          <button type="button" class="leise-aktion" (click)="loeschen(u.termin)">Löschen</button>
+            @if (u.vergangen) {
+            <button type="button" class="leise-aktion" (click)="kegelterminErzeugen(u.termin)" >Kegeltermin erzeugen</button>
+            } @else {
+              <button type="button" class="leise-aktion" (click)="loeschen(u.termin)">Löschen</button>
+            }
           }
         </div>
 
@@ -96,6 +101,10 @@
           <strong>{{ u.erwartet.length }}</strong> erwartet ·
           <strong>{{ u.abgemeldet.length }}</strong> abgemeldet
         </p>
+
+        @if (meldungFuer(u.termin.id); as m) {
+          <p [class]="m.art === 'ok' ? 'ok' : 'fehler'">{{ m.text }}</p>
+        }
 
         @if (u.abgemeldet.length > 0) {
           <table class="daten">
@@ -177,6 +186,7 @@
           <button type="button" (click)="abmeldungOeffnen(u.termin)">Abmeldung eintragen</button>
         }
       </div>
+      }
     }
   }
   } @else {
