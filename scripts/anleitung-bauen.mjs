@@ -3,7 +3,7 @@ import { join, resolve } from 'node:path';
 import { createRequire } from 'node:module';
 
 /**
- * Erzeugt das Template der Anleitungsseite aus BEDIENUNG.md.
+ * Erzeugt das Template der Anleitungsseite aus bedienung.md.
  *
  * Damit gibt es genau eine Quelle für den Text: die Markdown-Datei. Die
  * Seite in der Anwendung wird daraus abgeleitet und nie von Hand
@@ -19,7 +19,13 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 
 const wurzel = resolve(import.meta.dirname, '..');
-const quelle = join(wurzel, 'BEDIENUNG.md');
+/**
+ * Groß-/Kleinschreibung des Dateinamens ist auf manchen Dateisystemen
+ * belanglos, auf anderen nicht — deshalb beide Schreibweisen prüfen.
+ */
+const quelle = ['bedienung.md', 'BEDIENUNG.md']
+  .map(name => join(wurzel, name))
+  .find(pfad => existsSync(pfad)) ?? join(wurzel, 'bedienung.md');
 const ziel = join(wurzel, 'src/app/features/verwaltung/anleitung/anleitung.component.html');
 
 function markdownWandeln(text) {
@@ -183,7 +189,7 @@ function markenSetzen(html) {
 
 function anleitungBauen() {
   if (!existsSync(quelle)) {
-    throw new Error(`BEDIENUNG.md nicht gefunden unter ${quelle}`);
+    throw new Error(`bedienung.md nicht gefunden unter ${quelle}`);
   }
 
   const { html, abschnitte } = markenSetzen(markdownWandeln(readFileSync(quelle, 'utf8')));

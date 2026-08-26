@@ -147,10 +147,12 @@ export const SPIELE: readonly { key: SpielKey; name: string }[] = [
 export type SpielStatus = 'teilgenommen' | 'gewonnen' | 'verloren' | 'nicht_teilgenommen';
 
 /**
- * Wie kurzfristig abgesagt wurde.
+ * Wie ein Teilnehmer ferngeblieben ist.
  *
- * Die Grenze liegt bei 48 Stunden vor Beginn des Termins — wer später
- * absagt, zahlt mehr.
+ * Die Grenze zwischen den ersten beiden liegt bei 48 Stunden vor Beginn
+ * des Termins — wer später absagt, zahlt mehr. 'nichtErschienen' ist das
+ * unangekündigte Fernbleiben; es entsteht nur von Hand in der
+ * Detailansicht, weil es aus einem Termin keine Abmeldung dazu gibt.
  */
 export type AbsageArt = 'rechtzeitig' | 'kurzfristig' | 'nichtErschienen';
 
@@ -213,7 +215,7 @@ export interface Strafsaetze {
   absageRechtzeitig: number;
   /** Absage später als 48 Stunden vor Beginn. */
   absageKurzfristig: number;
-  /** Nicht-Erscheinen ohne Absage */
+  /** Unangekündigtes Fernbleiben. */
   absageNichtErschienen: number;
   pumpe: number;
   teilnahme: number;
@@ -224,7 +226,7 @@ export interface Strafsaetze {
 }
 
 export const STANDARD_STRAFSAETZE: Strafsaetze = {
-  verspaetungProStunde: 0.5,
+  verspaetungProStunde: 1.0,
   absageRechtzeitig: 4.0,
   absageKurzfristig: 12.0,
   absageNichtErschienen: 20.0,

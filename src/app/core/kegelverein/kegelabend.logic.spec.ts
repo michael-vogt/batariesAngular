@@ -160,7 +160,7 @@ describe('berechneKegelabendErgebnisse', () => {
       expect(strafe(kurzfristig, 'a')).toBe(STANDARD_STRAFSAETZE.absageKurzfristig);
     });
 
-    it('berechnet das Fernbleiben ohne Absage', () => {
+    it('berechnet das unangekündigte Fernbleiben', () => {
       const ka = abend([teilnehmer('a', { anwesend: false, absage: 'nichtErschienen' })]);
       expect(strafe(ka, 'a')).toBe(STANDARD_STRAFSAETZE.absageNichtErschienen);
     });
@@ -214,7 +214,7 @@ describe('berechneKegelabendErgebnisse', () => {
   });
 
   it('summiert über mehrere Spiele und rundet auf Cent', () => {
-    const ka = abend([teilnehmer('a', { verspaetungStunden: 1, pumpen: 3 })], {
+    const ka = abend([teilnehmer('a', { verspaetungStunden: 0.5, pumpen: 3 })], {
       hohe: [runde({ a: 'teilgenommen' }), runde({ a: 'verloren' })],
       fuchsjagd: [runde({ a: 'verloren' })],
     });

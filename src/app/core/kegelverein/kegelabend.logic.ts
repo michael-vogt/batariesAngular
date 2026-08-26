@@ -57,7 +57,8 @@ export function berechneKegelabendErgebnisse(
     zeile.bilanz = zeile.siege - zeile.niederlagen;
     zeile.strafeGesamt += t.verspaetungStunden * strafsaetze.verspaetungProStunde;
 
-    // Absagegebühr: unabhängig von der Anwesenheit - wer absagt, ist ja gerade nicht da.
+    // Absagegebühr: unabhängig von der Anwesenheit — wer absagt, ist ja
+    // gerade nicht da.
     if (t.absage === 'rechtzeitig') zeile.strafeGesamt += strafsaetze.absageRechtzeitig;
     if (t.absage === 'kurzfristig') zeile.strafeGesamt += strafsaetze.absageKurzfristig;
     if (t.absage === 'nichtErschienen') zeile.strafeGesamt += strafsaetze.absageNichtErschienen;

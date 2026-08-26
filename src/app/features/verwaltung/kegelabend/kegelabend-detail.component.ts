@@ -12,6 +12,7 @@ import {
 import { VereinsdatenService } from '../../../core/kegelverein/vereinsdaten.service';
 import { datumKurz, datumLang, euro } from '../../../shared/format.util';
 import {
+  AbsageArt,
   Kegelabend,
   KegelabendTeilnehmer,
   Mitglied,
@@ -207,7 +208,8 @@ export class KegelabendDetailComponent {
         if (x.id !== t.id) return x;
 
         const { absage: _weg, ...ohne } = x;
-        return wert === 'rechtzeitig' || wert === 'kurzfristig' || wert === 'nichtErschienen' ? { ...ohne, absage: wert } : ohne;
+        const gueltig: AbsageArt[] = ['rechtzeitig', 'kurzfristig', 'nichtErschienen'];
+        return gueltig.includes(wert as AbsageArt) ? { ...ohne, absage: wert as AbsageArt } : ohne;
       }),
     }));
   }

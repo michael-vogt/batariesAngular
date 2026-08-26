@@ -110,7 +110,10 @@ export function pruefeKegelabend(v: unknown): asserts v is Kegelabend {
     // unbekannter Wert wäre dagegen ein Fehler: Er würde stillschweigend
     // keine Gebühr auslösen.
     pruefe(
-      t.absage === undefined || t.absage === 'rechtzeitig' || t.absage === 'kurzfristig' || t.absage === 'nichtErschienen',
+      t.absage === undefined ||
+        t.absage === 'rechtzeitig' ||
+        t.absage === 'kurzfristig' ||
+        t.absage === 'nichtErschienen',
       `Kegelabend ${ka.id}: Teilnehmer "${t.name}" hat die unbekannte Absageart "${t.absage}"`,
     );
   }

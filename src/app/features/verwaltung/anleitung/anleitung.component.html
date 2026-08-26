@@ -1,8 +1,8 @@
 <div class="seite anleitung">
   <header class="seiten-kopf">
     <div>
-    <h1>Bedienung</h1>
-    <p class="hinweis">Anleitung zur täglichen Arbeit mit der Vereinsverwaltung</p>
+      <h1>Bedienung</h1>
+      <p class="hinweis">Anleitung zur täglichen Arbeit mit der Vereinsverwaltung</p>
     </div>
     <button type="button" class="drucken" (click)="drucken()">Drucken oder als PDF sichern</button>
   </header>
@@ -12,6 +12,39 @@
       <p>
         Diese Anleitung beschreibt die tägliche Arbeit mit der Anwendung: Kegelabende erfassen,
         Beiträge buchen, abrechnen und das Kegeljahr abschließen.
+      </p>
+      <hr>
+      <h2 id="die-beiden-bereiche">Die beiden Bereiche</h2>
+      <p>Die Anwendung hat zwei Teile, die sich in ihrem Zweck deutlich unterscheiden.</p>
+      <p>
+        <strong>Die Vereinsseite</strong> — Hauptseite, Satzung, Kegeltermine — ist für alle da.
+        Hier sieht man, wann als Nächstes gekegelt wird und wer sich abgemeldet hat. Änderungen
+        werden hier <strong>sofort gespeichert</strong>; es gibt kein „Änderungen speichern“.
+      </p>
+      <p>
+        <strong>Die Verwaltung</strong> — Mitglieder, Buchführung, Abrechnung, Jahresabschluss — ist
+        die Arbeitsumgebung von Kassenwart und Schriftführer. Hier werden Änderungen gesammelt und
+        erst auf Knopfdruck festgeschrieben.
+      </p>
+      <p>
+        Der Unterschied hat einen Grund: Wer sich abmeldet, erwartet, dass es unmittelbar gilt. Wer
+        dagegen eine Reihe von Buchungen erfasst, will sie prüfen können, bevor sie gelten.
+      </p>
+      <hr>
+      <h2 id="anmelden">Anmelden</h2>
+      <p>
+        Auf der Hauptseite steht links der Anmeldebereich. Rolle aus der Liste wählen, Passwort
+        eingeben, <strong>Login</strong> drücken. Oben erscheint dann, als wer man angemeldet ist;
+        <strong>Logout</strong> meldet wieder ab.
+      </p>
+      <p>
+        Die Anmeldung übersteht ein Neuladen der Seite, endet aber beim Schließen des Browser-Tabs.
+        Auf einem gemeinsam genutzten Rechner bleibt so niemand versehentlich angemeldet.
+      </p>
+      <p>
+        Rollen sind keine Personen, sondern Ämter: „Kassenwart“, „Schriftführer“, „Mitglied“. Eine
+        Rolle kann einem Mitglied zugeordnet sein — dann weiß die Anwendung, wer angemeldet ist.
+        Welche Rolle was darf, steht unter <a href="#rollen">Rollen</a>.
       </p>
       <hr>
       <h2 id="grundlegendes">Grundlegendes</h2>
@@ -48,8 +81,13 @@
       </p>
       <h3>Darstellung umschalten</h3>
       <p>
-        Der kleine Knopf <code>&gt;_</code> in der oberen Leiste wechselt zwischen hellem
-        Erscheinungsbild und dunklem Terminal-Thema. Die Wahl bleibt gespeichert.
+        Der Knopf in der oberen Leiste wechselt das Erscheinungsbild. Zur Auswahl stehen das helle
+        Grundthema, das dunkle Terminal-Thema und das Kegelbahn-Thema mit warmen Holztönen. Die Wahl
+        bleibt gespeichert.
+      </p>
+      <p>
+        Beim Drucken werden Farben und Schriftart unabhängig vom Thema auf eine gut lesbare Form
+        gebracht — sonst käme im Terminal-Thema hellgraue Schrift auf weißes Papier.
       </p>
       <hr>
       <h2 id="einmalige-einrichtung">Einmalige Einrichtung</h2>
@@ -105,28 +143,28 @@
       </p>
       <table>
         <thead>
-          <tr>
-            <th>Status</th>
-            <th>Bedeutung</th>
-          </tr>
+        <tr>
+          <th>Status</th>
+          <th>Bedeutung</th>
+        </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>aktiv</td>
-            <td>volles Mitglied, zahlt den vollen Beitrag</td>
-          </tr>
-          <tr>
-            <td>passiv</td>
-            <td>zahlt den ermäßigten Beitrag</td>
-          </tr>
-          <tr>
-            <td>Gastkegler</td>
-            <td>zahlt keinen Beitrag, aber Strafen aus Spielabenden</td>
-          </tr>
-          <tr>
-            <td>ausgetreten</td>
-            <td>zahlt nichts mehr, bleibt mit seiner Historie erhalten</td>
-          </tr>
+        <tr>
+          <td>aktiv</td>
+          <td>volles Mitglied, zahlt den vollen Beitrag</td>
+        </tr>
+        <tr>
+          <td>passiv</td>
+          <td>zahlt den ermäßigten Beitrag</td>
+        </tr>
+        <tr>
+          <td>Gastkegler</td>
+          <td>zahlt keinen Beitrag, aber Strafen aus Spielabenden</td>
+        </tr>
+        <tr>
+          <td>ausgetreten</td>
+          <td>zahlt nichts mehr, bleibt mit seiner Historie erhalten</td>
+        </tr>
         </tbody>
       </table>
       <h3>Statusverlauf</h3>
@@ -140,6 +178,83 @@
         Für Austritte den Status auf „ausgetreten“ setzen, <strong>nicht</strong> entfernen. Ein
         gelöschtes Mitglied verliert die Verbindung zu seinen Buchungen und Spielabenden.
         Endgültiges Entfernen ist nur für Fehleingaben gedacht.
+      </p>
+      <hr>
+      <h2 id="kegeltermine">Kegeltermine</h2>
+      <p>Die Planung der kommenden Kegelabende: Wann wird gekegelt, und wer ist verhindert?</p>
+      <p>
+        Die Seite liegt auf der Vereinsseite, nicht in der Verwaltung. <strong>Änderungen werden
+        sofort gespeichert</strong> — es gibt kein „Änderungen speichern“ und kein „Verwerfen“. Die
+        Termine liegen dafür in einer eigenen Datei, unabhängig von Buchführung und Kegeljahr.
+      </p>
+      <p>
+        Auf der Hauptseite erscheint zusätzlich der nächste anstehende Termin mit seinen
+        Abmeldungen, ohne dass man diese Seite öffnen müsste.
+      </p>
+      <h3>Termin anlegen</h3>
+      <p>
+        Beginn mit Datum <strong>und Uhrzeit</strong> eintragen, dazu optional Ort und eine Notiz.
+        Vorgeschlagen ist der nächste Freitag um 19:30 Uhr. Liegt der Termin in der Vergangenheit,
+        fragt die Anwendung nach.
+      </p>
+      <p>
+        Anstehende Termine stehen oben, die vergangenen darunter — letztere zurückgenommen
+        dargestellt und ohne die Möglichkeit, sich nachträglich abzumelden.
+      </p>
+      <h3>Abmelden</h3>
+      <p>
+        <strong>Abmeldung eintragen</strong> öffnet ein Feld: Mitglied auswählen, Grund angeben,
+        fertig. Der Zeitpunkt der Meldung wird automatisch festgehalten.
+      </p>
+      <p>
+        Zur Auswahl stehen aktive Mitglieder, die noch nicht abgemeldet sind. Gastkegler erscheinen
+        nicht — sie sind nicht verpflichtet zu kommen und müssen sich folglich auch nicht abmelden.
+      </p>
+      <p>
+        Meldet sich jemand ein zweites Mal ab, ersetzt das den bisherigen Eintrag; so lässt sich ein
+        Grund nachträglich richtigstellen. <strong>Zurücknehmen</strong> entfernt die Abmeldung
+        wieder, wenn jemand doch kommt.
+      </p>
+      <p>
+        Je Termin zeigt die Anwendung, wie viele erwartet werden und wie viele sich abgemeldet
+        haben. Als erwartet gelten alle aktiven Mitglieder ohne Abmeldung.
+      </p>
+      <h3>Aus einem Termin einen Kegelabend machen</h3>
+      <p>
+        Ist ein Termin vorbei, erzeugt <strong>Kegelabend erzeugen</strong> daraus den zugehörigen
+        Kegelabend in der Verwaltung. Übernommen werden Datum, Ort und alle aktiven Mitglieder als
+        Teilnehmer. Wer sich abgemeldet hat, wird als abwesend eingetragen — samt der Absageart, die
+        sich aus dem Zeitpunkt der Abmeldung ergibt:
+      </p>
+      <table>
+        <thead>
+        <tr>
+          <th>Abmeldung</th>
+          <th>Absageart</th>
+          <th>Gebühr</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td>mindestens 48 Stunden vorher</td>
+          <td>rechtzeitig</td>
+          <td>4,00 €</td>
+        </tr>
+        <tr>
+          <td>später</td>
+          <td>kurzfristig</td>
+          <td>12,00 €</td>
+        </tr>
+        </tbody>
+      </table>
+      <p>
+        Anschließend öffnet sich der neue Kegelabend, wo die Spielrunden erfasst werden. Anders als
+        sonst in der Verwaltung wird dabei sofort gespeichert — sonst ginge der Abend beim nächsten
+        Laden verloren, weil die Terminseite keinen Speichern-Knopf anbietet.
+      </p>
+      <p>
+        Wurde zu einem Termin bereits ein Kegelabend angelegt, steht das an seiner Stelle und der
+        Knopf verschwindet.
       </p>
       <hr>
       <h2 id="kegelabende">Kegelabende</h2>
@@ -157,6 +272,9 @@
       <ul>
         <li>
           <strong>Anwesend</strong> abhaken oder entfernen.
+        </li>
+        <li>
+          <strong>Absage</strong> wählen, sobald jemand als abwesend geführt wird.
         </li>
         <li>
           <strong>Verspätung, Pumpen, Neuner, Eingeholt, Schnaps</strong> je Teilnehmer eintragen.
@@ -178,39 +296,76 @@
       <p>Ein Klick auf eine Zelle schaltet weiter:</p>
       <table>
         <thead>
-          <tr>
-            <th>Zeichen</th>
-            <th>Bedeutung</th>
-          </tr>
+        <tr>
+          <th>Zeichen</th>
+          <th>Bedeutung</th>
+        </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>
-              <code>·</code>
-            </td>
-            <td>nicht dabei</td>
-          </tr>
-          <tr>
-            <td>
-              <code>○</code>
-            </td>
-            <td>mitgespielt</td>
-          </tr>
-          <tr>
-            <td>
-              <code>S</code>
-            </td>
-            <td>Sieg</td>
-          </tr>
-          <tr>
-            <td>
-              <code>N</code>
-            </td>
-            <td>Niederlage</td>
-          </tr>
+        <tr>
+          <td>
+            <code>·</code>
+          </td>
+          <td>nicht dabei</td>
+        </tr>
+        <tr>
+          <td>
+            <code>○</code>
+          </td>
+          <td>mitgespielt</td>
+        </tr>
+        <tr>
+          <td>
+            <code>S</code>
+          </td>
+          <td>Sieg</td>
+        </tr>
+        <tr>
+          <td>
+            <code>N</code>
+          </td>
+          <td>Niederlage</td>
+        </tr>
         </tbody>
       </table>
       <p>In der Regel musst du also nur Sieger und Verlierer markieren.</p>
+      <h3>Absagen</h3>
+      <p>
+        Wer nicht da war, hat entweder abgesagt oder ist unangekündigt ferngeblieben. Die Spalte
+        <strong>Absage</strong> hält fest, was zutrifft:
+      </p>
+      <table>
+        <thead>
+        <tr>
+          <th>Eintrag</th>
+          <th>Bedeutung</th>
+          <th>Gebühr</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td>rechtzeitig</td>
+          <td>mindestens 48 Stunden vor dem Termin abgemeldet</td>
+          <td>4,00 €</td>
+        </tr>
+        <tr>
+          <td>kurzfristig</td>
+          <td>später abgemeldet</td>
+          <td>12,00 €</td>
+        </tr>
+        <tr>
+          <td>nicht erschienen</td>
+          <td>gar nicht abgemeldet</td>
+          <td>20,00 €</td>
+        </tr>
+        </tbody>
+      </table>
+      <p>
+        Bei einem aus einem Termin erzeugten Kegelabend ist der Eintrag bereits gesetzt. Hakst du
+        jemanden von Hand als abwesend ab, musst du ihn wählen — solange die Angabe fehlt, ist das
+        Übernehmen der Strafen gesperrt und die betroffenen Namen stehen als Hinweis darüber. Ohne
+        Eintrag fiele nämlich gar keine Gebühr an, und niemand käme darauf, warum.
+      </p>
       <h3>Auswertung und Strafen</h3>
       <p>
         Unten stehen Siege, Niederlagen und die Strafsumme je Teilnehmer, laufend aktualisiert. Die
@@ -218,36 +373,48 @@
       </p>
       <table>
         <thead>
-          <tr>
-            <th>Anlass</th>
-            <th>Betrag</th>
-          </tr>
+        <tr>
+          <th>Anlass</th>
+          <th>Betrag</th>
+        </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>Verspätung</td>
-            <td>1,00 € je Stunde</td>
-          </tr>
-          <tr>
-            <td>Pumpe</td>
-            <td>0,10 € (nur bei Anwesenheit)</td>
-          </tr>
-          <tr>
-            <td>Teilnahme</td>
-            <td>0,10 €</td>
-          </tr>
-          <tr>
-            <td>Niederlage</td>
-            <td>0,25 €</td>
-          </tr>
-          <tr>
-            <td>Niederlage bei Fuchsjagd oder Totenkiste</td>
-            <td>0,50 €</td>
-          </tr>
-          <tr>
-            <td>Fuchsjagd, Teilnahme in einer Runde mit Sieger</td>
-            <td>0,25 €</td>
-          </tr>
+        <tr>
+          <td>Verspätung</td>
+          <td>1,00 € je Stunde</td>
+        </tr>
+        <tr>
+          <td>Absage rechtzeitig</td>
+          <td>4,00 €</td>
+        </tr>
+        <tr>
+          <td>Absage kurzfristig</td>
+          <td>12,00 €</td>
+        </tr>
+        <tr>
+          <td>nicht erschienen</td>
+          <td>20,00 €</td>
+        </tr>
+        <tr>
+          <td>Pumpe</td>
+          <td>0,10 € (nur bei Anwesenheit)</td>
+        </tr>
+        <tr>
+          <td>Teilnahme</td>
+          <td>0,10 €</td>
+        </tr>
+        <tr>
+          <td>Niederlage</td>
+          <td>0,25 €</td>
+        </tr>
+        <tr>
+          <td>Niederlage bei Fuchsjagd oder Totenkiste</td>
+          <td>0,50 €</td>
+        </tr>
+        <tr>
+          <td>Fuchsjagd, Teilnahme in einer Runde mit Sieger</td>
+          <td>0,25 €</td>
+        </tr>
         </tbody>
       </table>
       <p>
@@ -288,89 +455,89 @@
       <h3>Der Kontenrahmen</h3>
       <table>
         <thead>
-          <tr>
-            <th>Nr.</th>
-            <th>Konto</th>
-            <th>Art</th>
-          </tr>
+        <tr>
+          <th>Nr.</th>
+          <th>Konto</th>
+          <th>Art</th>
+        </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>000</td>
-            <td>Eröffnungsbilanzkonto</td>
-            <td>nur beim Jahreswechsel</td>
-          </tr>
-          <tr>
-            <td>100</td>
-            <td>Forderungen</td>
-            <td>was Mitglieder schulden</td>
-          </tr>
-          <tr>
-            <td>110</td>
-            <td>Kasse</td>
-            <td>Bargeldbestand</td>
-          </tr>
-          <tr>
-            <td>200</td>
-            <td>Vereinsvermögen</td>
-            <td>Eigenkapital</td>
-          </tr>
-          <tr>
-            <td>210</td>
-            <td>Restguthaben</td>
-            <td>was der Verein Mitgliedern schuldet</td>
-          </tr>
-          <tr>
-            <td>220</td>
-            <td>Schulden gegenüber Dritten</td>
-            <td>
-            </td>
-          </tr>
-          <tr>
-            <td>250</td>
-            <td>GuV-Konto</td>
-            <td>Jahresergebnis, wird errechnet</td>
-          </tr>
-          <tr>
-            <td>300</td>
-            <td>Beiträge</td>
-            <td>Ertrag</td>
-          </tr>
-          <tr>
-            <td>310</td>
-            <td>Strafen</td>
-            <td>Ertrag</td>
-          </tr>
-          <tr>
-            <td>320</td>
-            <td>Umlagen</td>
-            <td>Ertrag</td>
-          </tr>
-          <tr>
-            <td>330</td>
-            <td>Sonstige Erträge</td>
-            <td>Ertrag</td>
-          </tr>
-          <tr>
-            <td>400</td>
-            <td>Kegelbahn</td>
-            <td>Aufwand</td>
-          </tr>
-          <tr>
-            <td>410</td>
-            <td>Vereinsrunden</td>
-            <td>Aufwand</td>
-          </tr>
-          <tr>
-            <td>420</td>
-            <td>Generalversammlung</td>
-            <td>Aufwand</td>
-          </tr>
-          <tr>
-            <td>430</td>
-            <td>Sonstige Aufwendungen</td>
-            <td>Aufwand</td>
-          </tr>
+        <tr>
+          <td>000</td>
+          <td>Eröffnungsbilanzkonto</td>
+          <td>nur beim Jahreswechsel</td>
+        </tr>
+        <tr>
+          <td>100</td>
+          <td>Forderungen</td>
+          <td>was Mitglieder schulden</td>
+        </tr>
+        <tr>
+          <td>110</td>
+          <td>Kasse</td>
+          <td>Bargeldbestand</td>
+        </tr>
+        <tr>
+          <td>200</td>
+          <td>Vereinsvermögen</td>
+          <td>Eigenkapital</td>
+        </tr>
+        <tr>
+          <td>210</td>
+          <td>Restguthaben</td>
+          <td>was der Verein Mitgliedern schuldet</td>
+        </tr>
+        <tr>
+          <td>220</td>
+          <td>Schulden gegenüber Dritten</td>
+          <td>
+          </td>
+        </tr>
+        <tr>
+          <td>250</td>
+          <td>GuV-Konto</td>
+          <td>Jahresergebnis, wird errechnet</td>
+        </tr>
+        <tr>
+          <td>300</td>
+          <td>Beiträge</td>
+          <td>Ertrag</td>
+        </tr>
+        <tr>
+          <td>310</td>
+          <td>Strafen</td>
+          <td>Ertrag</td>
+        </tr>
+        <tr>
+          <td>320</td>
+          <td>Umlagen</td>
+          <td>Ertrag</td>
+        </tr>
+        <tr>
+          <td>330</td>
+          <td>Sonstige Erträge</td>
+          <td>Ertrag</td>
+        </tr>
+        <tr>
+          <td>400</td>
+          <td>Kegelbahn</td>
+          <td>Aufwand</td>
+        </tr>
+        <tr>
+          <td>410</td>
+          <td>Vereinsrunden</td>
+          <td>Aufwand</td>
+        </tr>
+        <tr>
+          <td>420</td>
+          <td>Generalversammlung</td>
+          <td>Aufwand</td>
+        </tr>
+        <tr>
+          <td>430</td>
+          <td>Sonstige Aufwendungen</td>
+          <td>Aufwand</td>
+        </tr>
         </tbody>
       </table>
       <h3>Monatsbeiträge</h3>
@@ -400,23 +567,23 @@
       </p>
       <table>
         <thead>
-          <tr>
-            <th>Anteil</th>
-            <th>Soll</th>
-            <th>Haben</th>
-          </tr>
+        <tr>
+          <th>Anteil</th>
+          <th>Soll</th>
+          <th>Haben</th>
+        </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>bis zur Höhe der offenen Forderung</td>
-            <td>Kasse (110)</td>
-            <td>Forderungen (100)</td>
-          </tr>
-          <tr>
-            <td>darüber hinaus gezahlt</td>
-            <td>Kasse (110)</td>
-            <td>Restguthaben (210)</td>
-          </tr>
+        <tr>
+          <td>bis zur Höhe der offenen Forderung</td>
+          <td>Kasse (110)</td>
+          <td>Forderungen (100)</td>
+        </tr>
+        <tr>
+          <td>darüber hinaus gezahlt</td>
+          <td>Kasse (110)</td>
+          <td>Restguthaben (210)</td>
+        </tr>
         </tbody>
       </table>
       <h3>Restguthaben verrechnen</h3>
@@ -429,23 +596,23 @@
       </p>
       <table>
         <thead>
-          <tr>
-            <th>Schritt</th>
-            <th>Soll</th>
-            <th>Haben</th>
-          </tr>
+        <tr>
+          <th>Schritt</th>
+          <th>Soll</th>
+          <th>Haben</th>
+        </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>Guthaben auflösen</td>
-            <td>Restguthaben (210)</td>
-            <td>Kasse (110)</td>
-          </tr>
-          <tr>
-            <td>Forderung tilgen</td>
-            <td>Kasse (110)</td>
-            <td>Forderungen (100)</td>
-          </tr>
+        <tr>
+          <td>Guthaben auflösen</td>
+          <td>Restguthaben (210)</td>
+          <td>Kasse (110)</td>
+        </tr>
+        <tr>
+          <td>Forderung tilgen</td>
+          <td>Kasse (110)</td>
+          <td>Forderungen (100)</td>
+        </tr>
         </tbody>
       </table>
       <p>
@@ -464,23 +631,23 @@
       </p>
       <table>
         <thead>
-          <tr>
-            <th>Vorgang</th>
-            <th>Soll</th>
-            <th>Haben</th>
-          </tr>
+        <tr>
+          <th>Vorgang</th>
+          <th>Soll</th>
+          <th>Haben</th>
+        </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>je Teilnehmer</td>
-            <td>Forderungen (100)</td>
-            <td>Umlagen (320)</td>
-          </tr>
-          <tr>
-            <td>Gutschrift an den Ausrichter</td>
-            <td>Umlagen (320)</td>
-            <td>Restguthaben (210)</td>
-          </tr>
+        <tr>
+          <td>je Teilnehmer</td>
+          <td>Forderungen (100)</td>
+          <td>Umlagen (320)</td>
+        </tr>
+        <tr>
+          <td>Gutschrift an den Ausrichter</td>
+          <td>Umlagen (320)</td>
+          <td>Restguthaben (210)</td>
+        </tr>
         </tbody>
       </table>
       <hr>
@@ -519,38 +686,38 @@
       </p>
       <table>
         <thead>
-          <tr>
-            <th>Vorgang</th>
-            <th>Soll</th>
-            <th>Haben</th>
-          </tr>
+        <tr>
+          <th>Vorgang</th>
+          <th>Soll</th>
+          <th>Haben</th>
+        </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>Bahnmiete bar bezahlt</td>
-            <td>Kegelbahn (400)</td>
-            <td>Kasse (110)</td>
-          </tr>
-          <tr>
-            <td>Vereinsrunde bar bezahlt</td>
-            <td>Vereinsrunden (410)</td>
-            <td>Kasse (110)</td>
-          </tr>
-          <tr>
-            <td>Generalversammlung</td>
-            <td>Generalversammlung (420)</td>
-            <td>Kasse (110)</td>
-          </tr>
-          <tr>
-            <td>sonstige Ausgabe</td>
-            <td>Sonstige Aufwendungen (430)</td>
-            <td>Kasse (110)</td>
-          </tr>
-          <tr>
-            <td>sonstige Einnahme</td>
-            <td>Kasse (110)</td>
-            <td>Sonstige Erträge (330)</td>
-          </tr>
+        <tr>
+          <td>Bahnmiete bar bezahlt</td>
+          <td>Kegelbahn (400)</td>
+          <td>Kasse (110)</td>
+        </tr>
+        <tr>
+          <td>Vereinsrunde bar bezahlt</td>
+          <td>Vereinsrunden (410)</td>
+          <td>Kasse (110)</td>
+        </tr>
+        <tr>
+          <td>Generalversammlung</td>
+          <td>Generalversammlung (420)</td>
+          <td>Kasse (110)</td>
+        </tr>
+        <tr>
+          <td>sonstige Ausgabe</td>
+          <td>Sonstige Aufwendungen (430)</td>
+          <td>Kasse (110)</td>
+        </tr>
+        <tr>
+          <td>sonstige Einnahme</td>
+          <td>Kasse (110)</td>
+          <td>Sonstige Erträge (330)</td>
+        </tr>
         </tbody>
       </table>
       <p>
@@ -627,24 +794,24 @@
       </p>
       <table>
         <thead>
-          <tr>
-            <th>Aufstellung</th>
-            <th>Grundlage</th>
-          </tr>
+        <tr>
+          <th>Aufstellung</th>
+          <th>Grundlage</th>
+        </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>Eröffnungsbilanz</td>
-            <td>die Eröffnungsbuchungen, also der aus dem Vorjahr übernommene Bestand</td>
-          </tr>
-          <tr>
-            <td>Schlussbilanz</td>
-            <td>alle Buchungen des Kegeljahres</td>
-          </tr>
-          <tr>
-            <td>Gewinn- und Verlustrechnung</td>
-            <td>Erträge und Aufwendungen des Kegeljahres</td>
-          </tr>
+        <tr>
+          <td>Eröffnungsbilanz</td>
+          <td>die Eröffnungsbuchungen, also der aus dem Vorjahr übernommene Bestand</td>
+        </tr>
+        <tr>
+          <td>Schlussbilanz</td>
+          <td>alle Buchungen des Kegeljahres</td>
+        </tr>
+        <tr>
+          <td>Gewinn- und Verlustrechnung</td>
+          <td>Erträge und Aufwendungen des Kegeljahres</td>
+        </tr>
         </tbody>
       </table>
       <p>
@@ -682,33 +849,33 @@
       </p>
       <table>
         <thead>
-          <tr>
-            <th>Bestand</th>
-            <th>Soll</th>
-            <th>Haben</th>
-          </tr>
+        <tr>
+          <th>Bestand</th>
+          <th>Soll</th>
+          <th>Haben</th>
+        </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>Vereinsvermögen</td>
-            <td>Eröffnungsbilanzkonto (000)</td>
-            <td>Vereinsvermögen (200)</td>
-          </tr>
-          <tr>
-            <td>Kasse</td>
-            <td>Kasse (110)</td>
-            <td>Eröffnungsbilanzkonto (000)</td>
-          </tr>
-          <tr>
-            <td>Restguthaben je Mitglied</td>
-            <td>Eröffnungsbilanzkonto (000)</td>
-            <td>Restguthaben (210)</td>
-          </tr>
-          <tr>
-            <td>Forderung je Mitglied</td>
-            <td>Forderungen (100)</td>
-            <td>Eröffnungsbilanzkonto (000)</td>
-          </tr>
+        <tr>
+          <td>Vereinsvermögen</td>
+          <td>Eröffnungsbilanzkonto (000)</td>
+          <td>Vereinsvermögen (200)</td>
+        </tr>
+        <tr>
+          <td>Kasse</td>
+          <td>Kasse (110)</td>
+          <td>Eröffnungsbilanzkonto (000)</td>
+        </tr>
+        <tr>
+          <td>Restguthaben je Mitglied</td>
+          <td>Eröffnungsbilanzkonto (000)</td>
+          <td>Restguthaben (210)</td>
+        </tr>
+        <tr>
+          <td>Forderung je Mitglied</td>
+          <td>Forderungen (100)</td>
+          <td>Eröffnungsbilanzkonto (000)</td>
+        </tr>
         </tbody>
       </table>
       <p>
@@ -761,11 +928,75 @@
         </p>
       </blockquote>
       <hr>
+      <h2 id="rollen">Rollen</h2>
+      <p>
+        Wer sich anmelden kann und was er darf, steht unter <strong>Rollen</strong> in der
+        Verwaltung. Die Seite ist selbst geschützt: Sie verlangt bei jedem Vorgang den eigenen
+        Rollennamen und das Passwort, weil es keine Sitzung gibt, die sie sich merkt. Der Name ist
+        mit der angemeldeten Rolle vorbelegt.
+      </p>
+      <p>
+        <strong>Rollen anzeigen</strong> lädt die Liste. Sichtbar wird sie nur für Rollen mit dem
+        Recht „Verwaltung“ — wer die Rechte anderer einsehen will, muss sie auch vergeben dürfen.
+      </p>
+      <h3>Berechtigungen</h3>
+      <table>
+        <thead>
+        <tr>
+          <th>Recht</th>
+          <th>Erlaubt</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td>Verwaltung</td>
+          <td>Mitglieder, Buchführung, Abrechnung, Jahresabschluss, Sicherungen, Rollen</td>
+        </tr>
+        <tr>
+          <td>Terminplanung</td>
+          <td>Termine anlegen und löschen</td>
+        </tr>
+        <tr>
+          <td>Von Terminen abmelden</td>
+          <td>sich und andere von Terminen abmelden</td>
+        </tr>
+        </tbody>
+      </table>
+      <h3>Anlegen, Bearbeiten, Duplizieren</h3>
+      <p>
+        Unten auf der Seite steht ein Formular, das beides leistet. Ist keine Rolle gewählt, legt es
+        eine neue an; über <strong>Bearbeiten</strong> in der Tabelle lädt es eine vorhandene, was
+        Überschrift und Knopfbeschriftung ändern. <strong>Duplizieren</strong> übernimmt die Rechte
+        einer Rolle in ein neues Formular — praktisch, um mehrere gleichartige Rollen anzulegen.
+      </p>
+      <p>
+        Beim Bearbeiten bedeutet ein leeres Passwortfeld „unverändert“. Das Wiederholungsfeld
+        daneben verhindert Tippfehler.
+      </p>
+      <p>
+        Optional lässt sich einer Rolle ein <strong>Mitglied</strong> zuordnen. Nötig ist das nicht
+        — ein Amt wie „Kassenwart“ kann von wechselnden Personen genutzt werden.
+      </p>
+      <blockquote>
+        <p>
+          <strong>Geschützt:</strong> Der letzten Rolle mit dem Recht „Verwaltung“ lässt sich dieses
+          Recht weder entziehen, noch kann sie gelöscht werden. Sonst käme niemand mehr an die
+          Rollenverwaltung, und reparieren ließe sich das nur noch von Hand auf dem Server.
+        </p>
+      </blockquote>
+      <p>
+        Passwörter werden nie im Klartext gespeichert — in der Rollendatei steht nur ein Hash, aus
+        dem sich das Passwort nicht zurückrechnen lässt. Die Prüfung geschieht auf dem Server, nicht
+        im Browser.
+      </p>
+      <hr>
       <h2 id="typische-ablaeufe">Typische Abläufe</h2>
       <p>
-        <strong>Nach einem Kegelabend</strong> Kegelabende → Anlegen → Teilnehmer und Anwesenheit
-        prüfen → Runden erfassen → Strafen übernehmen → <strong>Änderungen speichern</strong>
+        <strong>Nach einem Kegelabend</strong> Kegeltermine → beim vergangenen Termin
+        <strong>Kegelabend erzeugen</strong> → Teilnehmer und Anwesenheit prüfen → Runden erfassen →
+        Strafen übernehmen → <strong>Änderungen speichern</strong>
       </p>
+      <p>Ohne vorher angelegten Termin: Kegelabende → Anlegen → weiter wie oben.</p>
       <p>
         <strong>Monatlich</strong> Geschäftsvorfälle → Monatsbeiträge buchen → Zahlungseingänge
         erfassen → <strong>Änderungen speichern</strong> → Abrechnung → PDF für den nächsten
@@ -799,11 +1030,39 @@
         „Verwerfen“ in der oberen Leiste. Danach über die Seite <strong>Sicherungen</strong> den
         Stand von vor dem Speichern laden.
       </p>
+      <p>
+        <strong>Die Anmeldung ist nach einem Tab-Wechsel weg</strong> Das ist so gewollt: Die
+        Anmeldung endet mit dem Browser-Tab. Ein Neuladen mit F5 übersteht sie dagegen.
+      </p>
+      <p>
+        <strong>„Strafen übernehmen“ lässt sich nicht drücken</strong> Entweder beträgt die
+        Strafsumme null, oder bei einem Abwesenden fehlt die Absageart. Die betroffenen Namen stehen
+        als Hinweis über dem Knopf.
+      </p>
+      <p>
+        <strong>Der Kegelabend aus einem Termin taucht nicht auf</strong> Prüfen, ob überhaupt ein
+        Kegeljahr geladen ist — ohne eines läuft das Anlegen ins Leere. Die Kopfleiste zeigt das
+        aktuelle Kegeljahr an.
+      </p>
     </article>
 
     <nav class="inhalt" aria-label="Abschnitte">
       <p class="inhalt-titel">Abschnitte</p>
       <ul>
+        <li>
+          <a
+            href="#die-beiden-bereiche"
+            [class.aktiv]="aktiv() === 'die-beiden-bereiche'"
+            (click)="springe($event, 'die-beiden-bereiche')"
+          >Die beiden Bereiche</a>
+        </li>
+        <li>
+          <a
+            href="#anmelden"
+            [class.aktiv]="aktiv() === 'anmelden'"
+            (click)="springe($event, 'anmelden')"
+          >Anmelden</a>
+        </li>
         <li>
           <a
             href="#grundlegendes"
@@ -824,6 +1083,13 @@
             [class.aktiv]="aktiv() === 'mitglieder'"
             (click)="springe($event, 'mitglieder')"
           >Mitglieder</a>
+        </li>
+        <li>
+          <a
+            href="#kegeltermine"
+            [class.aktiv]="aktiv() === 'kegeltermine'"
+            (click)="springe($event, 'kegeltermine')"
+          >Kegeltermine</a>
         </li>
         <li>
           <a
@@ -873,6 +1139,13 @@
             [class.aktiv]="aktiv() === 'sicherungen'"
             (click)="springe($event, 'sicherungen')"
           >Sicherungen</a>
+        </li>
+        <li>
+          <a
+            href="#rollen"
+            [class.aktiv]="aktiv() === 'rollen'"
+            (click)="springe($event, 'rollen')"
+          >Rollen</a>
         </li>
         <li>
           <a

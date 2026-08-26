@@ -5,6 +5,41 @@ erfassen, Beiträge buchen, abrechnen und das Kegeljahr abschließen.
 
 ---
 
+## Die beiden Bereiche
+
+Die Anwendung hat zwei Teile, die sich in ihrem Zweck deutlich unterscheiden.
+
+**Die Vereinsseite** — Hauptseite, Satzung, Kegeltermine — ist für alle da. Hier
+sieht man, wann als Nächstes gekegelt wird und wer sich abgemeldet hat. Änderungen
+werden hier **sofort gespeichert**; es gibt kein „Änderungen speichern“.
+
+**Die Verwaltung** — Mitglieder, Buchführung, Abrechnung, Jahresabschluss — ist
+die Arbeitsumgebung von Kassenwart und Schriftführer. Hier werden Änderungen
+gesammelt und erst auf Knopfdruck festgeschrieben.
+
+Der Unterschied hat einen Grund: Wer sich abmeldet, erwartet, dass es unmittelbar
+gilt. Wer dagegen eine Reihe von Buchungen erfasst, will sie prüfen können, bevor
+sie gelten.
+
+---
+
+## Anmelden
+
+Auf der Hauptseite steht links der Anmeldebereich. Rolle aus der Liste wählen,
+Passwort eingeben, **Login** drücken. Oben erscheint dann, als wer man angemeldet
+ist; **Logout** meldet wieder ab.
+
+Die Anmeldung übersteht ein Neuladen der Seite, endet aber beim Schließen des
+Browser-Tabs. Auf einem gemeinsam genutzten Rechner bleibt so niemand
+versehentlich angemeldet.
+
+Rollen sind keine Personen, sondern Ämter: „Kassenwart“, „Schriftführer“,
+„Mitglied“. Eine Rolle kann einem Mitglied zugeordnet sein — dann weiß die
+Anwendung, wer angemeldet ist. Welche Rolle was darf, steht unter
+[Rollen](#rollen).
+
+---
+
 ## Grundlegendes
 
 ### Speichern
@@ -33,8 +68,13 @@ verwirft ungespeicherte Änderungen — die Anwendung fragt vorher nach.
 
 ### Darstellung umschalten
 
-Der kleine Knopf `>_` in der oberen Leiste wechselt zwischen hellem Erscheinungsbild
-und dunklem Terminal-Thema. Die Wahl bleibt gespeichert.
+Der Knopf in der oberen Leiste wechselt das Erscheinungsbild. Zur Auswahl stehen
+das helle Grundthema, das dunkle Terminal-Thema und das Kegelbahn-Thema mit
+warmen Holztönen. Die Wahl bleibt gespeichert.
+
+Beim Drucken werden Farben und Schriftart unabhängig vom Thema auf eine gut
+lesbare Form gebracht — sonst käme im Terminal-Thema hellgraue Schrift auf
+weißes Papier.
 
 ---
 
@@ -99,15 +139,18 @@ Endgültiges Entfernen ist nur für Fehleingaben gedacht.
 
 ---
 
-## Termine
+## Kegeltermine
 
 Die Planung der kommenden Kegelabende: Wann wird gekegelt, und wer ist
 verhindert?
 
-Dieser Bereich arbeitet anders als der Rest der Anwendung: **Änderungen werden
-sofort gespeichert.** Es gibt kein „Änderungen speichern“ und kein „Verwerfen“ —
-wer sich abmeldet, erwartet, dass es unmittelbar gilt. Die Termine liegen dafür
-in einer eigenen Datei, unabhängig von Buchführung und Kegeljahr.
+Die Seite liegt auf der Vereinsseite, nicht in der Verwaltung. **Änderungen
+werden sofort gespeichert** — es gibt kein „Änderungen speichern“ und kein
+„Verwerfen“. Die Termine liegen dafür in einer eigenen Datei, unabhängig von
+Buchführung und Kegeljahr.
+
+Auf der Hauptseite erscheint zusätzlich der nächste anstehende Termin mit seinen
+Abmeldungen, ohne dass man diese Seite öffnen müsste.
 
 ### Termin anlegen
 
@@ -134,6 +177,26 @@ Abmeldung wieder, wenn jemand doch kommt.
 Je Termin zeigt die Anwendung, wie viele erwartet werden und wie viele sich
 abgemeldet haben. Als erwartet gelten alle aktiven Mitglieder ohne Abmeldung.
 
+### Aus einem Termin einen Kegelabend machen
+
+Ist ein Termin vorbei, erzeugt **Kegelabend erzeugen** daraus den zugehörigen
+Kegelabend in der Verwaltung. Übernommen werden Datum, Ort und alle aktiven
+Mitglieder als Teilnehmer. Wer sich abgemeldet hat, wird als abwesend eingetragen
+— samt der Absageart, die sich aus dem Zeitpunkt der Abmeldung ergibt:
+
+| Abmeldung | Absageart | Gebühr |
+|---|---|---|
+| mindestens 48 Stunden vorher | rechtzeitig | 4,00 € |
+| später | kurzfristig | 12,00 € |
+
+Anschließend öffnet sich der neue Kegelabend, wo die Spielrunden erfasst werden.
+Anders als sonst in der Verwaltung wird dabei sofort gespeichert — sonst ginge
+der Abend beim nächsten Laden verloren, weil die Terminseite keinen
+Speichern-Knopf anbietet.
+
+Wurde zu einem Termin bereits ein Kegelabend angelegt, steht das an seiner Stelle
+und der Knopf verschwindet.
+
 ---
 
 ## Kegelabende
@@ -150,6 +213,7 @@ Die Statusspalte zeigt, ob ein Abend bereits **abgerechnet** oder noch **offen**
 In der Detailansicht (Klick auf das Datum):
 
 - **Anwesend** abhaken oder entfernen.
+- **Absage** wählen, sobald jemand als abwesend geführt wird.
 - **Verspätung, Pumpen, Neuner, Eingeholt, Schnaps** je Teilnehmer eintragen.
 - Weitere Mitglieder über die Auswahlliste **hinzufügen** — etwa passive Mitglieder,
   die diesmal mitkegeln.
@@ -172,6 +236,23 @@ Ein Klick auf eine Zelle schaltet weiter:
 
 In der Regel musst du also nur Sieger und Verlierer markieren.
 
+### Absagen
+
+Wer nicht da war, hat entweder abgesagt oder ist unangekündigt ferngeblieben. Die
+Spalte **Absage** hält fest, was zutrifft:
+
+| Eintrag | Bedeutung | Gebühr |
+|---|---|---|
+| rechtzeitig | mindestens 48 Stunden vor dem Termin abgemeldet | 4,00 € |
+| kurzfristig | später abgemeldet | 12,00 € |
+| nicht erschienen | gar nicht abgemeldet | 20,00 € |
+
+Bei einem aus einem Termin erzeugten Kegelabend ist der Eintrag bereits gesetzt.
+Hakst du jemanden von Hand als abwesend ab, musst du ihn wählen — solange die
+Angabe fehlt, ist das Übernehmen der Strafen gesperrt und die betroffenen Namen
+stehen als Hinweis darüber. Ohne Eintrag fiele nämlich gar keine Gebühr an, und
+niemand käme darauf, warum.
+
 ### Auswertung und Strafen
 
 Unten stehen Siege, Niederlagen und die Strafsumme je Teilnehmer, laufend
@@ -180,6 +261,9 @@ aktualisiert. Die Strafsätze:
 | Anlass | Betrag |
 |---|---|
 | Verspätung | 1,00 € je Stunde |
+| Absage rechtzeitig | 4,00 € |
+| Absage kurzfristig | 12,00 € |
+| nicht erschienen | 20,00 € |
 | Pumpe | 0,10 € (nur bei Anwesenheit) |
 | Teilnahme | 0,10 € |
 | Niederlage | 0,25 € |
@@ -477,11 +561,58 @@ eine Sicherung des überschriebenen Standes an.
 
 ---
 
+## Rollen
+
+Wer sich anmelden kann und was er darf, steht unter **Rollen** in der Verwaltung.
+Die Seite ist selbst geschützt: Sie verlangt bei jedem Vorgang den eigenen
+Rollennamen und das Passwort, weil es keine Sitzung gibt, die sie sich merkt. Der
+Name ist mit der angemeldeten Rolle vorbelegt.
+
+**Rollen anzeigen** lädt die Liste. Sichtbar wird sie nur für Rollen mit dem
+Recht „Verwaltung“ — wer die Rechte anderer einsehen will, muss sie auch vergeben
+dürfen.
+
+### Berechtigungen
+
+| Recht | Erlaubt |
+|---|---|
+| Verwaltung | Mitglieder, Buchführung, Abrechnung, Jahresabschluss, Sicherungen, Rollen |
+| Terminplanung | Termine anlegen und löschen |
+| Von Terminen abmelden | sich und andere von Terminen abmelden |
+
+### Anlegen, Bearbeiten, Duplizieren
+
+Unten auf der Seite steht ein Formular, das beides leistet. Ist keine Rolle
+gewählt, legt es eine neue an; über **Bearbeiten** in der Tabelle lädt es eine
+vorhandene, was Überschrift und Knopfbeschriftung ändern. **Duplizieren**
+übernimmt die Rechte einer Rolle in ein neues Formular — praktisch, um mehrere
+gleichartige Rollen anzulegen.
+
+Beim Bearbeiten bedeutet ein leeres Passwortfeld „unverändert“. Das
+Wiederholungsfeld daneben verhindert Tippfehler.
+
+Optional lässt sich einer Rolle ein **Mitglied** zuordnen. Nötig ist das nicht —
+ein Amt wie „Kassenwart“ kann von wechselnden Personen genutzt werden.
+
+> **Geschützt:** Der letzten Rolle mit dem Recht „Verwaltung“ lässt sich dieses
+> Recht weder entziehen, noch kann sie gelöscht werden. Sonst käme niemand mehr
+> an die Rollenverwaltung, und reparieren ließe sich das nur noch von Hand auf
+> dem Server.
+
+Passwörter werden nie im Klartext gespeichert — in der Rollendatei steht nur ein
+Hash, aus dem sich das Passwort nicht zurückrechnen lässt. Die Prüfung geschieht
+auf dem Server, nicht im Browser.
+
+---
+
 ## Typische Abläufe
 
 **Nach einem Kegelabend**
-Kegelabende → Anlegen → Teilnehmer und Anwesenheit prüfen → Runden erfassen →
-Strafen übernehmen → **Änderungen speichern**
+Kegeltermine → beim vergangenen Termin **Kegelabend erzeugen** → Teilnehmer und
+Anwesenheit prüfen → Runden erfassen → Strafen übernehmen →
+**Änderungen speichern**
+
+Ohne vorher angelegten Termin: Kegelabende → Anlegen → weiter wie oben.
 
 **Monatlich**
 Geschäftsvorfälle → Monatsbeiträge buchen → Zahlungseingänge erfassen →
@@ -514,3 +645,15 @@ die Seite **Sicherungen** lässt sich ein früherer Stand zurückholen.
 **Versehentlich etwas gelöscht**
 Solange noch nicht gespeichert wurde: „Verwerfen“ in der oberen Leiste. Danach
 über die Seite **Sicherungen** den Stand von vor dem Speichern laden.
+
+**Die Anmeldung ist nach einem Tab-Wechsel weg**
+Das ist so gewollt: Die Anmeldung endet mit dem Browser-Tab. Ein Neuladen mit F5
+übersteht sie dagegen.
+
+**„Strafen übernehmen“ lässt sich nicht drücken**
+Entweder beträgt die Strafsumme null, oder bei einem Abwesenden fehlt die
+Absageart. Die betroffenen Namen stehen als Hinweis über dem Knopf.
+
+**Der Kegelabend aus einem Termin taucht nicht auf**
+Prüfen, ob überhaupt ein Kegeljahr geladen ist — ohne eines läuft das Anlegen ins
+Leere. Die Kopfleiste zeigt das aktuelle Kegeljahr an.
