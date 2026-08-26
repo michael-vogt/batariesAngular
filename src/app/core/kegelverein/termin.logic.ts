@@ -1,5 +1,7 @@
-import { Abmeldung, Kegeltermin, Mitglied, Zeitpunkt } from './kegelverein.models';
+import { Abmeldung, Kegelabend, Kegeltermin, Mitglied, Zeitpunkt } from './kegelverein.models';
 import { aktuellerStatus } from './mitglied.util';
+import { inject } from '@angular/core';
+import { KegelabendService } from './kegelabend.service';
 
 /**
  * Auswertung der Kegeltermine. Reine Funktionen ohne Store-Zugriff.
@@ -12,6 +14,7 @@ export interface TerminUebersicht {
   /** Aktive Mitglieder ohne Abmeldung — die vermutlich kommen. */
   erwartet: Mitglied[];
   vergangen: boolean;
+  kegelabend?: Kegelabend;
 }
 
 /** Aktueller Zeitpunkt in lokaler Zeit, Format JJJJ-MM-TTTHH:MM. */
@@ -32,7 +35,7 @@ export function jetzt(): Zeitpunkt {
  * Gastkegler bleiben außen vor: Sie sind nicht verpflichtet zu kommen und
  * müssten sich folglich auch nicht abmelden.
  */
-export function erzeugeUebersicht(termin: Kegeltermin, mitglieder: Mitglied[]): TerminUebersicht {
+export function erzeugeUebersicht(termin: Kegeltermin, mitglieder: Mitglied[], kegelabende: Kegelabend[] | null): TerminUebersicht {
   const nachId = new Map(mitglieder.map((m) => [m.id, m]));
 
   const abgemeldet = termin.abmeldungen
@@ -48,7 +51,15 @@ export function erzeugeUebersicht(termin: Kegeltermin, mitglieder: Mitglied[]): 
     .filter((m) => !abgemeldeteIds.has(m.id) && aktuellerStatus(m) === 'aktiv')
     .sort((a, b) => a.name.localeCompare(b.name, 'de'));
 
-  return { termin, abgemeldet, erwartet, vergangen: termin.beginn < jetzt() };
+  let kegelabend: Kegelabend | undefined;
+  if (kegelabende) {
+    kegelabend = kegelabende.find((ka) => ka.datum === termin.beginn.slice(0, 10));
+  }
+  if (kegelabend) {
+    termin.ort = kegelabend.ort;
+  }
+
+  return { termin, abgemeldet, erwartet, vergangen: termin.beginn < jetzt(), kegelabend: kegelabend };
 }
 
 /** Termine chronologisch; anstehende zuerst, vergangene danach absteigend. */

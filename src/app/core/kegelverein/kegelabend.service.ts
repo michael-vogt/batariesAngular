@@ -23,6 +23,16 @@ export class KegelabendService {
     return berechneKegelabendErgebnisse(ka);
   }
 
+  existiertKegelabend(kaOderTermin: Kegelabend | string): boolean {
+    if (kaOderTermin && typeof kaOderTermin === 'string') { // termin
+      if (kaOderTermin.includes('T'))
+        kaOderTermin = kaOderTermin.slice(0, 10);
+      return this.store.kegelabende().some((ka) => ka.datum === kaOderTermin);
+    } else { // Kegelabend
+      return this.store.kegelabende().some((ka) => ka.id === (kaOderTermin as Kegelabend).id);
+    }
+  }
+
   speichern(ka: Kegelabend): void {
     const existiert = this.store.kegelabende().some((x) => x.id === ka.id);
     existiert ? this.store.updateKegelabend(ka) : this.store.addKegelabend(ka);

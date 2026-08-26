@@ -41,7 +41,7 @@ export class KegeltermineListeComponent {
   protected readonly uebersichten = computed(() => {
     const termine = this.terminService
       .termine()
-      .map((t) => erzeugeUebersicht(t, this.mitgliederService.mitglieder()));
+      .map((t) => erzeugeUebersicht(t, this.mitgliederService.mitglieder(), null));
     return this.modus() === 'alle' ? termine : termine.slice(0, 1);
   });
 

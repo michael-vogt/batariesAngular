@@ -90,7 +90,11 @@
           </div>
           @if (anmeldungService.darf('verwaltung')) {
             @if (u.vergangen) {
+              @if (!kegelabendService.existiertKegelabend(u.termin.beginn)) {
             <button type="button" class="leise-aktion" (click)="kegelterminErzeugen(u.termin)" >Kegeltermin erzeugen</button>
+              } @else {
+                <p class="hinweis">Kegelabend bereits angelegt</p>
+              }
             } @else {
               <button type="button" class="leise-aktion" (click)="loeschen(u.termin)">Löschen</button>
             }

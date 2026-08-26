@@ -60,7 +60,7 @@ export class TermineComponent {
   }
 
   protected readonly uebersichten = computed(() =>
-    this.termine.termine().map((t) => erzeugeUebersicht(t, this.mitgliederService.mitglieder())),
+    this.termine.termine().map((t) => erzeugeUebersicht(t, this.mitgliederService.mitglieder(), this.kegelabendService.kegelabende())),
   );
 
   /** Aktive Mitglieder, die für diesen Termin noch nicht abgemeldet sind. */
@@ -138,7 +138,7 @@ export class TermineComponent {
     return m?.terminId === terminId ? m : null;
   }
 
-  private readonly kegelabendService = inject(KegelabendService);
+  protected readonly kegelabendService = inject(KegelabendService);
   private readonly vereinsdatenService = inject(VereinsdatenService);
   private readonly router = inject(Router);
 
@@ -146,8 +146,6 @@ export class TermineComponent {
   //protected readonly fehler = signal<string | null>(null);
 
   protected async kegelterminErzeugen(termin: Kegeltermin): Promise<void> {
-    //this.meldung.set(null);
-    //this.fehler.set(null);
     this.terminMeldung.set(null);
 
     const ort = prompt('An welchem Ort fand das Kegeln statt?');
@@ -178,20 +176,24 @@ export class TermineComponent {
 
     try {
       await this.vereinsdatenService.speichern();
-      /*this.terminMeldung.set({
-        terminId: termin.id,
-        art: 'ok',
-        text: `Kegelabend vom ${datumKurz(ka.datum)} wurde angelegt.`,
-      });*/
     } catch {
       this.terminMeldung.set({
         terminId: termin.id,
         art: 'fehler',
         text: this.vereinsdatenService.fehler() ?? 'Speichern fehlgeschlagen.',
       });
+      return;
     }
 
-    await this.router.navigate(['/homepage/verwaltung/kegelabende/', ka.id]);
+    const gewechselt = await this.router.navigate(['/homepage/verwaltung/kegelabende', ka.id]);
+
+    if (!gewechselt) {
+      this.terminMeldung.set({
+        terminId: termin.id,
+        art: 'ok',
+        text: 'Kegelabend wurde angelegt, die Detailseite ließ sich aber nicht öffnen.',
+      });
+    }
   }
 
   private berechnetVerspaetung(mitglied: Mitglied, termin: Kegeltermin): number {
