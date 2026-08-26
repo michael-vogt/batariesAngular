@@ -243,6 +243,8 @@
 @media print {
   :host {
     color: #000;
+    font-family: var(--schrift-druck), serif;
+    font-size: 11pt;
   }
 
   .seite {

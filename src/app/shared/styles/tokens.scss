@@ -33,7 +33,9 @@
   --farbe-warnung-hell: #fbf4e0;
 
   /* Typografie: Systemschriften, Tabellenzahlen mit fester Breite */
-  --schrift-text: Raleway, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --schrift-text-standard: Raleway, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --schrift-text: var(--schrift-text-standard);
+  --schrift-druck: var(--schrift-text-standard);
   --schrift-zahl: 'SF Mono', 'Cascadia Mono', 'Roboto Mono', Consolas, monospace;
 
   --abstand-1: 0.25rem;

@@ -40,4 +40,9 @@ export class MarkdownViewerComponent {
     return markdown ? marked.parse(markdown) : '';
   });
 
+  protected drucken(event: Event): void {
+    event.preventDefault();
+    window.print();
+  }
+
 }

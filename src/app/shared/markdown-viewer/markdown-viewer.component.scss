@@ -1,5 +1,33 @@
 @media print {
+  /*
+   * Farben für den Druck zurücksetzen.
+   *
+   * Themen wie das Terminal-Thema sind für dunkle Flächen gemacht: Ihre
+   * Textfarbe ist hell, weil der Hintergrund dunkel ist. Auf Papier wird
+   * der Hintergrund aber nicht gedruckt — hellgrau auf weiß ergibt einen
+   * Kontrast von 1,4:1 und ist praktisch unsichtbar.
+   *
+   * Die Variablen werden deshalb hier überschrieben statt die Farben
+   * direkt zu setzen: So greifen sie auch in den per innerHTML
+   * eingefügten Inhalt, der über sie erbt.
+   */
   :host {
+    --farbe-text: #000;
+    --farbe-text-leise: #444;
+    --farbe-akzent: #000;
+    --farbe-karte: transparent;
+    --farbe-flaeche: transparent;
+
+    /* Auch die Schriftart zurücksetzen: Konsolenschrift braucht mehr
+       Platz und liest sich auf Papier schlechter als eine Grundschrift. */
+    //--schrift-text: 'DejaVu Serif', Georgia, 'Times New Roman', serif;
+
+    font-family: var(--schrift-druck), serif;
     font-size: 9.5pt;
+    color: var(--farbe-text);
+
+    & > button {
+      display: none;
+    }
   }
 }
