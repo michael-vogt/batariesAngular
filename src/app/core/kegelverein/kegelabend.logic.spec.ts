@@ -1,4 +1,4 @@
-import { describe, it, expect} from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { berechneKegelabendErgebnisse } from './kegelabend.logic';
 import {
   Kegelabend,
@@ -150,6 +150,39 @@ describe('berechneKegelabendErgebnisse', () => {
       // 7 Pumpen à 0,10 € — ohne Rundung käme 0.7000000000000001 heraus.
       const ka = abend([teilnehmer('a', { pumpen: 7 })]);
       expect(strafe(ka, 'a')).toBe(0.7);
+    });
+
+    it('berechnet die Absagegebühr nach Frist', () => {
+      const rechtzeitig = abend([teilnehmer('a', { anwesend: false, absage: 'rechtzeitig' })]);
+      expect(strafe(rechtzeitig, 'a')).toBe(STANDARD_STRAFSAETZE.absageRechtzeitig);
+
+      const kurzfristig = abend([teilnehmer('a', { anwesend: false, absage: 'kurzfristig' })]);
+      expect(strafe(kurzfristig, 'a')).toBe(STANDARD_STRAFSAETZE.absageKurzfristig);
+    });
+
+    it('berechnet das Fernbleiben ohne Absage', () => {
+      const ka = abend([teilnehmer('a', { anwesend: false, absage: 'nichtErschienen' })]);
+      expect(strafe(ka, 'a')).toBe(STANDARD_STRAFSAETZE.absageNichtErschienen);
+    });
+
+    it('berechnet die Absagegebühr unabhängig von der Anwesenheit', () => {
+      // Wer absagt und dann doch erscheint, zahlt trotzdem — die Gebühr
+      // hängt an der Absage, nicht am Fernbleiben.
+      const ka = abend([teilnehmer('a', { anwesend: true, absage: 'kurzfristig' })]);
+      expect(strafe(ka, 'a')).toBe(STANDARD_STRAFSAETZE.absageKurzfristig);
+    });
+
+    it('lässt eine fehlende Absage straffrei', () => {
+      const ka = abend([teilnehmer('a', { anwesend: false })]);
+      expect(strafe(ka, 'a')).toBe(0);
+    });
+
+    it('addiert Absagegebühr und Spielstrafen', () => {
+      const ka = abend([teilnehmer('a', { absage: 'rechtzeitig', pumpen: 2 })], {
+        hohe: [runde({ a: 'verloren' })],
+      });
+      // 4,00 + 0,20 + 0,25 = 4,45
+      expect(strafe(ka, 'a')).toBe(4.45);
     });
 
     it('lässt Neuner, Eingeholt und Schnaps straffrei', () => {

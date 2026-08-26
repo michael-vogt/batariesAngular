@@ -4,7 +4,12 @@ import { TerminService } from '../../../core/kegelverein/termin.service';
 import { MitgliederService } from '../../../core/kegelverein/mitglieder.service';
 import { FileStorageService } from '../../../core/kegelverein/persistenz/file-storage.service';
 import { erzeugeUebersicht, jetzt } from '../../../core/kegelverein/termin.logic';
-import { Kegelabend, Kegeltermin, Mitglied } from '../../../core/kegelverein/kegelverein.models';
+import {
+  AbsageArt,
+  Kegelabend,
+  Kegeltermin,
+  Mitglied,
+} from '../../../core/kegelverein/kegelverein.models';
 import { aktuellerStatus } from '../../../core/kegelverein/mitglied.util';
 import { LoginComponent } from '../login/login.component';
 import { AnmeldungService } from '../../../core/anmeldung.service';
@@ -18,7 +23,7 @@ function vorschlagBeginn(): string {
   const d = new Date();
   d.setDate(d.getDate() + ((5 - d.getDay() + 7) % 7 || 7));
   const zz = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${zz(d.getMonth() + 1)}-${zz(d.getDate())}T19:30`;
+  return `${d.getFullYear()}-${zz(d.getMonth() + 1)}-${zz(d.getDate())}T20:00`;
 }
 
 type TerminMeldung = {
@@ -142,9 +147,6 @@ export class TermineComponent {
   private readonly vereinsdatenService = inject(VereinsdatenService);
   private readonly router = inject(Router);
 
-  //protected readonly meldung = signal<string | null>(null);
-  //protected readonly fehler = signal<string | null>(null);
-
   protected async kegelterminErzeugen(termin: Kegeltermin): Promise<void> {
     this.terminMeldung.set(null);
 
@@ -166,7 +168,8 @@ export class TermineComponent {
           neuner: 0,
           eingeholt: 0,
           schnaps: 0,
-          verspaetungStunden: this.berechnetVerspaetung(m, termin),
+          verspaetungStunden: 0,
+          ...this.absageArt(m, termin)
         })),
       runden: {},
     };
@@ -196,16 +199,12 @@ export class TermineComponent {
     }
   }
 
-  private berechnetVerspaetung(mitglied: Mitglied, termin: Kegeltermin): number {
+  private absageArt(mitglied: Mitglied, termin: Kegeltermin): { absage?: AbsageArt } {
     const abmeldung = termin.abmeldungen.find((a) => a.mitgliedId === mitglied.id);
-    if (!abmeldung) return 0;
+    if (!abmeldung) return {};
 
-    const abmeldeZeitpunkt = new Date(abmeldung.gemeldetAm);
-    const terminBeginn = new Date(termin.beginn);
-    const diffStunden = (terminBeginn.getTime() - abmeldeZeitpunkt.getTime()) / (1000 * 60 * 60);
-
-    if (diffStunden >= 48) return 4;
-    else return 12;
+    const stundenVorher = (new Date(termin.beginn).getTime() - new Date(abmeldung.gemeldetAm).getTime()) / (1000*60*60);
+    return { absage: stundenVorher >= 48 ? 'rechtzeitig' : 'kurzfristig'};
   }
 
   // --- Abmeldungen -----------------------------------------------------

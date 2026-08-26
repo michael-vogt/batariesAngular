@@ -46,6 +46,7 @@
         <tr>
           <th>Name</th>
           <th>Anwesend</th>
+          <th>Absage</th>
           <th class="zahl">Verspätung (h)</th>
           <th class="zahl">Pumpen</th>
           <th class="zahl">Neuner</th>
@@ -69,6 +70,21 @@
                   (change)="anwesenheitGeaendert(t, $event)"
                   [attr.aria-label]="t.name + ' anwesend'"
                 />
+              </td>
+              <td>
+                <select
+                  [disabled]="gesperrt()"
+                  [class.fehlt]="fehltAbsage(t)"
+                  [ngModel]="t.absage ?? ''"
+                  (ngModelChange)="absageGeaendert(t, $event)"
+                  [attr.aria-label]="t.name + ' Absage'"
+                  [attr.aria-invalid]="fehltAbsage(t) ? 'true' : null"
+                >
+                  <option value="">–</option>
+                  <option value="rechtzeitig">rechtzeitig</option>
+                  <option value="kurzfristig">kurzfristig</option>
+                  <option value="nichtErschienen">nicht erschienen</option>
+                </select>
               </td>
               <td class="zahl">
                 <input
@@ -300,7 +316,21 @@
             ergänzte Buchungen bleiben unberührt.
           </p>
         } @else {
-          <button type="button" [disabled]="strafenSumme() === 0" (click)="strafenUebernehmen()">
+          @if (absageFehlt()) {
+            <p class="warnung">
+              Bei
+              @for (t of ohneAbsagegrund(); track t.id) {
+                <strong>{{ t.name }}</strong>{{ $last ? '' : ', ' }}
+              }
+              fehlt die Angabe, wie abgesagt wurde. Ohne sie fällt keine Absagegebühr an.
+            </p>
+          }
+
+          <button
+            type="button"
+            [disabled]="strafenSumme() === 0 || absageFehlt()"
+            (click)="strafenUebernehmen()"
+          >
             Strafen in die Buchführung übernehmen
           </button>
           <p class="hinweis">

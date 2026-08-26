@@ -120,6 +120,25 @@ export class KegelabendDetailComponent {
     return ka ? this.kegelabendService.ergebnisse(ka) : [];
   });
 
+  /**
+   * Abwesende ohne Angabe, wie sie abgesagt haben.
+   *
+   * Wer nicht da war, hat entweder rechtzeitig oder kurzfristig abgesagt —
+   * ohne diese Angabe bliebe die Gebühr aus, und niemand käme darauf,
+   * warum. Geprüft wird das in der Oberfläche und nicht beim Speichern:
+   * Ältere Kegelabende kennen das Feld nicht, ihre Dateien müssen lesbar
+   * bleiben.
+   */
+  protected readonly ohneAbsagegrund = computed(() =>
+    (this.abend()?.teilnehmer ?? []).filter((t) => !t.anwesend && !t.absage),
+  );
+
+  protected readonly absageFehlt = computed(() => this.ohneAbsagegrund().length > 0);
+
+  protected fehltAbsage(t: KegelabendTeilnehmer): boolean {
+    return !t.anwesend && !t.absage;
+  }
+
   protected readonly strafenSumme = computed(() =>
     this.auswertung().reduce((s, z) => s + z.strafeGesamt, 0),
   );
@@ -172,6 +191,24 @@ export class KegelabendDetailComponent {
     this.aendern((ka) => ({
       ...ka,
       teilnehmer: ka.teilnehmer.map((x) => (x.id === t.id ? { ...x, anwesend } : x)),
+    }));
+  }
+
+  /**
+   * Setzt oder entfernt die Absage eines Teilnehmers.
+   *
+   * Ein leerer Wert entfernt das Feld, statt es auf undefined zu setzen —
+   * so steht in der gespeicherten Datei nur, was auch gilt.
+   */
+  protected absageGeaendert(t: KegelabendTeilnehmer, wert: string): void {
+    this.aendern((ka) => ({
+      ...ka,
+      teilnehmer: ka.teilnehmer.map((x) => {
+        if (x.id !== t.id) return x;
+
+        const { absage: _weg, ...ohne } = x;
+        return wert === 'rechtzeitig' || wert === 'kurzfristig' || wert === 'nichtErschienen' ? { ...ohne, absage: wert } : ohne;
+      }),
     }));
   }
 
@@ -290,6 +327,13 @@ export class KegelabendDetailComponent {
   protected strafenUebernehmen(): void {
     const ka = this.abend();
     if (!ka) return;
+
+    if (this.absageFehlt()) {
+      this.uebernahmeFehler.set(
+        'Bei abwesenden Teilnehmern fehlt noch die Angabe, wie sie abgesagt haben.',
+      );
+      return;
+    }
 
     if (!confirm(`Strafen über ${this.euro(this.strafenSumme())} € als Buchungen anlegen?`)) return;
 

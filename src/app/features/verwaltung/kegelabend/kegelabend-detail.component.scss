@@ -183,3 +183,11 @@ button.status[data-status='verloren'] {
   background: var(--farbe-warnung-hell);
   color: var(--farbe-warnung);
 }
+
+/* Fehlende Absageangabe bei einem Abwesenden: farbige Kontur plus
+   Hinweistext über der Abrechnung — die Farbe allein trüge die
+   Information nicht. */
+select.fehlt {
+  border-color: var(--farbe-warnung);
+  background: var(--farbe-warnung-hell);
+}

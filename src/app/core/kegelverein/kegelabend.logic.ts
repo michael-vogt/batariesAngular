@@ -56,6 +56,12 @@ export function berechneKegelabendErgebnisse(
     const zeile = zeilen.get(t.id)!;
     zeile.bilanz = zeile.siege - zeile.niederlagen;
     zeile.strafeGesamt += t.verspaetungStunden * strafsaetze.verspaetungProStunde;
+
+    // Absagegebühr: unabhängig von der Anwesenheit - wer absagt, ist ja gerade nicht da.
+    if (t.absage === 'rechtzeitig') zeile.strafeGesamt += strafsaetze.absageRechtzeitig;
+    if (t.absage === 'kurzfristig') zeile.strafeGesamt += strafsaetze.absageKurzfristig;
+    if (t.absage === 'nichtErschienen') zeile.strafeGesamt += strafsaetze.absageNichtErschienen;
+
     if (t.anwesend) zeile.strafeGesamt += t.pumpen * strafsaetze.pumpe;
     zeile.strafeGesamt = Math.round(zeile.strafeGesamt * 100) / 100;
   }

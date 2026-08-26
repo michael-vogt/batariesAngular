@@ -104,6 +104,16 @@ export function pruefeKegelabend(v: unknown): asserts v is Kegelabend {
   );
   pruefe(Array.isArray(ka.teilnehmer), `Kegelabend ${ka.id}: teilnehmer fehlt`);
   pruefe(typeof ka.runden === 'object' && ka.runden !== null, `Kegelabend ${ka.id}: runden fehlt`);
+
+  for (const t of ka.teilnehmer) {
+    // absage ist optional — ältere Abende kennen das Feld nicht. Ein
+    // unbekannter Wert wäre dagegen ein Fehler: Er würde stillschweigend
+    // keine Gebühr auslösen.
+    pruefe(
+      t.absage === undefined || t.absage === 'rechtzeitig' || t.absage === 'kurzfristig' || t.absage === 'nichtErschienen',
+      `Kegelabend ${ka.id}: Teilnehmer "${t.name}" hat die unbekannte Absageart "${t.absage}"`,
+    );
+  }
 }
 
 /**

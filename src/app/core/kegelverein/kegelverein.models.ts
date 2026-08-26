@@ -146,6 +146,14 @@ export const SPIELE: readonly { key: SpielKey; name: string }[] = [
 
 export type SpielStatus = 'teilgenommen' | 'gewonnen' | 'verloren' | 'nicht_teilgenommen';
 
+/**
+ * Wie kurzfristig abgesagt wurde.
+ *
+ * Die Grenze liegt bei 48 Stunden vor Beginn des Termins — wer später
+ * absagt, zahlt mehr.
+ */
+export type AbsageArt = 'rechtzeitig' | 'kurzfristig' | 'nichtErschienen';
+
 export interface KegelabendTeilnehmer {
   /** = Mitglied.id (auch für Gastkegler, die als Mitglied mit Status 'gastkegler' geführt werden) */
   id: string;
@@ -157,6 +165,16 @@ export interface KegelabendTeilnehmer {
    */
   name: string;
   anwesend: boolean;
+  /**
+   * Absage von einem vorher geplanten Termin.
+   *
+   * Optional, damit bestehende Kegelabende ohne dieses Feld weiterhin
+   * gelesen werden — fehlt es, gab es keine Absage. Bewusst ein Zustand
+   * und kein Betrag: Der Satz steht bei den übrigen Strafsätzen und
+   * gilt damit einheitlich, statt bei jedem Abend mitgeschrieben zu
+   * werden.
+   */
+  absage?: AbsageArt;
   verspaetungStunden: number;
   pumpen: number;
   neuner: number;
@@ -191,6 +209,12 @@ export interface Kegelabend {
 
 export interface Strafsaetze {
   verspaetungProStunde: number;
+  /** Absage mindestens 48 Stunden vor Beginn. */
+  absageRechtzeitig: number;
+  /** Absage später als 48 Stunden vor Beginn. */
+  absageKurzfristig: number;
+  /** Nicht-Erscheinen ohne Absage */
+  absageNichtErschienen: number;
   pumpe: number;
   teilnahme: number;
   /** Fuchsjagd: Teilnahme in einer Runde, die einen Sieger hatte. */
@@ -200,7 +224,10 @@ export interface Strafsaetze {
 }
 
 export const STANDARD_STRAFSAETZE: Strafsaetze = {
-  verspaetungProStunde: 1.0,
+  verspaetungProStunde: 0.5,
+  absageRechtzeitig: 4.0,
+  absageKurzfristig: 12.0,
+  absageNichtErschienen: 20.0,
   pumpe: 0.1,
   teilnahme: 0.1,
   fuchsjagdTeilnahmeMitSieger: 0.25,
