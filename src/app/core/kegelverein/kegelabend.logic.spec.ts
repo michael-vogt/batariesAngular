@@ -214,7 +214,7 @@ describe('berechneKegelabendErgebnisse', () => {
   });
 
   it('summiert über mehrere Spiele und rundet auf Cent', () => {
-    const ka = abend([teilnehmer('a', { verspaetungStunden: 0.5, pumpen: 3 })], {
+    const ka = abend([teilnehmer('a', { verspaetungStunden: 1, pumpen: 3 })], {
       hohe: [runde({ a: 'teilgenommen' }), runde({ a: 'verloren' })],
       fuchsjagd: [runde({ a: 'verloren' })],
     });

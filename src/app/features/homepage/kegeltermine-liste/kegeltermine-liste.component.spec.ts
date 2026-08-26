@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { KegeltermineListeComponent } from './kegeltermine-liste.component';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { providePersistenz } from '../../../core/kegelverein/persistenz/persistenz.providers';
 
 describe('KegeltermineListeComponent', () => {
   let component: KegeltermineListeComponent;
@@ -9,6 +12,7 @@ describe('KegeltermineListeComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [KegeltermineListeComponent],
+      providers: [provideRouter([]), provideHttpClient(), providePersistenz()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(KegeltermineListeComponent);

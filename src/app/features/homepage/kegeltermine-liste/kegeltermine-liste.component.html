@@ -2,9 +2,9 @@
   <div class="karte">
   @if (modus() === 'nur_naechster') {
     <h2>Abmeldung für das nächste Kegeln</h2>
-    <p>Datum: {{ datumKurz(u.termin.beginn ?? '')}}</p>
+    <p>Datum: {{ datumKurz(u.termin.beginn)}}</p>
   } @else {
-    <h2>Abmeldungen für das Kegeln am {{ datumKurz(u.termin.beginn ?? '') }}</h2>
+    <h2>Abmeldungen für das Kegeln am {{ datumKurz(u.termin.beginn) }}</h2>
   }
   @if (u.abgemeldet.length === 0) {
     <p>noch keine Abmeldungen</p>

@@ -85,12 +85,12 @@ describe('erzeugeUebersicht', () => {
   const mitglieder: Mitglied[] = [anna, bert, gast, passiv];
 
   it('erwartet nur aktive Mitglieder ohne Abmeldung', () => {
-    const u = erzeugeUebersicht(termin(inTagen(3)), mitglieder);
+    const u = erzeugeUebersicht(termin(inTagen(3)), mitglieder, null);
     expect(u.erwartet.map((m) => m.name)).toEqual(['Anna', 'Bert']);
   });
 
   it('nimmt Abgemeldete aus den Erwarteten heraus', () => {
-    const u = erzeugeUebersicht(termin(inTagen(3), [neueAbmeldung(anna.id, 'Urlaub')]), mitglieder);
+    const u = erzeugeUebersicht(termin(inTagen(3), [neueAbmeldung(anna.id, 'Urlaub')]), mitglieder, null);
 
     expect(u.erwartet.map((m) => m.name)).toEqual(['Bert']);
     expect(u.abgemeldet.map((a) => a.name)).toEqual(['Anna']);
@@ -98,7 +98,7 @@ describe('erzeugeUebersicht', () => {
   });
 
   it('meldet unbekannte Kennungen, statt sie zu verschweigen', () => {
-    const u = erzeugeUebersicht(termin(inTagen(3), [neueAbmeldung('weg', 'x')]), mitglieder);
+    const u = erzeugeUebersicht(termin(inTagen(3), [neueAbmeldung('weg', 'x')]), mitglieder, null);
     expect(u.abgemeldet[0].name).toBe('unbekannt');
   });
 
@@ -106,12 +106,13 @@ describe('erzeugeUebersicht', () => {
     const u = erzeugeUebersicht(
       termin(inTagen(3), [neueAbmeldung(bert.id, 'a'), neueAbmeldung(anna.id, 'b')]),
       mitglieder,
+      null
     );
     expect(u.abgemeldet.map((a) => a.name)).toEqual(['Anna', 'Bert']);
   });
 
   it('erkennt vergangene Termine', () => {
-    expect(erzeugeUebersicht(termin(inTagen(-1)), mitglieder).vergangen).toBe(true);
-    expect(erzeugeUebersicht(termin(inTagen(1)), mitglieder).vergangen).toBe(false);
+    expect(erzeugeUebersicht(termin(inTagen(-1)), mitglieder, null).vergangen).toBe(true);
+    expect(erzeugeUebersicht(termin(inTagen(1)), mitglieder, null).vergangen).toBe(false);
   });
 });
