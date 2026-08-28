@@ -161,3 +161,44 @@
     display: block;
   }
 }
+
+/*
+ * Gruppenkopf im Menü — ein Schalter, kein Verweis: Unter
+ * /verwaltung/buchfuehrung gibt es keine eigene Seite, nur die vier
+ * Unterpunkte.
+ *
+ * Sieht bewusst aus wie die Verweise daneben, damit die Leiste ruhig
+ * bleibt; erkennbar wird der Unterschied am Pfeil davor.
+ */
+.menu button.gruppe {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-2);
+  width: 100%;
+  padding: inherit;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu button.gruppe .pfeil {
+  font-size: 0.75em;
+  opacity: 0.7;
+}
+
+/* Hervorgehoben, solange eine der Unterseiten offen ist — der Schalter
+   selbst kann kein routerLinkActive tragen. */
+.menu button.gruppe.aktiv {
+  font-weight: 600;
+}
+
+/* Solange eine Unterseite angezeigt wird, bleibt die Gruppe offen — ein
+   Klick würde nichts bewirken und wirkte wie ein Fehler. Der Zeiger
+   bleibt dabei normal, weil der Punkt kein Bedienelement mehr ist. */
+.menu button.gruppe:disabled {
+  cursor: default;
+  opacity: 1;
+}

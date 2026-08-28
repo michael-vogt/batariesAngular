@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
@@ -11,6 +11,19 @@ interface NavPunkt {
   /** Relativ zum Verwaltungsbereich, ohne führenden Schrägstrich. */
   pfad: string;
   titel: string;
+}
+
+/**
+ * Menüpunkt, der selbst keine Seite ist, sondern weitere Punkte bündelt.
+ *
+ * Der Pfad dient nur dazu zu erkennen, ob gerade eine der Unterseiten
+ * offen ist — angeklickt wird er nicht, weil es unter /buchfuehrung keine
+ * eigene Seite gibt.
+ */
+interface NavGruppe {
+  pfadPraefix: string;
+  titel: string;
+  punkte: NavPunkt[];
 }
 
 @Component({
@@ -42,18 +55,58 @@ export class RahmenComponent {
     { initialValue: this.router.url.includes('/verwaltung') },
   );
 
+  /** Ob gerade eine Buchführungsseite offen ist. */
+  protected readonly inBuchfuehrung = toSignal(
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map((event) => event.urlAfterRedirects.includes('/verwaltung/buchfuehrung')),
+    ),
+    { initialValue: this.router.url.includes('/verwaltung/buchfuehrung') },
+  );
+
   protected readonly jahrWechselt = signal(false);
   protected readonly verwirft = signal(false);
 
   protected readonly verwaltungsPunkte: NavPunkt[] = [
     { pfad: 'mitglieder', titel: 'Mitglieder' },
     { pfad: 'kegelabende', titel: 'Kegelabende' },
-    { pfad: 'buchfuehrung/journal', titel: 'Journal' },
-    { pfad: 'buchfuehrung/vorfaelle', titel: 'Geschäftsvorfälle' },
-    { pfad: 'buchfuehrung/konten', titel: 'Konten' },
     { pfad: 'abrechnung', titel: 'Abrechnung' },
-    { pfad: 'buchfuehrung/abschluss', titel: 'Jahresabschluss' },
   ];
+
+  /**
+   * Die Buchführung steht als eigene Gruppe im Menü, weil ihre vier
+   * Seiten zusammengehören und die Liste sonst länger ist als der Rest
+   * des Menüs zusammen.
+   */
+  protected readonly buchfuehrung: NavGruppe = {
+    pfadPraefix: 'buchfuehrung',
+    titel: 'Buchführung',
+    punkte: [
+      { pfad: 'buchfuehrung/journal', titel: 'Journal' },
+      { pfad: 'buchfuehrung/vorfaelle', titel: 'Geschäftsvorfälle' },
+      { pfad: 'buchfuehrung/konten', titel: 'Konten' },
+      { pfad: 'buchfuehrung/abschluss', titel: 'Jahresabschluss' },
+    ],
+  };
+
+  /**
+   * Aufgeklappt, sobald eine Buchführungsseite offen ist — oder wenn von
+   * Hand aufgeklappt wurde.
+   *
+   * Zwei Quellen statt einer: Beim Aufruf einer Buchführungsseite über
+   * einen Verweis oder ein Lesezeichen soll die Gruppe von selbst offen
+   * stehen, sonst wüsste man nicht, wo man ist. Zugleich muss sie sich
+   * anklicken lassen, wenn man von anderswo kommt.
+   */
+  private readonly buchfuehrungManuell = signal(false);
+
+  protected readonly buchfuehrungOffen = computed(
+    () => this.buchfuehrungManuell() || this.inBuchfuehrung(),
+  );
+
+  protected buchfuehrungUmschalten(): void {
+    this.buchfuehrungManuell.update((offen) => !offen);
+  }
 
   protected readonly weitereVerwaltungsPunkte: NavPunkt[] = [
     { pfad: 'anleitung', titel: 'Anleitung' },

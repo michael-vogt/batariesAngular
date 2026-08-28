@@ -59,6 +59,40 @@
               @for (punkt of verwaltungsPunkte; track punkt.pfad) {
                 <li><a [routerLink]="'verwaltung/' + punkt.pfad" routerLinkActive="aktiv">{{ punkt.titel }}</a></li>
               }
+
+              <li>
+                <!-- Kein Verweis, sondern ein Schalter: Unter
+                     /verwaltung/buchfuehrung gibt es keine eigene Seite. -->
+                <button
+                  type="button"
+                  class="gruppe"
+                  [class.aktiv]="inBuchfuehrung()"
+                  [disabled]="inBuchfuehrung()"
+                  [attr.aria-expanded]="buchfuehrungOffen()"
+                  [title]="
+                    inBuchfuehrung()
+                      ? 'Bleibt offen, solange eine Buchführungsseite angezeigt wird'
+                      : null
+                  "
+                  (click)="buchfuehrungUmschalten()"
+                >
+                  <span class="pfeil" aria-hidden="true">{{ buchfuehrungOffen() ? '▾' : '▸' }}</span>
+                  {{ buchfuehrung.titel }}
+                </button>
+
+                @if (buchfuehrungOffen()) {
+                  <ul class="unterliste">
+                    @for (punkt of buchfuehrung.punkte; track punkt.pfad) {
+                      <li>
+                        <a [routerLink]="'verwaltung/' + punkt.pfad" routerLinkActive="aktiv">
+                          {{ punkt.titel }}
+                        </a>
+                      </li>
+                    }
+                  </ul>
+                }
+              </li>
+
               <li class="trenner" aria-hidden="true"></li>
               @for (punkt of weitereVerwaltungsPunkte; track punkt.pfad) {
                 <li><a class="leise-punkt" [routerLink]="'verwaltung/' + punkt.pfad" routerLinkActive="aktiv">{{ punkt.titel }}</a></li>
