@@ -19,7 +19,8 @@
         <button
           type="button"
           class="primaer"
-          [disabled]="!daten.ungespeichert() || speichert()"
+          [disabled]="!daten.ungespeichert() || speichert() || !daten.darfBearbeiten()"
+          [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
           (click)="speichern()"
         >
           {{ speichert() ? 'Speichert…' : 'Änderungen speichern' }}
@@ -128,7 +129,12 @@
               </td>
               <td>
                 @if (!gesperrt()) {
-                  <button type="button" class="leise-aktion" (click)="teilnehmerEntfernen(t)">
+                  <button
+                    [disabled]="!daten.darfBearbeiten()"
+                    [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
+                    type="button" class="leise-aktion"
+                    (click)="teilnehmerEntfernen(t)"
+                  >
                     Entfernen
                   </button>
                 }
@@ -153,7 +159,12 @@
                   }
                 </select>
               </label>
-              <button type="button" [disabled]="!auswahlId()" (click)="teilnehmerHinzufuegen()">
+              <button
+                type="button"
+                [disabled]="!auswahlId() || !daten.darfBearbeiten()"
+                [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
+                (click)="teilnehmerHinzufuegen()"
+              >
                 Hinzufügen
               </button>
             </div>
@@ -170,7 +181,12 @@
                 (keyup.enter)="gastAnlegen()"
               />
             </label>
-            <button type="button" [disabled]="!gastName().trim()" (click)="gastAnlegen()">
+            <button
+              type="button"
+              [disabled]="!gastName().trim() || !daten.darfBearbeiten()"
+              [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
+              (click)="gastAnlegen()"
+            >
               Anlegen und hinzufügen
             </button>
           </div>
@@ -252,11 +268,21 @@
 
       @if (!gesperrt()) {
         <div class="runden-aktionen">
-          <button type="button" (click)="rundeHinzufuegen()">
+          <button
+            [disabled]="!daten.darfBearbeiten()"
+            [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
+            type="button"
+            (click)="rundeHinzufuegen()"
+          >
             Runde für {{ aktivesSpielName() }} hinzufügen
           </button>
           @if (runden().length > 0) {
-            <button type="button" class="leise-aktion" (click)="letzteRundeEntfernen()">
+            <button
+              [disabled]="!daten.darfBearbeiten()"
+              [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
+              type="button" class="leise-aktion"
+              (click)="letzteRundeEntfernen()"
+            >
               Letzte Runde entfernen
             </button>
           }
@@ -307,7 +333,12 @@
             <strong>Abgerechnet</strong> am {{ datumKurz(zeitpunkt) }} —
             die Strafen dieses Abends stehen in der Buchführung.
           </p>
-          <button type="button" (click)="strafenZuruecknehmen()">
+          <button
+            [disabled]="!daten.darfBearbeiten()"
+            [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
+            type="button"
+            (click)="strafenZuruecknehmen()"
+          >
             Abrechnung zurücknehmen
           </button>
           <p class="hinweis">
@@ -328,7 +359,7 @@
 
           <button
             type="button"
-            [disabled]="strafenSumme() === 0 || absageFehlt()"
+            [disabled]="strafenSumme() === 0 || absageFehlt() || !daten.darfBearbeiten()"
             (click)="strafenUebernehmen()"
           >
             Strafen in die Buchführung übernehmen

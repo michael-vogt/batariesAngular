@@ -576,9 +576,20 @@ dürfen.
 
 | Recht | Erlaubt |
 |---|---|
-| Verwaltung | Mitglieder, Buchführung, Abrechnung, Jahresabschluss, Sicherungen, Rollen |
+| Verwaltung sehen | Mitglieder, Buchführung, Abrechnung, Jahresabschluss, Sicherungen, Rollen — nur ansehen |
+| Verwaltung bearbeiten | dort auch speichern, löschen und abschließen |
 | Terminplanung | Termine anlegen und löschen |
 | Von Terminen abmelden | sich und andere von Terminen abmelden |
+
+Die beiden Verwaltungsrechte sind getrennt, damit etwa der Präsident die Zahlen
+einsehen kann, ohne versehentlich etwas zu verstellen. Ohne das Recht
+„Verwaltung bearbeiten“ sind alle ändernden Knöpfe deaktiviert und tragen einen
+entsprechenden Hinweis.
+
+> **Zum Umfang dieses Schutzes:** Bei den Vereinsdaten ist er eine Hilfe gegen
+> Versehen, keine Sperre — der Server prüft dort nicht mit. Bei der
+> Rollenverwaltung dagegen schon: Dort lehnt der Server einen ändernden Aufruf
+> ohne dieses Recht ab.
 
 ### Anlegen, Bearbeiten, Duplizieren
 

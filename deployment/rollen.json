@@ -6,6 +6,7 @@
       "hash": "$2y$12$t4/9wSqB1JDBfRBjvPewt.sJv/XWNLqDo/RcBKOQtNkYZZVPOoFi.",
       "berechtigungen": {
         "verwaltung": true,
+        "verwaltungSchreiben": true,
         "terminplanung": true,
         "termine": true
       }
@@ -15,6 +16,7 @@
       "hash": "$2y$12$/jM.q5pXDvFA7Scbnr7MO.h00uTWOAKlExFUP/ODcDl2trt.IepK2",
       "berechtigungen": {
         "verwaltung": false,
+        "verwaltungSchreiben": false,
         "terminplanung": false,
         "termine": true
       }
@@ -24,6 +26,7 @@
       "hash": "$2y$12$ApsIFuC2ZHu4TCeBkrrZG.9HlvYvvSby/aChxZUoL3oXEyZVW3Taa",
       "berechtigungen": {
         "verwaltung": true,
+        "verwaltungSchreiben": true,
         "terminplanung": true,
         "termine": true
       },
@@ -34,6 +37,7 @@
       "hash": "$2y$12$Ideb5e7Go9c5ACRpBDBYJ.J/0EsNAmWDE.kVRawDcDUFVCwVyJbXK",
       "berechtigungen": {
         "verwaltung": false,
+        "verwaltungSchreiben": false,
         "terminplanung": true,
         "termine": true
       },

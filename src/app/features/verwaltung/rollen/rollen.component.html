@@ -66,20 +66,29 @@
             @for (b of berechtigungsliste; track b.schluessel) {
               <td class="mitte">{{ rolle.berechtigungen[b.schluessel] ? '✅' : '❌' }}</td>
             }
-            <td [class.verwaist]="zuordnungVerwaist(rolle.mitgliedId)">
+            <td class="mitte" [class.verwaist]="zuordnungVerwaist(rolle.mitgliedId)">
               {{ mitgliedName(rolle.mitgliedId) || '—' }}
             </td>
             <td class="aktionen">
-              <button type="button" class="leise-aktion" (click)="bearbeitenOeffnen(rolle)">
+              <button
+                [disabled]="!darfBearbeiten()"
+                [title]="darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
+                type="button" class="leise-aktion" (click)="bearbeitenOeffnen(rolle)"
+              >
                 {{ bearbeitet() === rolle.name ? 'Schließen' : 'Bearbeiten' }}
               </button>
-              <button type="button" class="leise-aktion" (click)="duplizieren(rolle)">
+              <button
+                [disabled]="!darfBearbeiten()"
+                [title]="darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
+                type="button" class="leise-aktion" (click)="duplizieren(rolle)"
+              >
                 Duplizieren
               </button>
               <button
                 type="button"
                 class="leise-aktion"
-                [disabled]="istLetzterVerwalter(rolle) || speichert()"
+                [disabled]="istLetzterVerwalter(rolle) || speichert() || !darfBearbeiten()"
+                [title]="darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
                 (click)="loeschen(rolle)"
               >
                 Löschen
@@ -92,6 +101,7 @@
   </div>
 }
 
+@if (darfBearbeiten()) {
 <div class="karte" [class.bearbeiten-modus]="bearbeitet()">
   <div class="form-kopf">
     <h2>{{ formTitel() }}</h2>
@@ -169,7 +179,7 @@
   }
 
   <div class="formular-zeile">
-    <button type="button" class="primaer" [disabled]="speichert()" (click)="speichern()">
+    <button type="button" class="primaer" [disabled]="speichert() || !darfBearbeiten()" (click)="speichern()">
       {{ speichert() ? 'Speichert…' : formKnopf() }}
     </button>
   </div>
@@ -181,3 +191,4 @@
     <p class="ok">{{ text }}</p>
   }
 </div>
+}

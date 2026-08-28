@@ -23,7 +23,7 @@ type Phase = 'leer' | 'geprueft' | 'speichert' | 'fertig' | 'fehler';
 })
 export class LegacyImportComponent {
   protected readonly storage = inject(FileStorageService);
-  private readonly daten = inject(VereinsdatenService);
+  protected readonly daten = inject(VereinsdatenService);
 
   protected readonly phase = signal<Phase>('leer');
   protected readonly ergebnis = signal<ImportErgebnis | null>(null);

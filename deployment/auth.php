@@ -49,7 +49,12 @@ declare(strict_types=1);
  * ergeben, und niemand käme darauf, warum. Beim Ergänzen einer neuen
  * Berechtigung ist sie hier einzutragen.
  */
-const BEKANNTE_BERECHTIGUNGEN = ['verwaltung', 'terminplanung', 'termine'];
+const BEKANNTE_BERECHTIGUNGEN = [
+    'verwaltung',
+    'verwaltungSchreiben',
+    'terminplanung',
+    'termine',
+];
 
 $config = require __DIR__ . '/../config.php';
 $apiKey = (string) $config['apiKey'];
@@ -340,7 +345,7 @@ function anzahlVerwalter(array $rollen): int
 {
     $anzahl = 0;
     foreach ($rollen as $r) {
-        if ((($r['berechtigungen'] ?? [])['verwaltung'] ?? false) === true) {
+        if ((($r['berechtigungen'] ?? [])['verwaltungSchreiben'] ?? false) === true) {
             $anzahl++;
         }
     }
@@ -415,7 +420,9 @@ function rechteFiltern(array $roh, string $wofuer): array
 }
 
 if ($aktion === 'rolle-anlegen') {
-    if (!$gefundeneRechte['verwaltung']) {
+    // Rollen anzulegen ist ein schreibender Vorgang — hier prüft der
+    // Server tatsächlich, anders als bei den Vereinsdaten.
+    if (!$gefundeneRechte['verwaltungSchreiben']) {
         http_response_code(403);
         echo json_encode(['error' => 'Diese Rolle darf keine Rollen anlegen']);
         exit;
@@ -485,7 +492,7 @@ if ($aktion === 'rolle-anlegen') {
 }
 
 if ($aktion === 'rolle-aendern' || $aktion === 'rolle-loeschen') {
-    if (!$gefundeneRechte['verwaltung']) {
+    if (!$gefundeneRechte['verwaltungSchreiben']) {
         http_response_code(403);
         echo json_encode(['error' => 'Diese Rolle darf keine Rollen bearbeiten']);
         exit;
@@ -508,7 +515,7 @@ if ($aktion === 'rolle-aendern' || $aktion === 'rolle-loeschen') {
     }
 
     $bisher = $rollen[$index];
-    $hatteVerwaltung = (($bisher['berechtigungen'] ?? [])['verwaltung'] ?? false) === true;
+    $hatteVerwaltung = (($bisher['berechtigungen'] ?? [])['verwaltungSchreiben'] ?? false) === true;
 
     // ---------------- Löschen ----------------
     if ($aktion === 'rolle-loeschen') {
@@ -586,7 +593,11 @@ if ($aktion === 'rolle-aendern' || $aktion === 'rolle-loeschen') {
 
         // Sperre gegen Aussperren: Das Verwaltungsrecht der letzten Rolle,
         // die es hat, lässt sich nicht entziehen.
-        if ($hatteVerwaltung && $neueRechte['verwaltung'] !== true && anzahlVerwalter($rollen) <= 1) {
+        if (
+            $hatteVerwaltung
+            && $neueRechte['verwaltungSchreiben'] !== true
+            && anzahlVerwalter($rollen) <= 1
+        ) {
             http_response_code(409);
             echo json_encode([
                 'error' => 'Das ist die letzte Rolle mit Verwaltungsrecht — '

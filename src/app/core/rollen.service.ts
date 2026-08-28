@@ -15,8 +15,13 @@ import { PhpApiAdapter } from './kegelverein/persistenz/php-api-adapter';
 export const BERECHTIGUNGSLISTE = [
   {
     schluessel: 'verwaltung',
-    titel: 'Verwaltung',
-    beschreibung: 'Mitglieder, Buchführung, Abrechnung, Jahresabschluss, Sicherungen',
+    titel: 'Verwaltung sehen',
+    beschreibung: 'Mitglieder, Buchführung, Abrechnung, Jahresabschluss, Sicherungen — nur ansehen',
+  },
+  {
+    schluessel: 'verwaltungSchreiben',
+    titel: 'Verwaltung bearbeiten',
+    beschreibung: 'Änderungen in der Verwaltung speichern, löschen, abschließen',
   },
   {
     schluessel: 'terminplanung',
@@ -44,7 +49,7 @@ export type Berechtigungen = Record<Berechtigung, boolean>;
 
 /** Keine Berechtigung — Ausgangswert und Rückfallebene. */
 export const KEINE_BERECHTIGUNGEN: Berechtigungen = Object.fromEntries(
-  BERECHTIGUNGSLISTE.map(b => [b.schluessel, false]),
+  BERECHTIGUNGSLISTE.map((b) => [b.schluessel, false]),
 ) as Berechtigungen;
 
 /**
@@ -53,9 +58,11 @@ export const KEINE_BERECHTIGUNGEN: Berechtigungen = Object.fromEntries(
  * Fehlende Angaben gelten als nicht erteilt: Im Zweifel lieber zu wenig
  * erlauben als zu viel.
  */
-export function normalisiereBerechtigungen(roh: Partial<Berechtigungen> | undefined): Berechtigungen {
+export function normalisiereBerechtigungen(
+  roh: Partial<Berechtigungen> | undefined,
+): Berechtigungen {
   return Object.fromEntries(
-    BERECHTIGUNGSLISTE.map(b => [b.schluessel, roh?.[b.schluessel] === true]),
+    BERECHTIGUNGSLISTE.map((b) => [b.schluessel, roh?.[b.schluessel] === true]),
   ) as Berechtigungen;
 }
 
@@ -378,7 +385,11 @@ export class RollenService {
         };
       }
 
-      return { gueltig: false, grund: 'abgelehnt', meldung: 'Name oder Zugangsdaten stimmen nicht.' };
+      return {
+        gueltig: false,
+        grund: 'abgelehnt',
+        meldung: 'Name oder Zugangsdaten stimmen nicht.',
+      };
     } catch (e) {
       // 401 ist die reguläre Ablehnung durch auth.php, alles andere ein
       // technisches Problem — die Unterscheidung ist wichtig, damit

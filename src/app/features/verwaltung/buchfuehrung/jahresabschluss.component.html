@@ -34,7 +34,7 @@
         <button
           type="button"
           class="primaer"
-          [disabled]="legtAn() || !neuStart() || !neuEnde()"
+          [disabled]="legtAn() || !neuStart() || !neuEnde() || !daten.darfBearbeiten()"
           (click)="erstesJahrAnlegen()"
         >
           {{ legtAn() ? 'Lege an…' : 'Kegeljahr anlegen' }}
@@ -85,7 +85,13 @@
       </p>
 
       @if (!vorschau()) {
-        <button type="button" (click)="vorschauErstellen()">Abschluss vorbereiten</button>
+        <button
+          [disabled]="!daten.darfBearbeiten()"
+          [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
+          type="button" (click)="vorschauErstellen()"
+        >
+          Abschluss vorbereiten
+        </button>
       }
 
       @if (pruefFehler(); as text) {
@@ -297,7 +303,8 @@
           <button
             type="button"
             class="primaer"
-            [disabled]="laeuft()"
+            [disabled]="!daten.darfBearbeiten() || laeuft()"
+            [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
             (click)="ausfuehren()"
           >
             {{ laeuft() ? 'Schließe ab…' : 'Jahr abschließen' }}

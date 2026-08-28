@@ -16,7 +16,8 @@
       <button
         type="button"
         class="primaer"
-        [disabled]="!daten.ungespeichert() || speichert()"
+        [disabled]="!daten.ungespeichert() || speichert() || !daten.darfBearbeiten()"
+        [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
         (click)="speichern()"
       >
         {{ speichert() ? 'Speichert…' : 'Änderungen speichern' }}
@@ -91,7 +92,7 @@
                       <button
                         type="button"
                         class="primaer"
-                        [disabled]="stelltWiederHer()"
+                        [disabled]="stelltWiederHer() || !daten.darfBearbeiten()"
                         (click)="uebernehmen(v)"
                       >
                         {{ stelltWiederHer() ? 'Lade…' : 'Diesen Stand laden' }}

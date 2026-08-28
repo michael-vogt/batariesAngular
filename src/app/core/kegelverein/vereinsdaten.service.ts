@@ -1,5 +1,6 @@
 import { computed, inject, signal, Service } from '@angular/core';
 import { KegeljahrStore } from './kegeljahr.store';
+import { AnmeldungService } from '../anmeldung.service';
 import { Kegeljahr } from './kegelverein.models';
 import { FileStorageService, SicherungsInhalt } from './persistenz/file-storage.service';
 import { KegeljahrRef, SCHEMA_VERSION } from './persistenz/file-storage.models';
@@ -23,6 +24,28 @@ export type LadeStatus = 'leer' | 'laedt' | 'bereit' | 'fehler';
 @Service()
 export class VereinsdatenService {
   private readonly store = inject(KegeljahrStore);
+  private readonly anmeldung = inject(AnmeldungService);
+
+  /**
+   * Ob die angemeldete Rolle Änderungen speichern darf.
+   *
+   * Wird hier bereitgestellt und nicht aus dem Anmeldedienst gelesen,
+   * weil alle Verwaltungsseiten diesen Dienst ohnehin einbinden — so
+   * bleibt die Bindung in den Vorlagen auf einen Namen beschränkt.
+   *
+   * Das ist ein Schutz vor Versehen, keine Sicherheitsgrenze: Der Server
+   * prüft beim Schreiben von Vereinsdaten nichts dergleichen. Wer die
+   * Entwicklerwerkzeuge öffnet, kommt daran vorbei.
+   */
+  readonly darfBearbeiten = computed(() => this.anmeldung.darf('verwaltungSchreiben'));
+
+  /** Bricht ab, wenn die angemeldete Rolle nur lesen darf. */
+  private pruefeSchreibrecht(vorgang: string): void {
+    if (!this.darfBearbeiten()) {
+      throw new Error(`${vorgang} ist mit dieser Rolle nicht möglich — nur Lesezugriff.`);
+    }
+  }
+
   private readonly storage = inject(FileStorageService);
 
   private readonly _status = signal<LadeStatus>('leer');
@@ -178,6 +201,8 @@ export class VereinsdatenService {
    * es zum aktuellen. Das alte Jahr bleibt unverändert erhalten.
    */
   async abschlussAusfuehren(vorschau: AbschlussVorschau): Promise<void> {
+    this.pruefeSchreibrecht('Der Jahresabschluss');
+
     this._fehler.set(null);
     try {
       // Mitglieder zuerst — die Eröffnungsbuchungen verweisen darauf.
@@ -273,6 +298,8 @@ export class VereinsdatenService {
    * keine Seite, auf der man „Änderungen speichern“ drücken könnte.
    */
   async erstesKegeljahrAnlegen(startDatum: string, endDatum: string): Promise<Kegeljahr> {
+    this.pruefeSchreibrecht('Das Anlegen eines Kegeljahres');
+
     if (this._verfuegbareJahre().length > 0 || this.store.kegeljahre().length > 0) {
       throw new Error(
         'Es existiert bereits ein Kegeljahr. Weitere Jahre entstehen über den Jahresabschluss.',
@@ -343,6 +370,8 @@ export class VereinsdatenService {
    * würde die referentielle Prüfung nicht bestehen.
    */
   async speichern(): Promise<void> {
+    this.pruefeSchreibrecht('Speichern');
+
     this._fehler.set(null);
     try {
       await this.storage.mitgliederSpeichern(this.store.mitglieder());

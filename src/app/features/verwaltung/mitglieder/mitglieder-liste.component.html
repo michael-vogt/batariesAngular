@@ -8,7 +8,8 @@
       <button
         type="button"
         class="primaer"
-        [disabled]="!daten.ungespeichert() || speichert()"
+        [disabled]="!daten.ungespeichert() || speichert() || !daten.darfBearbeiten()"
+        [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
         (click)="speichern()"
       >
         {{ speichert() ? 'Speichert…' : 'Änderungen speichern' }}
@@ -69,6 +70,8 @@
                     <select
                       [ngModel]="zeile.status"
                       (ngModelChange)="statusGeaendert(zeile.mitglied, $event)"
+                      [disabled]="!daten.darfBearbeiten()"
+                      [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
                     >
                       <option value="aktiv">aktiv</option>
                       <option value="passiv">passiv</option>
@@ -91,13 +94,20 @@
                   </td>
                   <td>
                     @if (bearbeiteId() === zeile.mitglied.id) {
-                      <button type="button" class="leise-aktion" (click)="bearbeitungSpeichern()">
+                      <button
+                        [disabled]="!daten.darfBearbeiten()"
+                        [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
+                        type="button" class="leise-aktion"
+                        (click)="bearbeitungSpeichern()"
+                      >
                         Fertig
                       </button>
                     } @else {
                       <button
                         type="button"
                         class="leise-aktion"
+                        [disabled]="!daten.darfBearbeiten()"
+                        [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
                         (click)="bearbeitungStarten(zeile.mitglied)"
                       >
                         Umbenennen
@@ -125,10 +135,14 @@
                             @if (e.notiz) { <span class="leise">— {{ e.notiz }}</span> }
                             @if (zeile.mitglied.statusVerlauf.length > 1) {
                               <button
+                                [disabled]="!daten.darfBearbeiten()"
+                                [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
                                 type="button"
                                 class="leise-aktion"
                                 (click)="eintragEntfernen(zeile.mitglied, e.ab)"
-                                >entfernen</button>
+                              >
+                                entfernen
+                              </button>
                             }
                           </li>
                         }
@@ -166,6 +180,8 @@
                           Eintragen
                         </button>
                         <button
+                          [disabled]="!daten.darfBearbeiten()"
+                          [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
                           type="button"
                           class="leise-aktion"
                           (click)="loeschen(zeile.mitglied)"
@@ -200,6 +216,7 @@
     }
   }
 
+  @if (daten.darfBearbeiten()) {
   <div class="karte neu">
     <h2>Mitglied aufnehmen</h2>
     <div class="formular-zeile">
@@ -228,7 +245,12 @@
         Mitglied seit
         <input type="date" [ngModel]="neuEintritt()" (ngModelChange)="neuEintritt.set($event)" />
       </label>
-      <button type="button" [disabled]="!neuName().trim()" (click)="anlegen()">
+      <button
+        type="button"
+        [disabled]="!neuName().trim() || !daten.darfBearbeiten()"
+        [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
+        (click)="anlegen()"
+      >
         Aufnehmen
       </button>
     </div>
@@ -236,4 +258,5 @@
       <p class="fehler">{{ text }}</p>
     }
   </div>
+  }
 </div>

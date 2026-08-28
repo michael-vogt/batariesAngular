@@ -85,7 +85,7 @@
         <button
           type="button"
           class="primaer"
-          [disabled]="phase() === 'speichert'"
+          [disabled]="phase() === 'speichert' || !daten.darfBearbeiten()"
           (click)="speichern()"
         >
           {{ phase() === 'speichert' ? 'Speichere…' : 'Auf Server speichern' }}

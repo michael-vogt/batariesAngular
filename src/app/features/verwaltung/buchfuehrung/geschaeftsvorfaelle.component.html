@@ -8,7 +8,8 @@
       <button
         type="button"
         class="primaer"
-        [disabled]="!daten.ungespeichert() || speichert()"
+        [disabled]="!daten.ungespeichert() || speichert() || !daten.darfBearbeiten()"
+        [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
         (click)="speichern()"
       >
         {{ speichert() ? 'Speichert…' : 'Änderungen speichern' }}
@@ -103,7 +104,12 @@
           </tfoot>
         </table>
 
-        <button type="button" class="primaer aktion" (click)="beitraegeBuchen()">
+        <button
+          [disabled]="!daten.darfBearbeiten()"
+          [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
+          type="button" class="primaer aktion"
+          (click)="beitraegeBuchen()"
+        >
           Beiträge buchen
         </button>
       }
@@ -157,6 +163,8 @@
                 </td>
                 <td>
                   <button
+                    [disabled]="!daten.darfBearbeiten()"
+                    [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
                     type="button" class="leise-aktion"
                     (click)="offenenBetragUebernehmen(zeile.mitglied.id, zeile.offen)"
                   >offenen Betrag</button>
@@ -219,7 +227,12 @@
           </tbody>
         </table>
 
-        <button type="button" class="primaer aktion" (click)="verrechnungBuchen()">
+        <button
+          [disabled]="!daten.darfBearbeiten()"
+          [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
+          type="button" class="primaer aktion"
+          (click)="verrechnungBuchen()"
+        >
           Verrechnung buchen
         </button>
       }

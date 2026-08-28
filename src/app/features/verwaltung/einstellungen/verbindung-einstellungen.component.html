@@ -10,7 +10,13 @@
       <p class="ok verbunden">
         Verbunden mit <code>{{ adapter.aktiveBaseUrl() }}</code>
       </p>
-      <button type="button" (click)="trennen()">Verbindung trennen</button>
+      <button
+        [disabled]="!daten.darfBearbeiten()"
+        [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
+        type="button" (click)="trennen()"
+      >
+        Verbindung trennen
+      </button>
       <p class="hinweis">
         Nach dem Trennen sind die Vereinsdaten erst wieder erreichbar, wenn Adresse und
         Schlüssel erneut eingetragen wurden.

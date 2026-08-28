@@ -8,7 +8,8 @@
       <button
         type="button"
         class="primaer"
-        [disabled]="!daten.ungespeichert() || speichert()"
+        [disabled]="!daten.ungespeichert() || speichert() || !daten.darfBearbeiten()"
+        [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
         (click)="speichern()"
       >
         {{ speichert() ? 'Speichert…' : 'Änderungen speichern' }}
@@ -74,7 +75,12 @@
         </select>
       </label>
 
-      <button type="button" [class.primaer]="bearbeiteId()" (click)="uebernehmen()">
+      <button
+        [disabled]="!daten.darfBearbeiten()"
+        [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
+        type="button" [class.primaer]="bearbeiteId()"
+        (click)="uebernehmen()"
+      >
         {{ bearbeiteId() ? 'Änderung übernehmen' : 'Buchen' }}
       </button>
       @if (bearbeiteId()) {
@@ -147,7 +153,12 @@
           <button type="button" class="leise-aktion" (click)="auswahlAufheben()">
             Auswahl aufheben
           </button>
-          <button type="button" class="loeschen" (click)="ausgewaehlteLoeschen()">
+          <button
+            [disabled]="!daten.darfBearbeiten()"
+            [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
+            type="button" class="loeschen"
+            (click)="ausgewaehlteLoeschen()"
+          >
             Ausgewählte löschen
           </button>
         </span>
@@ -200,11 +211,30 @@
               <td class="leise">{{ b.habenKonto }} · {{ kontoName(b.habenKonto) }}</td>
               <td class="zahl">{{ euro(b.betrag) }}</td>
               <td class="aktionen-spalte">
-                <button type="button" class="leise-aktion" (click)="bearbeitenStarten(b)">
+                <button
+                  [disabled]="!daten.darfBearbeiten()"
+                  [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
+                  type="button" class="leise-aktion"
+                  (click)="bearbeitenStarten(b)"
+                >
                   Bearbeiten
                 </button>
-                <button type="button" class="leise-aktion" (click)="kopieren(b)">Kopieren</button>
-                <button type="button" class="leise-aktion" (click)="loeschen(b)">Löschen</button>
+                <button
+                  [disabled]="!daten.darfBearbeiten()"
+                  [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
+                  type="button" class="leise-aktion"
+                  (click)="kopieren(b)"
+                >
+                  Kopieren
+                </button>
+                <button
+                  [disabled]="!daten.darfBearbeiten()"
+                  [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
+                  type="button" class="leise-aktion"
+                  (click)="loeschen(b)"
+                >
+                  Löschen
+                </button>
               </td>
             </tr>
           }

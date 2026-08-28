@@ -21,7 +21,7 @@ import { VereinsdatenService } from '../../../core/kegelverein/vereinsdaten.serv
 export class VerbindungEinstellungenComponent {
   protected readonly adapter = inject(PhpApiAdapter);
   protected readonly storage = inject(FileStorageService);
-  private readonly daten = inject(VereinsdatenService);
+  protected readonly daten = inject(VereinsdatenService);
 
   protected readonly baseUrl = signal('');
   protected readonly apiKey = signal('');

@@ -8,7 +8,8 @@
       <button
         type="button"
         class="primaer"
-        [disabled]="!daten.ungespeichert() || speichert()"
+        [disabled]="!daten.ungespeichert() || speichert() || !daten.darfBearbeiten()"
+        [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
         (click)="speichern()"
       >
         {{ speichert() ? 'Speichert…' : 'Änderungen speichern' }}
@@ -31,7 +32,13 @@
         Ort (optional)
         <input type="text" [ngModel]="neuOrt()" (ngModelChange)="neuOrt.set($event)" />
       </label>
-      <button type="button" [disabled]="!neuDatum()" (click)="anlegen()">Anlegen</button>
+      <button
+        type="button"
+        [disabled]="!neuDatum() || !daten.darfBearbeiten()"
+        [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'" (click)="anlegen()"
+      >
+        Anlegen
+      </button>
     </div>
     <p class="hinweis">
       Alle aktiven Mitglieder werden automatisch als anwesend eingetragen.
@@ -76,7 +83,12 @@
                 }
               </td>
               <td>
-                <button type="button" class="leise-aktion" (click)="loeschen(zeile.abend)">
+                <button
+                  [disabled]="!daten.darfBearbeiten()"
+                  [title]="daten.darfBearbeiten() ? null : 'Mit dieser Rolle nur Lesezugriff'"
+                  type="button" class="leise-aktion"
+                  (click)="loeschen(zeile.abend)"
+                >
                   Löschen
                 </button>
               </td>

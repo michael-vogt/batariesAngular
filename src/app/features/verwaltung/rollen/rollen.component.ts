@@ -18,6 +18,7 @@ import {
 } from '../../../core/rollen.service';
 import { MitgliederService } from '../../../core/kegelverein/mitglieder.service';
 import { AnmeldungService } from '../../../core/anmeldung.service';
+import { VereinsdatenService } from '../../../core/kegelverein/vereinsdaten.service';
 
 /** Einheitliches Ergebnis für beide Schreibwege. */
 type Schreibergebnis = { erfolg: true; name: string } | { erfolg: false; meldung: string };
@@ -32,6 +33,16 @@ export class RollenComponent {
   protected readonly rollenService = inject(RollenService);
   protected readonly berechtigungsliste = BERECHTIGUNGSLISTE;
   protected readonly anmeldung = inject(AnmeldungService);
+
+  /**
+   * Ob die angemeldete Rolle Rollen ändern darf.
+   *
+   * Hier über den Anmeldedienst statt über die Vereinsdaten, weil diese
+   * Seite ohne geladenes Kegeljahr auskommt. Verlässlich geprüft wird
+   * ohnehin auf dem Server — anders als bei den Vereinsdaten lehnt
+   * auth.php einen schreibenden Aufruf ohne dieses Recht ab.
+   */
+  protected readonly darfBearbeiten = computed(() => this.anmeldung.darf('verwaltungSchreiben'));
 
   private readonly mitgliederService = inject(MitgliederService);
 
@@ -90,11 +101,11 @@ export class RollenComponent {
 
   protected mitgliedName(id: string | null): string {
     if (!id) return '';
-    return this.mitglieder().find(m => m.id === id)?.name ?? 'unbekannt';
+    return this.mitglieder().find((m) => m.id === id)?.name ?? 'unbekannt';
   }
 
   protected zuordnungVerwaist(id: string | null): boolean {
-    return !!id && !this.mitglieder().some(m => m.id === id);
+    return !!id && !this.mitglieder().some((m) => m.id === id);
   }
 
   /**
@@ -106,7 +117,7 @@ export class RollenComponent {
    * sagt es aber besser vorher als nach dem Klick.
    */
   protected readonly anzahlVerwalter = computed(
-    () => this.rollen().filter(r => r.berechtigungen.verwaltung).length,
+    () => this.rollen().filter((r) => r.berechtigungen.verwaltung).length,
   );
 
   protected istLetzterVerwalter(rolle: RolleMitRechten): boolean {
@@ -161,12 +172,12 @@ export class RollenComponent {
     const name = this.bearbeitet();
     if (!name) return false;
 
-    const rolle = this.rollen().find(r => r.name === name);
+    const rolle = this.rollen().find((r) => r.name === name);
     return !!rolle && this.istLetzterVerwalter(rolle);
   });
 
   protected rechtUmschalten(recht: Berechtigung): void {
-    this.formRechte.update(r => ({ ...r, [recht]: !r[recht] }));
+    this.formRechte.update((r) => ({ ...r, [recht]: !r[recht] }));
   }
 
   // --- Formular öffnen ---------------------------------------------------
@@ -276,10 +287,7 @@ export class RollenComponent {
     });
   }
 
-  private async anlegen(ausweis: {
-    name: string;
-    credential: string;
-  }): Promise<Schreibergebnis> {
+  private async anlegen(ausweis: { name: string; credential: string }): Promise<Schreibergebnis> {
     const name = this.formName().trim();
 
     const antwort = await this.rollenService.rolleAnlegen(ausweis, {
