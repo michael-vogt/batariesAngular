@@ -21,6 +21,7 @@ import {
 } from './features/homepage/kegeltermine-liste/kegeltermine-liste.component';
 import { HauptseiteComponent } from './features/homepage/hauptseite/hauptseite.component';
 import { AbrechnungComponent } from './features/verwaltung/abrechnung/abrechnung.component';
+import { ProfilComponent } from './features/homepage/profil/profil.component';
 
 export const routes: Routes = [
   {
@@ -43,6 +44,11 @@ export const routes: Routes = [
       {
         path: 'kegeltermine',
         component: TermineComponent,
+      },
+
+      {
+        path: 'profil',
+        component: ProfilComponent,
       },
 
       {

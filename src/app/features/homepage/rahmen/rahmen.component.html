@@ -51,6 +51,10 @@
       <li><a [routerLink]="['home']" routerLinkActive="aktiv">Hauptseite</a></li>
       <li><a [routerLink]="['dokument', 'satzung']" routerLinkActive="aktiv">Satzung</a></li>
       <li><a [routerLink]="['kegeltermine']" routerLinkActive="aktiv">Kegeltermine</a></li>
+
+      @if (anmeldungService.mitgliedId()) {
+        <li><a [routerLink]="['profil']" routerLinkActive="aktiv">Profil</a></li>
+      }
       @if (anmeldungService.darf('verwaltung')) {
         <li>
           <a [routerLink]="['verwaltung']" routerLinkActive="aktiv">Verwaltung</a>

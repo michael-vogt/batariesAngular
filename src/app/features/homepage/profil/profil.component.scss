@@ -1,0 +1,147 @@
+.karte {
+  margin-bottom: var(--abstand-4);
+}
+
+.karte h2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--abstand-2);
+  margin: 0 0 var(--abstand-3);
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+.anzahl {
+  padding: 0 var(--abstand-2);
+  border-radius: 999px;
+  background: var(--farbe-warnung-hell);
+  color: var(--farbe-warnung);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+/* Die Zahl, auf die es ankommt — größer als der Rest der Karte. */
+.summe {
+  margin: 0 0 var(--abstand-3);
+  font-size: 1.25rem;
+  color: var(--farbe-soll);
+}
+
+.summe.guthaben {
+  color: var(--farbe-haben);
+}
+
+tr.zwischensumme td {
+  border-top: 1px solid var(--farbe-linie);
+}
+
+td.belastung {
+  color: var(--farbe-soll);
+}
+
+/* --- Termine --- */
+
+.termine {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.termine > li {
+  padding: var(--abstand-3) 0;
+  border-bottom: 1px solid var(--farbe-linie);
+}
+
+.termine > li:last-child {
+  border-bottom: none;
+}
+
+.termine .zeile {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--abstand-3);
+}
+
+.termine .zeit {
+  font-family: var(--schrift-zahl);
+  font-variant-numeric: tabular-nums;
+}
+
+.termine .hinweis {
+  margin: var(--abstand-1) 0 0;
+}
+
+.grund {
+  margin-left: var(--abstand-2);
+  font-style: italic;
+}
+
+/* Marken tragen ihre Aussage im Text, nicht nur in der Farbe. */
+.marke {
+  padding: 0 var(--abstand-2);
+  border-radius: 999px;
+  font-size: 0.75rem;
+}
+
+.marke.ab {
+  background: var(--farbe-warnung-hell);
+  color: var(--farbe-warnung);
+}
+
+.marke.da {
+  background: var(--farbe-akzent-hell);
+  color: var(--farbe-akzent);
+}
+
+/* --- Kennzahlen --- */
+
+.kennzahlen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--abstand-6);
+}
+
+.kennzahlen > div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--abstand-1);
+}
+
+.kennzahlen .wert {
+  font-family: var(--schrift-zahl);
+  font-variant-numeric: tabular-nums;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.kennzahlen .wert.positiv {
+  color: var(--farbe-haben);
+}
+
+.kennzahlen .wert.negativ {
+  color: var(--farbe-soll);
+}
+
+.kennzahlen .beschriftung {
+  font-size: 0.8125rem;
+  color: var(--farbe-text-leise);
+}
+
+/* --- Verlauf --- */
+
+.verlauf {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.verlauf li {
+  padding: var(--abstand-1) 0;
+}
+
+.karte > .hinweis {
+  margin: var(--abstand-3) 0 0;
+  max-width: 44rem;
+}

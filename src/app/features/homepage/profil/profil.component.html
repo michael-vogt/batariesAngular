@@ -1,0 +1,222 @@
+<div class="seite">
+  @if (!anmeldung.angemeldet()) {
+    <div class="karte">
+      <p class="hinweis">Bitte zuerst anmelden.</p>
+    </div>
+  } @else if (!mitglied()) {
+    <div class="karte">
+      <p class="hinweis">
+        Der angemeldeten Rolle ist kein Mitglied zugeordnet — es gibt daher nichts anzuzeigen.
+      </p>
+    </div>
+  } @else {
+    <header class="seiten-kopf">
+      <div>
+        <h1>{{ mitglied()!.name }}</h1>
+        <p class="hinweis">
+          {{ status() }}
+          @if (mitgliedSeit(); as seit) {
+            · Mitglied seit {{ datumKurz(seit) }}
+          }
+          @if (mitglied()!.rolle; as amt) {
+            · {{ amt }}
+          }
+        </p>
+      </div>
+    </header>
+
+    @if (daten.fehler(); as text) {
+      <p class="fehler">{{ text }}</p>
+    }
+
+    <!-- Abrechnungsstand -->
+    @if (finanzen(); as f) {
+      <div class="karte">
+        <h2>Abrechnungsstand</h2>
+
+        <p class="summe" [class.guthaben]="zuZahlen() < 0">
+          @if (zuZahlen() > 0) {
+            Offen: <strong>{{ euro(zuZahlen()) }} €</strong>
+          } @else if (zuZahlen() < 0) {
+            Guthaben: <strong>{{ euro(-zuZahlen()) }} €</strong>
+          } @else {
+            <strong>Nichts offen.</strong>
+          }
+        </p>
+
+        <table class="daten">
+          <tbody>
+          <tr>
+            <td>Beiträge</td>
+            <td class="zahl">{{ euro(f.offeneBeitraege) }} €</td>
+          </tr>
+          <tr>
+            <td>Strafen</td>
+            <td class="zahl">{{ euro(f.offeneStrafen) }} €</td>
+          </tr>
+          <tr>
+            <td>Umlagen</td>
+            <td class="zahl">{{ euro(f.offeneUmlagen) }} €</td>
+          </tr>
+          <tr class="zwischensumme">
+            <td><strong>Offene Forderungen</strong></td>
+            <td class="zahl"><strong>{{ euro(f.offeneForderungenGesamt) }} €</strong></td>
+          </tr>
+          <tr>
+            <td>Restguthaben</td>
+            <td class="zahl">{{ euro(f.restguthaben) }} €</td>
+          </tr>
+          </tbody>
+        </table>
+
+        <p class="hinweis">
+          Restguthaben wird beim nächsten Zahlungslauf mit offenen Forderungen verrechnet.
+        </p>
+      </div>
+    }
+
+    <!-- Kommende Termine -->
+    <div class="karte">
+      <h2>
+        Kommende Kegeltermine
+        @if (anzahlAbmeldungen() > 0) {
+          <span class="anzahl">{{ anzahlAbmeldungen() }} abgemeldet</span>
+        }
+      </h2>
+
+      @if (termineStand().length === 0) {
+        <p class="hinweis">Zurzeit sind keine Termine eingetragen.</p>
+      } @else {
+        <ul class="termine">
+          @for (t of termineStand(); track t.termin.id) {
+            <li [class.abgemeldet]="t.abgemeldet">
+              <div class="zeile">
+                <span class="zeit">{{ zeitpunkt(t.termin.beginn) }}</span>
+                @if (t.abgemeldet) {
+                  <span class="marke ab">abgemeldet</span>
+                } @else {
+                  <span class="marke da">wird erwartet</span>
+                }
+              </div>
+              <p class="hinweis">
+                @if (t.termin.ort) {
+                  {{ t.termin.ort }}
+                }
+                @if (t.termin.ort && t.termin.notiz) {
+                  ·
+                }
+                @if (t.termin.notiz) {
+                  {{ t.termin.notiz }}
+                }
+                @if (t.grund) {
+                  <span class="grund">Grund: {{ t.grund }}</span>
+                }
+              </p>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+
+    <!-- Spielbilanz -->
+    @if (bilanz(); as b) {
+      @if (b.abende > 0) {
+        <div class="karte">
+          <h2>Im laufenden Kegeljahr</h2>
+
+          <div class="kennzahlen">
+            <div>
+              <span class="wert">{{ b.anwesend }}</span>
+              <span class="beschriftung">von {{ b.abende }} Abenden dabei</span>
+            </div>
+            <div>
+              <span class="wert">{{ b.siege }}</span>
+              <span class="beschriftung">Siege</span>
+            </div>
+            <div>
+              <span class="wert">{{ b.niederlagen }}</span>
+              <span class="beschriftung">Niederlagen</span>
+            </div>
+            <div>
+              <span class="wert" [class.positiv]="b.bilanz > 0" [class.negativ]="b.bilanz < 0">
+                {{ b.bilanz > 0 ? '+' : '' }}{{ b.bilanz }}
+              </span>
+              <span class="beschriftung">Bilanz</span>
+            </div>
+            <div>
+              <span class="wert">{{ euro(b.strafenGesamt) }} €</span>
+              <span class="beschriftung">Strafen gesamt</span>
+            </div>
+            @if (b.absagen > 0) {
+              <div>
+                <span class="wert">{{ b.absagen }}</span>
+                <span class="beschriftung">{{ b.absagen === 1 ? 'Absage' : 'Absagen' }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    }
+
+    <!-- Eigene Buchungen -->
+    @if (buchungen().length > 0) {
+      <div class="karte">
+        <h2>Eigene Buchungen</h2>
+
+        <table class="daten">
+          <thead>
+          <tr>
+            <th>Datum</th>
+            <th>Vorgang</th>
+            <th class="zahl">Betrag</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (b of buchungen(); track b.id) {
+              <tr>
+                <td class="zahl leise">{{ datumKurz(b.datum) }}</td>
+                <td>
+                  {{ b.buchungstext }}
+                  <span class="leise">
+                    ({{ istBelastung(b.sollKonto) ? kontoName(b.habenKonto) : 'Zahlung' }})
+                  </span>
+                </td>
+                <td class="zahl" [class.belastung]="istBelastung(b.sollKonto)">
+                  {{ istBelastung(b.sollKonto) ? '' : '−' }}{{ euro(b.betrag) }} €
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        @if (weitereBuchungen() > 0 && !alleBuchungen()) {
+          <button type="button" class="leise-aktion" (click)="alleBuchungen.set(true)">
+            {{ weitereBuchungen() }} weitere anzeigen
+          </button>
+        }
+
+        <p class="hinweis">
+          Belastungen stehen ohne Vorzeichen, Zahlungen und Gutschriften mit einem Minus.
+        </p>
+      </div>
+    }
+
+    <!-- Mitgliedschaft -->
+    @if (verlauf().length > 1) {
+      <div class="karte">
+        <h2>Mitgliedschaft</h2>
+        <ul class="verlauf">
+          @for (e of verlauf(); track e.ab) {
+            <li>
+              <span class="zahl leise">{{ datumKurz(e.ab) }}</span>
+              {{ e.status }}
+              @if (e.notiz) {
+                <span class="leise">— {{ e.notiz }}</span>
+              }
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  }
+</div>

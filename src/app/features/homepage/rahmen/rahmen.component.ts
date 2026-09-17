@@ -6,6 +6,7 @@ import { VereinsdatenService } from '../../../core/kegelverein/vereinsdaten.serv
 import { FileStorageService } from '../../../core/kegelverein/persistenz/file-storage.service';
 import { ThemaService } from '../../../core/thema.service';
 import { AnmeldungService } from '../../../core/anmeldung.service';
+import { ProfilComponent } from '../profil/profil.component';
 
 interface NavPunkt {
   /** Relativ zum Verwaltungsbereich, ohne führenden Schrägstrich. */

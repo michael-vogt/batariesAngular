@@ -47,6 +47,47 @@
         Welche Rolle was darf, steht unter <a href="#rollen">Rollen</a>.
       </p>
       <hr>
+      <h2 id="profil">Profil</h2>
+      <p>
+        Ist der angemeldeten Rolle ein Mitglied zugeordnet, erscheint im Menü der Punkt
+        <strong>Profil</strong>. Er zeigt alles, was die eigene Person betrifft — ohne dass man
+        dafür Zugang zur Verwaltung bräuchte.
+      </p>
+      <table>
+        <thead>
+        <tr>
+          <th>Abschnitt</th>
+          <th>Inhalt</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td>Abrechnungsstand</td>
+          <td>offene Beiträge, Strafen und Umlagen, Restguthaben, Summe</td>
+        </tr>
+        <tr>
+          <td>Kommende Kegeltermine</td>
+          <td>je Termin, ob man erwartet wird oder abgemeldet ist — mit Grund</td>
+        </tr>
+        <tr>
+          <td>Im laufenden Kegeljahr</td>
+          <td>Teilnahmen, Siege, Niederlagen, Bilanz, Strafen, Absagen</td>
+        </tr>
+        <tr>
+          <td>Eigene Buchungen</td>
+          <td>die letzten Vorgänge, um einen Betrag nachzuvollziehen</td>
+        </tr>
+        <tr>
+          <td>Mitgliedschaft</td>
+          <td>der eigene Statusverlauf, sofern es mehr als einen Eintrag gibt</td>
+        </tr>
+        </tbody>
+      </table>
+      <p>
+        Hat eine Rolle kein zugeordnetes Mitglied — etwa ein Amt, das wechselnde Personen nutzen —,
+        bleibt der Menüpunkt aus. Es gäbe dort nichts anzuzeigen.
+      </p>
+      <hr>
       <h2 id="grundlegendes">Grundlegendes</h2>
       <h3>Speichern</h3>
       <p>
@@ -1081,6 +1122,13 @@
             [class.aktiv]="aktiv() === 'anmelden'"
             (click)="springe($event, 'anmelden')"
           >Anmelden</a>
+        </li>
+        <li>
+          <a
+            href="#profil"
+            [class.aktiv]="aktiv() === 'profil'"
+            (click)="springe($event, 'profil')"
+          >Profil</a>
         </li>
         <li>
           <a

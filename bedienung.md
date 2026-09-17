@@ -40,6 +40,25 @@ Anwendung, wer angemeldet ist. Welche Rolle was darf, steht unter
 
 ---
 
+## Profil
+
+Ist der angemeldeten Rolle ein Mitglied zugeordnet, erscheint im Menü der Punkt
+**Profil**. Er zeigt alles, was die eigene Person betrifft — ohne dass man dafür
+Zugang zur Verwaltung bräuchte.
+
+| Abschnitt | Inhalt |
+|---|---|
+| Abrechnungsstand | offene Beiträge, Strafen und Umlagen, Restguthaben, Summe |
+| Kommende Kegeltermine | je Termin, ob man erwartet wird oder abgemeldet ist — mit Grund |
+| Im laufenden Kegeljahr | Teilnahmen, Siege, Niederlagen, Bilanz, Strafen, Absagen |
+| Eigene Buchungen | die letzten Vorgänge, um einen Betrag nachzuvollziehen |
+| Mitgliedschaft | der eigene Statusverlauf, sofern es mehr als einen Eintrag gibt |
+
+Hat eine Rolle kein zugeordnetes Mitglied — etwa ein Amt, das wechselnde Personen
+nutzen —, bleibt der Menüpunkt aus. Es gäbe dort nichts anzuzeigen.
+
+---
+
 ## Grundlegendes
 
 ### Speichern
